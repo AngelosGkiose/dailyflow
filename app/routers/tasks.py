@@ -7,7 +7,7 @@ from app.dependencies.db import get_db
 from app.models.user_model import UserModel
 from app.schemas.tasks import TaskResponse, TaskCreate, TaskUpdate
 from app.services.task_service import create_task_service, get_tasks_service, get_task_by_id_service, \
-    update_task_service
+    update_task_service, delete_task_service
 
 router = APIRouter(
     prefix="/tasks",
@@ -29,3 +29,7 @@ def get_task_by_id(task_id:int,current_user:UserModel=Depends(get_current_user),
 @router.patch("/{task_id}",response_model=TaskResponse,status_code=status.HTTP_200_OK)
 def update_task(task_id:int,updated_task:TaskUpdate,current_user:UserModel=Depends(get_current_user),db:Session=Depends(get_db)):
     return update_task_service(task_id, updated_task, current_user, db)
+
+@router.delete("/{task_id}",status_code=status.HTTP_204_NO_CONTENT)
+def delete_task(task_id:int,current_user:UserModel=Depends(get_current_user),db:Session=Depends(get_db)):
+    delete_task_service(task_id, current_user, db)
