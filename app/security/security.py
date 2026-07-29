@@ -1,8 +1,9 @@
 import datetime
 
 import jwt
-from dns.dnssectypes import Algorithm
+from jwt.jwa import none
 from pwdlib import PasswordHash
+from jose import JWTError
 
 from app.config import Settings, settings
 
@@ -29,4 +30,11 @@ def create_access_token(data:dict)-> str:
         algorithm=settings.algorithm
     )
     return access_token
+
+def decode_access_token(token:str)->dict | None:
+    try:
+        payload=jwt.decode(token,settings.secret_key,algorithms=[settings.algorithm])
+        return payload
+    except JWTError:
+        return none
 
