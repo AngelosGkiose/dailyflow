@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
 
 from app.database.database import Base
 
@@ -10,3 +11,9 @@ class UserModel(Base):
     email =Column(String,unique=True,nullable=False)
     hashed_password = Column(String,nullable=False)
     role =Column(String,nullable=False,default="user")
+
+    tasks = relationship(
+        "TaskModel",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
