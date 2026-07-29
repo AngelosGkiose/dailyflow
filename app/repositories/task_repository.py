@@ -25,3 +25,9 @@ def update_task( db: Session,task: TaskModel) -> TaskModel:
 def delete_task_repo(db: Session,task):
     db.delete(task)
     db.commit()
+
+def complete_task_repo(db: Session,task:TaskModel):
+    db.commit()
+    db.refresh(task)
+
+    return task

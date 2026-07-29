@@ -1,11 +1,13 @@
+from datetime import datetime, timezone
+
 from fastapi import HTTPException
 from sqlalchemy.orm.session import Session
 from starlette import status
 
-from app.models.task_model import  TaskModel
+from app.models.task_model import TaskModel, TaskStatus
 from app.models.user_model import UserModel
 from app.repositories.task_repository import add_task, get_tasks_by_user_id, get_task_by_id, update_task, \
-    delete_task_repo
+    delete_task_repo, complete_task_repo
 from app.schemas.tasks import TaskCreate, TaskUpdate
 
 
@@ -42,3 +44,18 @@ def delete_task_service(task_id:int,current_user:UserModel,db:Session):
     if task is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Task not found")
     delete_task_repo(db, task)
+
+def complete_task_service(task_id:int,current_user:UserModel,db:Session)->TaskModel:
+    task= get_task_by_id(db, task_id, current_user)
+    if task is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Task not found")
+    if task.status == TaskStatus.COMPLETED:
+        return task
+    task.status = TaskStatus.COMPLETED
+    task.completed_at = datetime.now(timezone.utc)
+    task.updated_at = datetime.now(timezone.utc)
+    complete_task_repo(db, task)
+    return task
+
+
+
