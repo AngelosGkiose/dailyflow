@@ -17,3 +17,5 @@ class UserModel(Base):
         back_populates="user",
         cascade="all, delete-orphan"
     )
+
+    projects = relationship("ProjectModel", back_populates="user",cascade="all, delete-orphan")
