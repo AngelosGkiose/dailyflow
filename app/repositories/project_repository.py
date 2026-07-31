@@ -18,5 +18,7 @@ def add_project(db:Session,project:ProjectModel):
 def get_all_projects_by_user(db:Session,current_user_id:int):
     return db.query(ProjectModel).filter(ProjectModel.user_id==current_user_id).all()
 
+def get_project_by_id_repo(db:Session,project_id:int,current_user_id:int):
+    return db.query(ProjectModel).filter(ProjectModel.user_id==current_user_id,ProjectModel.id==project_id).first()
 
 
