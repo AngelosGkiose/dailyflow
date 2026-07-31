@@ -32,11 +32,12 @@ class TaskResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     completed_at: datetime | None
+    project_id: int | None
 
     model_config = {
         "from_attributes": True
     }
-    project_id: int | None
+
 
 
 class TaskUpdate(BaseModel):

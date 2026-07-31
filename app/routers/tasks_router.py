@@ -7,7 +7,7 @@ from app.dependencies.db import get_db
 from app.models.user_model import UserModel
 from app.schemas.tasks import TaskResponse, TaskCreate, TaskUpdate
 from app.services.task_service import create_task_service, get_tasks_service, get_task_by_id_service, \
-    update_task_service, delete_task_service, complete_task_service, reopen_task_service
+    update_task_service, delete_task_service, complete_task_service, reopen_task_service, get_tasks_inbox_service
 
 router = APIRouter(
     prefix="/tasks",
@@ -21,6 +21,10 @@ def create_task(request:TaskCreate,db:Session=Depends(get_db),current_user:UserM
 @router.get("/",response_model=list[TaskResponse],status_code=status.HTTP_200_OK)
 def get_tasks(current_user:UserModel=Depends(get_current_user),db:Session=Depends(get_db)):
     return get_tasks_service(current_user,db)
+
+@router.get("/inbox",response_model=list[TaskResponse],status_code=status.HTTP_200_OK)
+def get_tasks_inbox(current_user:UserModel=Depends(get_current_user),db:Session=Depends(get_db)):
+    return get_tasks_inbox_service(current_user,db)
 
 @router.get("/{task_id}",response_model=TaskResponse,status_code=status.HTTP_200_OK)
 def get_task_by_id(task_id:int,current_user:UserModel=Depends(get_current_user),db:Session=Depends(get_db)):
@@ -41,3 +45,4 @@ def complete_task(task_id:int,current_user:UserModel=Depends(get_current_user),d
 @router.patch("/{task_id}/reopen",response_model=TaskResponse,status_code=status.HTTP_200_OK)
 def reopen_task(task_id:int,current_user:UserModel=Depends(get_current_user),db:Session=Depends(get_db)):
     return reopen_task_service(task_id, current_user, db)
+
