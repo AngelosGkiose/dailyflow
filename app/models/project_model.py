@@ -28,4 +28,9 @@ class ProjectModel(Base):
         nullable=False
     )
 
+    tasks = relationship(
+        "TaskModel",
+        back_populates="project"
+    )
+
     user = relationship("UserModel", back_populates="projects")

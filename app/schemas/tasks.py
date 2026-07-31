@@ -19,6 +19,7 @@ class TaskCreate(BaseModel):
     priority: TaskPriority
 
     due_date: datetime | None = None
+    project_id: int | None = None
 
 
 class TaskResponse(BaseModel):
@@ -35,6 +36,7 @@ class TaskResponse(BaseModel):
     model_config = {
         "from_attributes": True
     }
+    project_id: int | None
 
 
 class TaskUpdate(BaseModel):
@@ -52,3 +54,4 @@ class TaskUpdate(BaseModel):
     priority: TaskPriority | None = None
 
     due_date: datetime | None = None
+    project_id: int | None = None

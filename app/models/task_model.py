@@ -83,8 +83,19 @@ class TaskModel(Base):
         ForeignKey("users.id"),
         nullable=False
     )
+    project_id = Column(
+        Integer,
+        ForeignKey("projects.id"),
+        nullable=True,
+        index=True
+    )
 
     user = relationship(
         "UserModel",
+        back_populates="tasks"
+    )
+
+    project = relationship(
+        "ProjectModel",
         back_populates="tasks"
     )
