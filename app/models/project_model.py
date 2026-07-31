@@ -7,7 +7,7 @@ from app.database.database import Base
 
 
 class ProjectModel(Base):
-    __tablename__ = 'project'
+    __tablename__ = "projects"
     id = Column(Integer, primary_key=True,index=True)
     name = Column(String(100),nullable=False)
     description = Column(String(500),nullable=True)
@@ -30,7 +30,8 @@ class ProjectModel(Base):
 
     tasks = relationship(
         "TaskModel",
-        back_populates="project"
+        back_populates="project",
+        cascade="all, delete"
     )
 
     user = relationship("UserModel", back_populates="projects")

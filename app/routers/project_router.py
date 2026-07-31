@@ -7,7 +7,7 @@ from app.dependencies.db import get_db
 from app.models.user_model import UserModel
 from app.schemas.projects import ProjectCreate, ProjectResponse, ProjectUpdate
 from app.services.project_service import create_project_service, get_projects_service, get_project_by_id_service, \
-    update_project_service
+    update_project_service, delete_project_service
 
 router=APIRouter(prefix="/projects",tags=["Project"])
 
@@ -26,3 +26,7 @@ def get_project_by_id(project_id:int,current_user:UserModel=Depends(get_current_
 @router.patch("/{project_id}",response_model=ProjectResponse,status_code=status.HTTP_200_OK)
 def update_project(project_id:int,updated_project:ProjectUpdate,current_user:UserModel=Depends(get_current_user),db:Session=Depends(get_db)):
     return update_project_service(project_id,updated_project,current_user, db)
+
+@router.delete("/{project_id}",status_code=status.HTTP_204_NO_CONTENT)
+def delete_project(project_id:int,current_user:UserModel=Depends(get_current_user),db:Session=Depends(get_db)):
+    delete_project_service(project_id, current_user, db)
