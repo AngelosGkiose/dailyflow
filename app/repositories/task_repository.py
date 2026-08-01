@@ -1,9 +1,11 @@
+
+
 from sqlalchemy.orm.session import Session
 
 from app.models.task_model import TaskModel, TaskStatus, TaskPriority
 from app.models.user_model import UserModel
 from sqlalchemy import or_
-
+from datetime import date, datetime, time, timedelta
 
 def add_task(db: Session, task: TaskModel) -> TaskModel:
     db.add(task)
@@ -38,7 +40,7 @@ def get_filtered_tasks(db: Session,
     project_id: int | None,
     task_status: TaskStatus | None,
     priority: TaskPriority | None,
-    search:str|None):
+    search:str|None,due_date: date | None):
     query=db.query(TaskModel)
     query=query.filter(TaskModel.user_id == current_user_id)
     if project_id is not None:
@@ -55,4 +57,17 @@ def get_filtered_tasks(db: Session,
                 TaskModel.description.ilike(search_pattern)
             )
         )
+    if due_date is not None:
+        start_datetime = datetime.combine(
+            due_date,
+            time.min
+        )
+
+        end_datetime = start_datetime + timedelta(days=1)
+
+        query = query.filter(
+            TaskModel.due_date >= start_datetime,
+            TaskModel.due_date < end_datetime
+        )
+
     return query.all()
