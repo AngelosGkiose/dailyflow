@@ -2,6 +2,7 @@ from sqlalchemy.orm.session import Session
 
 from app.models.task_model import TaskModel, TaskStatus, TaskPriority
 from app.models.user_model import UserModel
+from sqlalchemy import or_
 
 
 def add_task(db: Session, task: TaskModel) -> TaskModel:
@@ -10,10 +11,10 @@ def add_task(db: Session, task: TaskModel) -> TaskModel:
     db.refresh(task)
     return task
 
-def get_tasks_by_user_id(db: Session, current_user_id:int) -> list[TaskModel]:
+def get_tasks_by_user_id(db: Session, current_user_id:int):
     return db.query(TaskModel).filter(TaskModel.user_id == current_user_id).all()
 
-def get_task_by_id(db: Session, task_id:int,current_user:UserModel) -> TaskModel:
+def get_task_by_id(db: Session, task_id:int,current_user:UserModel):
     return db.query(TaskModel).filter(TaskModel.id == task_id, TaskModel.user_id == current_user.id).first()
 
 def update_task( db: Session,task: TaskModel) -> TaskModel:
@@ -36,7 +37,8 @@ def get_filtered_tasks(db: Session,
     current_user_id: int,
     project_id: int | None,
     task_status: TaskStatus | None,
-    priority: TaskPriority | None):
+    priority: TaskPriority | None,
+    search:str|None):
     query=db.query(TaskModel)
     query=query.filter(TaskModel.user_id == current_user_id)
     if project_id is not None:
@@ -45,4 +47,12 @@ def get_filtered_tasks(db: Session,
         query=query.filter(TaskModel.status == task_status)
     if priority is not None:
         query=query.filter(TaskModel.priority == priority)
+    if search is not None:
+        search_pattern = f"%{search}%"
+        query = query.filter(
+            or_(
+                TaskModel.title.ilike(search_pattern),
+                TaskModel.description.ilike(search_pattern)
+            )
+        )
     return query.all()

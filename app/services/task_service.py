@@ -36,12 +36,14 @@ def create_task_service(request:TaskCreate,db:Session,current_user:UserModel):
     return add_task(db, new_task)
 
 
-def get_tasks_service(project_id:int,task_status: TaskStatus,priority: TaskPriority,current_user:UserModel,db:Session):
+def get_tasks_service(project_id:int,task_status: TaskStatus,priority: TaskPriority,search:str,current_user:UserModel,db:Session):
     if project_id is not None:
         project = get_project_by_id_repo(db, project_id, current_user.id)
         if project is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
-    return get_filtered_tasks(db,current_user.id, project_id,task_status,priority)
+    if search is not None:
+        search=search.strip()
+    return get_filtered_tasks(db,current_user.id, project_id,task_status,priority,search)
 
 
 def get_task_by_id_service(task_id,current_user:UserModel,db:Session)->TaskModel:
