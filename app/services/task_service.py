@@ -8,7 +8,7 @@ from app.models.task_model import TaskModel, TaskStatus
 from app.models.user_model import UserModel
 from app.repositories.project_repository import get_project_by_id_repo
 from app.repositories.task_repository import add_task, get_tasks_by_user_id, get_task_by_id, update_task, \
-    delete_task_repo, get_tasks_inbox_repo
+    delete_task_repo, get_tasks_inbox_repo, get_tasks_by_project_id_repo
 from app.schemas.tasks import TaskCreate, TaskUpdate
 
 
@@ -36,8 +36,13 @@ def create_task_service(request:TaskCreate,db:Session,current_user:UserModel):
     return add_task(db, new_task)
 
 
-def get_tasks_service(current_user:UserModel,db:Session)->list[TaskModel]:
-    return get_tasks_by_user_id(db, current_user)
+def get_tasks_service(project_id,current_user:UserModel,db:Session)->list[TaskModel]:
+    if project_id is  None:
+        return get_tasks_by_user_id(db, current_user.id)
+    project = get_project_by_id_repo(db, project_id, current_user.id)
+    if project is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    return get_tasks_by_project_id_repo(db, project_id, current_user.id)
 
 
 def get_task_by_id_service(task_id,current_user:UserModel,db:Session)->TaskModel:
@@ -113,3 +118,6 @@ def reopen_task_service(task_id:int,current_user:UserModel,db:Session)->TaskMode
 
 def get_tasks_inbox_service(current_user:UserModel,db:Session):
     return get_tasks_inbox_repo(db, current_user.id)
+
+
+

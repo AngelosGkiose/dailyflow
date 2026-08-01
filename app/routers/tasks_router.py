@@ -19,8 +19,8 @@ def create_task(request:TaskCreate,db:Session=Depends(get_db),current_user:UserM
     return create_task_service(request,db,current_user)
 
 @router.get("/",response_model=list[TaskResponse],status_code=status.HTTP_200_OK)
-def get_tasks(current_user:UserModel=Depends(get_current_user),db:Session=Depends(get_db)):
-    return get_tasks_service(current_user,db)
+def get_tasks(project_id: int | None = None,current_user:UserModel=Depends(get_current_user),db:Session=Depends(get_db)):
+    return get_tasks_service(project_id,current_user,db)
 
 @router.get("/inbox",response_model=list[TaskResponse],status_code=status.HTTP_200_OK)
 def get_tasks_inbox(current_user:UserModel=Depends(get_current_user),db:Session=Depends(get_db)):
@@ -45,4 +45,6 @@ def complete_task(task_id:int,current_user:UserModel=Depends(get_current_user),d
 @router.patch("/{task_id}/reopen",response_model=TaskResponse,status_code=status.HTTP_200_OK)
 def reopen_task(task_id:int,current_user:UserModel=Depends(get_current_user),db:Session=Depends(get_db)):
     return reopen_task_service(task_id, current_user, db)
+
+
 

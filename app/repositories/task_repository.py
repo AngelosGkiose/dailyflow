@@ -10,8 +10,8 @@ def add_task(db: Session, task: TaskModel) -> TaskModel:
     db.refresh(task)
     return task
 
-def get_tasks_by_user_id(db: Session, current_user:UserModel) -> list[TaskModel]:
-    return db.query(TaskModel).filter(TaskModel.user_id == current_user.id).all()
+def get_tasks_by_user_id(db: Session, current_user_id:int) -> list[TaskModel]:
+    return db.query(TaskModel).filter(TaskModel.user_id == current_user_id).all()
 
 def get_task_by_id(db: Session, task_id:int,current_user:UserModel) -> TaskModel:
     return db.query(TaskModel).filter(TaskModel.id == task_id, TaskModel.user_id == current_user.id).first()
@@ -28,3 +28,6 @@ def delete_task_repo(db: Session,task):
 
 def get_tasks_inbox_repo(db: Session, current_user_id:int):
     return db.query(TaskModel).filter(TaskModel.user_id == current_user_id,TaskModel.project_id.is_(None)).all()
+
+def get_tasks_by_project_id_repo(db: Session, project_id:int,current_user_id:int):
+    return db.query(TaskModel).filter(TaskModel.project_id == project_id,TaskModel.user_id==current_user_id).all()
