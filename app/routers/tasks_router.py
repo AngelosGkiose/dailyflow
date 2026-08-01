@@ -4,6 +4,7 @@ from starlette import status
 
 from app.dependencies.authutils import get_current_user
 from app.dependencies.db import get_db
+from app.models.task_model import TaskStatus, TaskPriority
 from app.models.user_model import UserModel
 from app.schemas.tasks import TaskResponse, TaskCreate, TaskUpdate
 from app.services.task_service import create_task_service, get_tasks_service, get_task_by_id_service, \
@@ -19,8 +20,12 @@ def create_task(request:TaskCreate,db:Session=Depends(get_db),current_user:UserM
     return create_task_service(request,db,current_user)
 
 @router.get("/",response_model=list[TaskResponse],status_code=status.HTTP_200_OK)
-def get_tasks(project_id: int | None = None,current_user:UserModel=Depends(get_current_user),db:Session=Depends(get_db)):
-    return get_tasks_service(project_id,current_user,db)
+def get_tasks(project_id: int | None = None,
+    task_status: TaskStatus | None = None,
+    priority: TaskPriority | None = None,
+    current_user: UserModel = Depends(get_current_user),
+    db: Session = Depends(get_db),):
+    return get_tasks_service(project_id,task_status,priority,current_user,db)
 
 @router.get("/inbox",response_model=list[TaskResponse],status_code=status.HTTP_200_OK)
 def get_tasks_inbox(current_user:UserModel=Depends(get_current_user),db:Session=Depends(get_db)):
