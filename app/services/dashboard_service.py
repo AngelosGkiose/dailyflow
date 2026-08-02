@@ -1,6 +1,6 @@
 from datetime import datetime, timezone, timedelta, time
 
-from app.repositories.dashboard_repository import today_tasks_repo, upcoming_tasks_repo
+from app.repositories.dashboard_repository import today_tasks_repo, upcoming_tasks_repo, overdue_task_repo
 
 
 def today_tasks_service(db,current_user):
@@ -19,4 +19,8 @@ def upcoming_tasks_service(db,current_user):
     tomorrow = today + timedelta(days=1)
     start_tomorrow = datetime.combine(tomorrow,time.min)
     return upcoming_tasks_repo(db,current_user.id,start_tomorrow)
+
+def overdue_tasks_service(db,current_user):
+    now=datetime.now(timezone.utc)
+    return overdue_task_repo(db, current_user.id, now)
 
