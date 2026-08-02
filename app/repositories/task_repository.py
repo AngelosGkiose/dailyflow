@@ -7,6 +7,9 @@ from app.models.user_model import UserModel
 from sqlalchemy import or_
 from datetime import date, datetime, time, timedelta
 
+from app.schemas.tasks import TaskSortBy, SortOrder
+
+
 def add_task(db: Session, task: TaskModel) -> TaskModel:
     db.add(task)
     db.commit()
@@ -40,7 +43,9 @@ def get_filtered_tasks(db: Session,
     project_id: int | None,
     task_status: TaskStatus | None,
     priority: TaskPriority | None,
-    search:str|None,due_date: date | None):
+    search:str|None,due_date: date | None,
+    sort_by: TaskSortBy,
+    order: SortOrder):
     query=db.query(TaskModel)
     query=query.filter(TaskModel.user_id == current_user_id)
     if project_id is not None:
@@ -69,5 +74,21 @@ def get_filtered_tasks(db: Session,
             TaskModel.due_date >= start_datetime,
             TaskModel.due_date < end_datetime
         )
-
+    sort_columns = {
+        TaskSortBy.CREATED_AT: TaskModel.created_at,
+        TaskSortBy.UPDATED_AT: TaskModel.updated_at,
+        TaskSortBy.DUE_DATE: TaskModel.due_date,
+        TaskSortBy.TITLE: TaskModel.title
+    }
+    sort_column = sort_columns[sort_by]
+    if order == SortOrder.ASC:
+        query = query.order_by(
+            sort_column.asc(),
+            TaskModel.id.asc()
+        )
+    else:
+        query = query.order_by(
+            sort_column.desc(),
+            TaskModel.id.desc()
+        )
     return query.all()

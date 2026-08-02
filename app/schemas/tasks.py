@@ -1,9 +1,21 @@
 from datetime import datetime
+from enum import Enum
 
 from pydantic import BaseModel, Field
 
 from app.models.task_model import TaskPriority, TaskStatus
 
+class TaskSortBy(str, Enum):
+    CREATED_AT = "created_at"
+    UPDATED_AT = "updated_at"
+    DUE_DATE = "due_date"
+    TITLE = "title"
+    PRIORITY = "priority"
+
+
+class SortOrder(str, Enum):
+    ASC = "asc"
+    DESC = "desc"
 
 class TaskCreate(BaseModel):
     title: str = Field(

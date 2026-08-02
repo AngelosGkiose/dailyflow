@@ -8,7 +8,7 @@ from app.dependencies.authutils import get_current_user
 from app.dependencies.db import get_db
 from app.models.task_model import TaskStatus, TaskPriority
 from app.models.user_model import UserModel
-from app.schemas.tasks import TaskResponse, TaskCreate, TaskUpdate
+from app.schemas.tasks import TaskResponse, TaskCreate, TaskUpdate, TaskSortBy, SortOrder
 from app.services.task_service import create_task_service, get_tasks_service, get_task_by_id_service, \
     update_task_service, delete_task_service, complete_task_service, reopen_task_service, get_tasks_inbox_service
 
@@ -29,9 +29,13 @@ def get_tasks(project_id: int | None = None,
     priority: TaskPriority | None = None,
     search:str|None =None,
     due_date: date | None = Query(default=None),
+    sort_by: TaskSortBy = Query(
+    default=TaskSortBy.CREATED_AT),
+    order: SortOrder = Query(
+    default=SortOrder.DESC),
     current_user: UserModel = Depends(get_current_user),
     db: Session = Depends(get_db),):
-    return get_tasks_service(project_id,task_status,priority,search,due_date,current_user,db)
+    return get_tasks_service(project_id,task_status,priority,search,due_date,sort_by,order,current_user,db)
 
 @router.get("/inbox",response_model=list[TaskResponse],status_code=status.HTTP_200_OK)
 def get_tasks_inbox(current_user:UserModel=Depends(get_current_user),db:Session=Depends(get_db)):

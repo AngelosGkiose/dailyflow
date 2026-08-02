@@ -9,7 +9,7 @@ from app.models.user_model import UserModel
 from app.repositories.project_repository import get_project_by_id_repo
 from app.repositories.task_repository import add_task, get_tasks_by_user_id, get_task_by_id, update_task, \
     delete_task_repo, get_tasks_inbox_repo, get_tasks_by_project_id_repo, get_filtered_tasks
-from app.schemas.tasks import TaskCreate, TaskUpdate
+from app.schemas.tasks import TaskCreate, TaskUpdate, TaskSortBy, SortOrder
 
 
 def create_task_service(request:TaskCreate,db:Session,current_user:UserModel):
@@ -36,11 +36,13 @@ def create_task_service(request:TaskCreate,db:Session,current_user:UserModel):
     return add_task(db, new_task)
 
 
-def get_tasks_service(    project_id: int | None,
+def get_tasks_service(project_id: int | None,
     task_status: TaskStatus | None,
     priority: TaskPriority | None,
     search: str | None,
     due_date: date | None,
+    sort_by:TaskSortBy,
+    order: SortOrder,
     current_user: UserModel,
     db: Session):
     if project_id is not None:
@@ -51,7 +53,7 @@ def get_tasks_service(    project_id: int | None,
         search=search.strip()
         if not search:
             search = None
-    return get_filtered_tasks(db,current_user.id, project_id,task_status,priority,search,due_date)
+    return get_filtered_tasks(db,current_user.id, project_id,task_status,priority,search,due_date,sort_by,order)
 
 
 def get_task_by_id_service(task_id,current_user:UserModel,db:Session)->TaskModel:
