@@ -17,6 +17,13 @@ class SortOrder(str, Enum):
     ASC = "asc"
     DESC = "desc"
 
+class TaskPaginationResponse(BaseModel):
+    items: list[TaskResponse]
+    page: int
+    page_size: int
+    total: int
+    total_pages: int
+
 class TaskCreate(BaseModel):
     title: str = Field(
         min_length=1,
