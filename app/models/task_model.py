@@ -12,6 +12,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 from app.database.database import Base
+from app.models.task_labels_model import task_labels
 
 
 class TaskStatus(str, Enum):
@@ -97,5 +98,10 @@ class TaskModel(Base):
 
     project = relationship(
         "ProjectModel",
+        back_populates="tasks"
+    )
+    labels = relationship(
+        "LabelModel",
+        secondary=task_labels,
         back_populates="tasks"
     )
