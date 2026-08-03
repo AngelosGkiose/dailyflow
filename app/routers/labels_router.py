@@ -7,7 +7,7 @@ from app.dependencies.db import get_db
 from app.models.user_model import UserModel
 from app.schemas.labels import LabelResponse, LabelCreate, LabelUpdate
 from app.services.label_service import create_label_service, get_all_labels_service, get_label_by_id_service, \
-    update_label_service
+    update_label_service, delete_label_service
 
 router = APIRouter(prefix="/labels", tags=["labels"])
 
@@ -27,3 +27,6 @@ def get_label_by_id(label_id:int,current_user:UserModel=Depends(get_current_user
 def update_label(request:LabelUpdate,label_id:int,current_user:UserModel=Depends(get_current_user),db:Session=Depends(get_db)):
     return update_label_service(request,label_id,current_user,db)
 
+@router.delete("/{label_id}",status_code=status.HTTP_204_NO_CONTENT)
+def delete_label(label_id:int,current_user:UserModel=Depends(get_current_user),db:Session=Depends(get_db)):
+    delete_label_service(label_id,current_user,db)

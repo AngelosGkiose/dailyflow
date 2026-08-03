@@ -5,7 +5,7 @@ from starlette import status
 from app.models.label_model import LabelModel
 from app.models.user_model import UserModel
 from app.repositories.label_repository import get_label_by_name, add_label, get_all_labels_repo, get_label_by_id_repo, \
-    update_label_repo
+    update_label_repo, delete_label_repo
 from app.schemas.labels import LabelCreate, LabelUpdate
 
 
@@ -50,4 +50,10 @@ def update_label_service(request:LabelUpdate,label_id:int,current_user:UserModel
             raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="Label with that name already exists")
         label.name=new_label_name
     return update_label_repo(db, label)
+
+def delete_label_service(label_id:int,current_user:UserModel,db:Session):
+    label=get_label_by_id_repo(db,label_id,current_user.id)
+    if label is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Label not found")
+    delete_label_repo(db, label)
 

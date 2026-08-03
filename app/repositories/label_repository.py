@@ -25,3 +25,8 @@ def update_label_repo(db:Session,label:LabelModel):
     db.commit()
     db.refresh(label)
     return label
+
+def delete_label_repo(db:Session,label:LabelModel):
+    db.delete(label)
+    db.commit()
+    
