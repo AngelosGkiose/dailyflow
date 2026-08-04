@@ -7,6 +7,7 @@ from starlette import status
 
 from app.models.task_model import TaskModel, TaskStatus, TaskPriority
 from app.models.user_model import UserModel
+from app.repositories.label_repository import get_label_by_id_repo
 from app.repositories.project_repository import get_project_by_id_repo
 from app.repositories.task_repository import add_task, get_tasks_by_user_id, get_task_by_id, update_task, \
     delete_task_repo, get_tasks_inbox_repo, get_tasks_by_project_id_repo, get_filtered_tasks
@@ -140,6 +141,18 @@ def reopen_task_service(task_id:int,current_user:UserModel,db:Session)->TaskMode
 
 def get_tasks_inbox_service(current_user:UserModel,db:Session):
     return get_tasks_inbox_repo(db, current_user.id)
+
+def add_label_to_task_service(task_id:int,label_id:int,current_user:UserModel,db:Session)->TaskModel:
+    task= get_task_by_id(db, task_id, current_user)
+    if task is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Task not found")
+    label=get_label_by_id_repo(db, label_id, current_user.id)
+    if label is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Label not found")
+    if label  in task.labels:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="Label already exists")
+    task.labels.append(label)
+    return update_task(db, task)
 
 
 

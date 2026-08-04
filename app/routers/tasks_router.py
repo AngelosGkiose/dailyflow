@@ -10,7 +10,8 @@ from app.models.task_model import TaskStatus, TaskPriority
 from app.models.user_model import UserModel
 from app.schemas.tasks import TaskResponse, TaskCreate, TaskUpdate, TaskSortBy, SortOrder, TaskPaginationResponse
 from app.services.task_service import create_task_service, get_tasks_service, get_task_by_id_service, \
-    update_task_service, delete_task_service, complete_task_service, reopen_task_service, get_tasks_inbox_service
+    update_task_service, delete_task_service, complete_task_service, reopen_task_service, get_tasks_inbox_service, \
+    add_label_to_task_service
 
 router = APIRouter(
     prefix="/tasks",
@@ -63,5 +64,8 @@ def complete_task(task_id:int,current_user:UserModel=Depends(get_current_user),d
 def reopen_task(task_id:int,current_user:UserModel=Depends(get_current_user),db:Session=Depends(get_db)):
     return reopen_task_service(task_id, current_user, db)
 
+@router.post("/{task_id}/labels/{label_id}",response_model=TaskResponse,status_code=status.HTTP_200_OK)
+def add_label_to_task(task_id:int,label_id:int,current_user:UserModel=Depends(get_current_user),db:Session=Depends(get_db)):
+    return add_label_to_task_service(task_id, label_id, current_user, db)
 
 

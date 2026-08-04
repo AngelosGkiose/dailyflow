@@ -4,6 +4,8 @@ from enum import Enum
 from pydantic import BaseModel, Field
 
 from app.models.task_model import TaskPriority, TaskStatus
+from app.schemas.labels import LabelResponse
+
 
 class TaskSortBy(str, Enum):
     CREATED_AT = "created_at"
@@ -52,6 +54,7 @@ class TaskResponse(BaseModel):
     updated_at: datetime
     completed_at: datetime | None
     project_id: int | None
+    labels: list[LabelResponse] = Field(default_factory=list)
 
     model_config = {
         "from_attributes": True
