@@ -36,9 +36,10 @@ def get_tasks(project_id: int | None = Query(default=None,gt=0),
     default=SortOrder.DESC),
     page: int = Query( default=1,ge=1),
     page_size: int = Query(default=20,ge=1,le=100),
+    label_id: int | None = Query(default=None,gt=0),
     current_user: UserModel = Depends(get_current_user),
     db: Session = Depends(get_db)):
-    return get_tasks_service(project_id,task_status,priority,search,due_date,sort_by,order,page,page_size,current_user,db)
+    return get_tasks_service(project_id,task_status,priority,search,due_date,sort_by,order,page,page_size,label_id,current_user,db)
 
 @router.get("/inbox",response_model=list[TaskResponse],status_code=status.HTTP_200_OK)
 def get_tasks_inbox(current_user:UserModel=Depends(get_current_user),db:Session=Depends(get_db)):

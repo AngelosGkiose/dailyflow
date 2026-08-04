@@ -46,7 +46,7 @@ def get_tasks_service(project_id: int | None,
     sort_by:TaskSortBy,
     order: SortOrder,
     page:int,
-    page_size:int,
+    page_size:int,label_id:int |None,
     current_user: UserModel,
     db: Session):
     if project_id is not None:
@@ -57,7 +57,11 @@ def get_tasks_service(project_id: int | None,
         search=search.strip()
         if not search:
             search = None
-    tasks,total=get_filtered_tasks(db,current_user.id, project_id,task_status,priority,search,due_date,sort_by,order,page,page_size)
+    if label_id is not None:
+        label = get_label_by_id_repo(db, label_id, current_user.id)
+        if label is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Label not found")
+    tasks,total=get_filtered_tasks(db,current_user.id, project_id,task_status,priority,search,due_date,sort_by,order,page,page_size,label_id)
     total_pages=math.ceil(total/page_size)
     return TaskPaginationResponse(
         items=tasks,

@@ -19,7 +19,7 @@ def get_current_user(token:str=Depends(oauth2_scheme),db:Session=Depends(get_db(
         headers={
             "WWW-Authenticate": "Bearer"
         })
-    payload=decode_access_token(token,db)
+    payload=decode_access_token(token)
     if payload is None:
         raise credentials_exception
     try:
@@ -28,7 +28,7 @@ def get_current_user(token:str=Depends(oauth2_scheme),db:Session=Depends(get_db(
         raise credentials_exception
     if user_id is None:
         raise credentials_exception
-    user=get_user_by_id(user_id,db)
+    user=get_user_by_id(db,user_id)
     if user is None:
         raise credentials_exception
     return user

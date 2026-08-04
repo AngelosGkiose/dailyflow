@@ -2,6 +2,7 @@
 
 from sqlalchemy.orm.session import Session
 
+from app.models.label_model import LabelModel
 from app.models.task_model import TaskModel, TaskStatus, TaskPriority
 from app.models.user_model import UserModel
 from sqlalchemy import or_
@@ -49,7 +50,7 @@ def get_filtered_tasks(
     sort_by: TaskSortBy,
     order: SortOrder,
     page: int,
-    page_size: int) :
+    page_size: int,label_id: int | None) :
     query = db.query(TaskModel).filter(
         TaskModel.user_id == current_user_id
     )
@@ -90,6 +91,12 @@ def get_filtered_tasks(
         query = query.filter(
             TaskModel.due_date >= start_datetime,
             TaskModel.due_date < end_datetime
+        )
+    if label_id is not None:
+        query = query.filter(
+            TaskModel.labels.any(
+                LabelModel.id == label_id
+            )
         )
 
     total = query.count()
