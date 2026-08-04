@@ -1,9 +1,9 @@
 import datetime
 
 import jwt
-from jwt.jwa import none
+
 from pwdlib import PasswordHash
-from jose import JWTError
+from jwt import InvalidTokenError
 
 from app.config import Settings, settings
 
@@ -35,6 +35,6 @@ def decode_access_token(token:str)->dict | None:
     try:
         payload=jwt.decode(token,settings.secret_key,algorithms=[settings.algorithm])
         return payload
-    except JWTError:
-        return none
+    except InvalidTokenError:
+        return None
 

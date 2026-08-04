@@ -13,7 +13,7 @@ oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/auth/login"
 )
 
-def get_current_user(token:str=Depends(oauth2_scheme),db:Session=Depends(get_db()))->UserModel:
+def get_current_user(token:str=Depends(oauth2_scheme),db:Session=Depends(get_db))->UserModel:
     credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={
@@ -22,6 +22,15 @@ def get_current_user(token:str=Depends(oauth2_scheme),db:Session=Depends(get_db(
     payload=decode_access_token(token)
     if payload is None:
         raise credentials_exception
+    user_id_value = payload.get("sub")
+
+    if user_id_value is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    
     try:
         user_id=int(payload.get("sub"))
     except (ValueError, TypeError):
