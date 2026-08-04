@@ -124,3 +124,6 @@ def get_filtered_tasks(
     )
 
     return tasks, total
+
+def commit_task_labels_repo(db: Session):
+    db.commit()

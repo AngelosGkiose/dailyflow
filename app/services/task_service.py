@@ -10,7 +10,7 @@ from app.models.user_model import UserModel
 from app.repositories.label_repository import get_label_by_id_repo
 from app.repositories.project_repository import get_project_by_id_repo
 from app.repositories.task_repository import add_task, get_tasks_by_user_id, get_task_by_id, update_task, \
-    delete_task_repo, get_tasks_inbox_repo, get_tasks_by_project_id_repo, get_filtered_tasks
+    delete_task_repo, get_tasks_inbox_repo, get_tasks_by_project_id_repo, get_filtered_tasks, commit_task_labels_repo
 from app.schemas.tasks import TaskCreate, TaskUpdate, TaskSortBy, SortOrder, TaskPaginationResponse
 
 
@@ -154,5 +154,16 @@ def add_label_to_task_service(task_id:int,label_id:int,current_user:UserModel,db
     task.labels.append(label)
     return update_task(db, task)
 
+def delete_label_from_task_service(task_id:int,label_id:int,current_user:UserModel,db:Session):
+    task= get_task_by_id(db, task_id, current_user)
+    if task is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Task not found")
+    label= get_label_by_id_repo(db, label_id, current_user.id)
+    if label is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Label not found")
+    if label not in task.labels:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="Label is not assigned to task")
+    task.labels.remove(label)
+    return commit_task_labels_repo(db)
 
 
