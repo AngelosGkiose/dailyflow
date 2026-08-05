@@ -29,18 +29,14 @@ function DashboardPage() {
     useState(false);
 
   const [loading, setLoading] = useState(true);
-
   const [projectsLoading, setProjectsLoading] =
     useState(true);
-
   const [labelsLoading, setLabelsLoading] =
     useState(true);
 
   const [error, setError] = useState("");
-
   const [projectsError, setProjectsError] =
     useState("");
-
   const [labelsError, setLabelsError] =
     useState("");
 
@@ -336,34 +332,27 @@ function DashboardPage() {
 
   async function handleTaskCreated() {
     setShowTaskForm(false);
-
     await loadTasks();
   }
 
   function handleViewChange(view) {
     setActiveView(view);
-
     setSelectedProject(null);
     setSelectedLabel(null);
-
     setShowTaskForm(false);
   }
 
   function handleProjectSelect(project) {
     setActiveView("project");
-
     setSelectedProject(project);
     setSelectedLabel(null);
-
     setShowTaskForm(false);
   }
 
   function handleLabelSelect(label) {
     setActiveView("label");
-
     setSelectedLabel(label);
     setSelectedProject(null);
-
     setShowTaskForm(false);
   }
 
@@ -444,6 +433,7 @@ function DashboardPage() {
         {showTaskForm && (
           <TaskForm
             projects={projects}
+            labels={labels}
             defaultProjectId={
               activeView === "project"
                 ? selectedProject?.id ?? null

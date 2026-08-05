@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 function TaskForm({
   projects,
+  labels,
   defaultProjectId,
   onTaskCreated,
   onCancel,
@@ -17,6 +18,7 @@ function TaskForm({
       defaultProjectId !== undefined
         ? String(defaultProjectId)
         : "",
+    label_ids: [],
   });
 
   const [loading, setLoading] = useState(false);
@@ -39,6 +41,21 @@ function TaskForm({
     setFormData((currentFormData) => ({
       ...currentFormData,
       [name]: value,
+    }));
+  }
+
+  function handleLabelChange(event) {
+    const labelId = Number(event.target.value);
+    const isChecked = event.target.checked;
+
+    setFormData((currentFormData) => ({
+      ...currentFormData,
+      label_ids: isChecked
+        ? [...currentFormData.label_ids, labelId]
+        : currentFormData.label_ids.filter(
+            (currentLabelId) =>
+              currentLabelId !== labelId
+          ),
     }));
   }
 
@@ -66,9 +83,7 @@ function TaskForm({
         formData.description.trim() || null,
       priority: formData.priority,
       due_date: formData.due_date
-        ? new Date(
-            formData.due_date
-          ).toISOString()
+        ? new Date(formData.due_date).toISOString()
         : null,
       project_id: formData.project_id
         ? Number(formData.project_id)
@@ -79,7 +94,7 @@ function TaskForm({
     setError("");
 
     try {
-      const response = await fetch(
+      const taskResponse = await fetch(
         "http://127.0.0.1:8000/tasks/",
         {
           method: "POST",
@@ -91,19 +106,48 @@ function TaskForm({
         }
       );
 
-      if (response.status === 401) {
+      if (taskResponse.status === 401) {
         onUnauthorized();
         return;
       }
 
-      const data = await response.json();
+      const createdTask =
+        await taskResponse.json();
 
-      if (!response.ok) {
+      if (!taskResponse.ok) {
         throw new Error(
-          typeof data.detail === "string"
-            ? data.detail
+          typeof createdTask.detail === "string"
+            ? createdTask.detail
             : "Could not create task"
         );
+      }
+
+      for (const labelId of formData.label_ids) {
+        const labelResponse = await fetch(
+          `http://127.0.0.1:8000/tasks/${createdTask.id}/labels/${labelId}`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        if (labelResponse.status === 401) {
+          onUnauthorized();
+          return;
+        }
+
+        if (!labelResponse.ok) {
+          const labelError =
+            await labelResponse.json();
+
+          throw new Error(
+            typeof labelError.detail === "string"
+              ? labelError.detail
+              : "Task was created, but a label could not be assigned"
+          );
+        }
       }
 
       setFormData({
@@ -116,9 +160,10 @@ function TaskForm({
           defaultProjectId !== undefined
             ? String(defaultProjectId)
             : "",
+        label_ids: [],
       });
 
-      onTaskCreated(data);
+      onTaskCreated();
     } catch (requestError) {
       setError(
         requestError instanceof Error
@@ -180,11 +225,9 @@ function TaskForm({
           disabled={loading}
         >
           <option value="low">Low</option>
-
           <option value="medium">
             Medium
           </option>
-
           <option value="high">High</option>
         </select>
       </div>
@@ -230,6 +273,30 @@ function TaskForm({
           ))}
         </select>
       </div>
+
+      <fieldset>
+        <legend>Labels</legend>
+
+        {labels.length === 0 ? (
+          <p>No labels available.</p>
+        ) : (
+          labels.map((label) => (
+            <label key={label.id}>
+              <input
+                type="checkbox"
+                value={label.id}
+                checked={formData.label_ids.includes(
+                  label.id
+                )}
+                onChange={handleLabelChange}
+                disabled={loading}
+              />
+
+              #{label.name}
+            </label>
+          ))
+        )}
+      </fieldset>
 
       {error && (
         <div role="alert">
