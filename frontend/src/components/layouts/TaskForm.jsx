@@ -1,18 +1,37 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function TaskForm({
+  projects,
+  defaultProjectId,
   onTaskCreated,
   onCancel,
+  onUnauthorized,
 }) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     priority: "medium",
     due_date: "",
+    project_id:
+      defaultProjectId !== null &&
+      defaultProjectId !== undefined
+        ? String(defaultProjectId)
+        : "",
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    setFormData((currentFormData) => ({
+      ...currentFormData,
+      project_id:
+        defaultProjectId !== null &&
+        defaultProjectId !== undefined
+          ? String(defaultProjectId)
+          : "",
+    }));
+  }, [defaultProjectId]);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -26,27 +45,38 @@ function TaskForm({
   async function handleSubmit(event) {
     event.preventDefault();
 
-    const accessToken = localStorage.getItem(
-      "access_token"
-    );
+    const accessToken =
+      localStorage.getItem("access_token");
 
     if (!accessToken) {
-      setError("You must be logged in.");
+      onUnauthorized();
       return;
     }
 
-    setLoading(true);
-    setError("");
+    const title = formData.title.trim();
+
+    if (!title) {
+      setError("Task title cannot be empty.");
+      return;
+    }
 
     const requestData = {
-      title: formData.title.trim(),
+      title,
       description:
         formData.description.trim() || null,
       priority: formData.priority,
       due_date: formData.due_date
-        ? new Date(formData.due_date).toISOString()
+        ? new Date(
+            formData.due_date
+          ).toISOString()
+        : null,
+      project_id: formData.project_id
+        ? Number(formData.project_id)
         : null,
     };
+
+    setLoading(true);
+    setError("");
 
     try {
       const response = await fetch(
@@ -60,6 +90,11 @@ function TaskForm({
           body: JSON.stringify(requestData),
         }
       );
+
+      if (response.status === 401) {
+        onUnauthorized();
+        return;
+      }
 
       const data = await response.json();
 
@@ -76,6 +111,11 @@ function TaskForm({
         description: "",
         priority: "medium",
         due_date: "",
+        project_id:
+          defaultProjectId !== null &&
+          defaultProjectId !== undefined
+            ? String(defaultProjectId)
+            : "",
       });
 
       onTaskCreated(data);
@@ -139,17 +179,13 @@ function TaskForm({
           onChange={handleChange}
           disabled={loading}
         >
-          <option value="low">
-            Low
-          </option>
+          <option value="low">Low</option>
 
           <option value="medium">
             Medium
           </option>
 
-          <option value="high">
-            High
-          </option>
+          <option value="high">High</option>
         </select>
       </div>
 
@@ -166,6 +202,33 @@ function TaskForm({
           onChange={handleChange}
           disabled={loading}
         />
+      </div>
+
+      <div>
+        <label htmlFor="task-project">
+          Project
+        </label>
+
+        <select
+          id="task-project"
+          name="project_id"
+          value={formData.project_id}
+          onChange={handleChange}
+          disabled={loading}
+        >
+          <option value="">
+            No project — Inbox
+          </option>
+
+          {projects.map((project) => (
+            <option
+              key={project.id}
+              value={String(project.id)}
+            >
+              {project.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       {error && (

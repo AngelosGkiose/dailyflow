@@ -8,7 +8,6 @@ import { useNavigate } from "react-router";
 import Sidebar from "../components/layouts/Sidebar.jsx";
 import TaskForm from "../components/layouts/TaskForm.jsx";
 import TaskList from "../components/layouts/TaskList.jsx";
-
 function DashboardPage() {
   const navigate = useNavigate();
 
@@ -25,10 +24,12 @@ function DashboardPage() {
     useState(false);
 
   const [loading, setLoading] = useState(true);
+
   const [projectsLoading, setProjectsLoading] =
     useState(true);
 
   const [error, setError] = useState("");
+
   const [projectsError, setProjectsError] =
     useState("");
 
@@ -36,7 +37,9 @@ function DashboardPage() {
     useState(null);
 
   function getAccessToken() {
-    return localStorage.getItem("access_token");
+    return localStorage.getItem(
+      "access_token"
+    );
   }
 
   const handleUnauthorized = useCallback(() => {
@@ -217,7 +220,8 @@ function DashboardPage() {
         return;
       }
 
-      const updatedTask = await response.json();
+      const updatedTask =
+        await response.json();
 
       if (!response.ok) {
         throw new Error(
@@ -252,6 +256,7 @@ function DashboardPage() {
 
   async function handleTaskCreated() {
     setShowTaskForm(false);
+
     await loadTasks();
   }
 
@@ -324,9 +329,18 @@ function DashboardPage() {
 
         {showTaskForm && (
           <TaskForm
+            projects={projects}
+            defaultProjectId={
+              activeView === "project"
+                ? selectedProject?.id ?? null
+                : null
+            }
             onTaskCreated={handleTaskCreated}
             onCancel={() =>
               setShowTaskForm(false)
+            }
+            onUnauthorized={
+              handleUnauthorized
             }
           />
         )}
