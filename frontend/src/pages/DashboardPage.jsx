@@ -1,4 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { useNavigate } from "react-router";
 
 import Sidebar from "../components/layouts/Sidebar.jsx";
@@ -11,28 +15,28 @@ function DashboardPage() {
   const [activeView, setActiveView] =
     useState("today");
 
+  const [selectedProject, setSelectedProject] =
+    useState(null);
+
   const [tasks, setTasks] = useState([]);
+  const [projects, setProjects] = useState([]);
+
   const [showTaskForm, setShowTaskForm] =
     useState(false);
 
   const [loading, setLoading] = useState(true);
+  const [projectsLoading, setProjectsLoading] =
+    useState(true);
+
   const [error, setError] = useState("");
+  const [projectsError, setProjectsError] =
+    useState("");
 
   const [updatingTaskId, setUpdatingTaskId] =
     useState(null);
 
-  function handleLogout() {
-    localStorage.removeItem("access_token");
-
-    navigate("/login", {
-      replace: true,
-    });
-  }
-
   function getAccessToken() {
-    return localStorage.getItem(
-      "access_token"
-    );
+    return localStorage.getItem("access_token");
   }
 
   const handleUnauthorized = useCallback(() => {
@@ -43,7 +47,21 @@ function DashboardPage() {
     });
   }, [navigate]);
 
+  function handleLogout() {
+    handleUnauthorized();
+  }
+
   const getTasksEndpoint = useCallback(() => {
+    if (
+      activeView === "project" &&
+      selectedProject
+    ) {
+      return (
+        "http://127.0.0.1:8000/tasks/" +
+        `?project_id=${selectedProject.id}`
+      );
+    }
+
     if (activeView === "inbox") {
       return "http://127.0.0.1:8000/tasks/inbox";
     }
@@ -53,7 +71,7 @@ function DashboardPage() {
     }
 
     return "http://127.0.0.1:8000/dashboard/today";
-  }, [activeView]);
+  }, [activeView, selectedProject]);
 
   const loadTasks = useCallback(async () => {
     const accessToken = getAccessToken();
@@ -91,7 +109,11 @@ function DashboardPage() {
         );
       }
 
-      setTasks(data);
+      if (activeView === "project") {
+        setTasks(data.items);
+      } else {
+        setTasks(data);
+      }
     } catch (requestError) {
       setError(
         requestError instanceof Error
@@ -102,9 +124,62 @@ function DashboardPage() {
       setLoading(false);
     }
   }, [
+    activeView,
     getTasksEndpoint,
     handleUnauthorized,
   ]);
+
+  const loadProjects = useCallback(async () => {
+    const accessToken = getAccessToken();
+
+    if (!accessToken) {
+      handleUnauthorized();
+      return;
+    }
+
+    setProjectsLoading(true);
+    setProjectsError("");
+
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:8000/projects/",
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (response.status === 401) {
+        handleUnauthorized();
+        return;
+      }
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          typeof data.detail === "string"
+            ? data.detail
+            : "Could not load projects"
+        );
+      }
+
+      setProjects(data);
+    } catch (requestError) {
+      setProjectsError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Something went wrong"
+      );
+    } finally {
+      setProjectsLoading(false);
+    }
+  }, [handleUnauthorized]);
+
+  useEffect(() => {
+    loadProjects();
+  }, [loadProjects]);
 
   useEffect(() => {
     loadTasks();
@@ -142,8 +217,7 @@ function DashboardPage() {
         return;
       }
 
-      const updatedTask =
-        await response.json();
+      const updatedTask = await response.json();
 
       if (!response.ok) {
         throw new Error(
@@ -178,16 +252,29 @@ function DashboardPage() {
 
   async function handleTaskCreated() {
     setShowTaskForm(false);
-
     await loadTasks();
   }
 
   function handleViewChange(view) {
     setActiveView(view);
+    setSelectedProject(null);
+    setShowTaskForm(false);
+  }
+
+  function handleProjectSelect(project) {
+    setActiveView("project");
+    setSelectedProject(project);
     setShowTaskForm(false);
   }
 
   function getPageTitle() {
+    if (
+      activeView === "project" &&
+      selectedProject
+    ) {
+      return selectedProject.name;
+    }
+
     if (activeView === "inbox") {
       return "Inbox";
     }
@@ -203,7 +290,13 @@ function DashboardPage() {
     <main>
       <Sidebar
         activeView={activeView}
+        selectedProjectId={
+          selectedProject?.id ?? null
+        }
+        projects={projects}
+        projectsLoading={projectsLoading}
         onViewChange={handleViewChange}
+        onProjectSelect={handleProjectSelect}
         onLogout={handleLogout}
       />
 
@@ -223,11 +316,15 @@ function DashboardPage() {
           )}
         </header>
 
+        {projectsError && (
+          <div role="alert">
+            {projectsError}
+          </div>
+        )}
+
         {showTaskForm && (
           <TaskForm
-            onTaskCreated={
-              handleTaskCreated
-            }
+            onTaskCreated={handleTaskCreated}
             onCancel={() =>
               setShowTaskForm(false)
             }
@@ -241,9 +338,7 @@ function DashboardPage() {
           onToggleStatus={
             handleToggleTaskStatus
           }
-          updatingTaskId={
-            updatingTaskId
-          }
+          updatingTaskId={updatingTaskId}
         />
       </section>
     </main>
