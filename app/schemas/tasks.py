@@ -19,12 +19,6 @@ class SortOrder(str, Enum):
     ASC = "asc"
     DESC = "desc"
 
-class TaskPaginationResponse(BaseModel):
-    items: list[TaskResponse]
-    page: int
-    page_size: int
-    total: int
-    total_pages: int
 
 class TaskCreate(BaseModel):
     title: str = Field(
@@ -38,7 +32,6 @@ class TaskCreate(BaseModel):
     )
 
     priority: TaskPriority
-
     due_date: datetime | None = None
     project_id: int | None = None
 
@@ -61,6 +54,13 @@ class TaskResponse(BaseModel):
     }
 
 
+class TaskPaginationResponse(BaseModel):
+    items: list[TaskResponse]
+    page: int
+    page_size: int
+    total: int
+    total_pages: int
+
 
 class TaskUpdate(BaseModel):
     title: str | None = Field(
@@ -75,6 +75,5 @@ class TaskUpdate(BaseModel):
     )
 
     priority: TaskPriority | None = None
-
     due_date: datetime | None = None
     project_id: int | None = None

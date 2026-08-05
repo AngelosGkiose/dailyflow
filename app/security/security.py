@@ -19,7 +19,7 @@ def create_access_token(data:dict)-> str:
     payload=data.copy()
     expiration_time = (
             datetime.datetime.now(datetime.timezone.utc)
-            + datetime.timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+            + datetime.timedelta(minutes=settings.expiration_time)
     )
     payload.update({
         "exp":expiration_time
