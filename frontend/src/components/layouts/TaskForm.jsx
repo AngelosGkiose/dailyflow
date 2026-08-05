@@ -1,9 +1,23 @@
 import { useEffect, useState } from "react";
 
+function getCurrentLocalDateTime() {
+  const now = new Date();
+
+  const timezoneOffset =
+    now.getTimezoneOffset() * 60 * 1000;
+
+  return new Date(
+    now.getTime() - timezoneOffset
+  )
+    .toISOString()
+    .slice(0, 16);
+}
+
 function TaskForm({
   projects,
   labels,
   defaultProjectId,
+  defaultToToday,
   onTaskCreated,
   onCancel,
   onUnauthorized,
@@ -12,7 +26,9 @@ function TaskForm({
     title: "",
     description: "",
     priority: "medium",
-    due_date: "",
+    due_date: defaultToToday
+      ? getCurrentLocalDateTime()
+      : "",
     project_id:
       defaultProjectId !== null &&
       defaultProjectId !== undefined
@@ -27,13 +43,18 @@ function TaskForm({
   useEffect(() => {
     setFormData((currentFormData) => ({
       ...currentFormData,
+
       project_id:
         defaultProjectId !== null &&
         defaultProjectId !== undefined
           ? String(defaultProjectId)
           : "",
+
+      due_date: defaultToToday
+        ? getCurrentLocalDateTime()
+        : "",
     }));
-  }, [defaultProjectId]);
+  }, [defaultProjectId, defaultToToday]);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -50,8 +71,12 @@ function TaskForm({
 
     setFormData((currentFormData) => ({
       ...currentFormData,
+
       label_ids: isChecked
-        ? [...currentFormData.label_ids, labelId]
+        ? [
+            ...currentFormData.label_ids,
+            labelId,
+          ]
         : currentFormData.label_ids.filter(
             (currentLabelId) =>
               currentLabelId !== labelId
@@ -62,8 +87,9 @@ function TaskForm({
   async function handleSubmit(event) {
     event.preventDefault();
 
-    const accessToken =
-      localStorage.getItem("access_token");
+    const accessToken = localStorage.getItem(
+      "access_token"
+    );
 
     if (!accessToken) {
       onUnauthorized();
@@ -79,12 +105,18 @@ function TaskForm({
 
     const requestData = {
       title,
+
       description:
         formData.description.trim() || null,
+
       priority: formData.priority,
+
       due_date: formData.due_date
-        ? new Date(formData.due_date).toISOString()
+        ? new Date(
+            formData.due_date
+          ).toISOString()
         : null,
+
       project_id: formData.project_id
         ? Number(formData.project_id)
         : null,
@@ -98,10 +130,12 @@ function TaskForm({
         "http://127.0.0.1:8000/tasks/",
         {
           method: "POST",
+
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
           },
+
           body: JSON.stringify(requestData),
         }
       );
@@ -127,6 +161,7 @@ function TaskForm({
           `http://127.0.0.1:8000/tasks/${createdTask.id}/labels/${labelId}`,
           {
             method: "POST",
+
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
@@ -154,16 +189,21 @@ function TaskForm({
         title: "",
         description: "",
         priority: "medium",
-        due_date: "",
+
+        due_date: defaultToToday
+          ? getCurrentLocalDateTime()
+          : "",
+
         project_id:
           defaultProjectId !== null &&
           defaultProjectId !== undefined
             ? String(defaultProjectId)
             : "",
+
         label_ids: [],
       });
 
-      onTaskCreated();
+      onTaskCreated(createdTask);
     } catch (requestError) {
       setError(
         requestError instanceof Error
@@ -224,11 +264,17 @@ function TaskForm({
           onChange={handleChange}
           disabled={loading}
         >
-          <option value="low">Low</option>
+          <option value="low">
+            Low
+          </option>
+
           <option value="medium">
             Medium
           </option>
-          <option value="high">High</option>
+
+          <option value="high">
+            High
+          </option>
         </select>
       </div>
 

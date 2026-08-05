@@ -3,8 +3,10 @@ import {
   useEffect,
   useState,
 } from "react";
+
 import { useNavigate } from "react-router";
 
+import LabelForm from "../components/layouts/LabelForm.jsx";
 import Sidebar from "../components/layouts/Sidebar.jsx";
 import TaskForm from "../components/layouts/TaskForm.jsx";
 import TaskList from "../components/layouts/TaskList.jsx";
@@ -28,15 +30,22 @@ function DashboardPage() {
   const [showTaskForm, setShowTaskForm] =
     useState(false);
 
+  const [showLabelForm, setShowLabelForm] =
+    useState(false);
+
   const [loading, setLoading] = useState(true);
+
   const [projectsLoading, setProjectsLoading] =
     useState(true);
+
   const [labelsLoading, setLabelsLoading] =
     useState(true);
 
   const [error, setError] = useState("");
+
   const [projectsError, setProjectsError] =
     useState("");
+
   const [labelsError, setLabelsError] =
     useState("");
 
@@ -105,6 +114,7 @@ function DashboardPage() {
       return;
     }
 
+    setTasks([]);
     setLoading(true);
     setError("");
 
@@ -137,9 +147,17 @@ function DashboardPage() {
         activeView === "project" ||
         activeView === "label"
       ) {
-        setTasks(data.items);
+        setTasks(
+          Array.isArray(data.items)
+            ? data.items
+            : []
+        );
       } else {
-        setTasks(data);
+        setTasks(
+          Array.isArray(data)
+            ? data
+            : []
+        );
       }
     } catch (requestError) {
       setError(
@@ -192,7 +210,11 @@ function DashboardPage() {
         );
       }
 
-      setProjects(data);
+      setProjects(
+        Array.isArray(data)
+          ? data
+          : []
+      );
     } catch (requestError) {
       setProjectsError(
         requestError instanceof Error
@@ -240,7 +262,11 @@ function DashboardPage() {
         );
       }
 
-      setLabels(data);
+      setLabels(
+        Array.isArray(data)
+          ? data
+          : []
+      );
     } catch (requestError) {
       setLabelsError(
         requestError instanceof Error
@@ -286,6 +312,7 @@ function DashboardPage() {
     try {
       const response = await fetch(endpoint, {
         method: "PATCH",
+
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -335,11 +362,17 @@ function DashboardPage() {
     await loadTasks();
   }
 
+  async function handleLabelCreated() {
+    setShowLabelForm(false);
+    await loadLabels();
+  }
+
   function handleViewChange(view) {
     setActiveView(view);
     setSelectedProject(null);
     setSelectedLabel(null);
     setShowTaskForm(false);
+    setShowLabelForm(false);
   }
 
   function handleProjectSelect(project) {
@@ -347,6 +380,7 @@ function DashboardPage() {
     setSelectedProject(project);
     setSelectedLabel(null);
     setShowTaskForm(false);
+    setShowLabelForm(false);
   }
 
   function handleLabelSelect(label) {
@@ -354,6 +388,17 @@ function DashboardPage() {
     setSelectedLabel(label);
     setSelectedProject(null);
     setShowTaskForm(false);
+    setShowLabelForm(false);
+  }
+
+  function handleAddLabel() {
+    setShowLabelForm(true);
+    setShowTaskForm(false);
+  }
+
+  function handleAddTask() {
+    setShowTaskForm(true);
+    setShowLabelForm(false);
   }
 
   function getPageTitle() {
@@ -399,6 +444,7 @@ function DashboardPage() {
         onViewChange={handleViewChange}
         onProjectSelect={handleProjectSelect}
         onLabelSelect={handleLabelSelect}
+        onAddLabel={handleAddLabel}
         onLogout={handleLogout}
       />
 
@@ -409,9 +455,7 @@ function DashboardPage() {
           {!showTaskForm && (
             <button
               type="button"
-              onClick={() =>
-                setShowTaskForm(true)
-              }
+              onClick={handleAddTask}
             >
               + Add task
             </button>
@@ -430,19 +474,43 @@ function DashboardPage() {
           </div>
         )}
 
+        {showLabelForm && (
+          <LabelForm
+            onLabelCreated={
+              handleLabelCreated
+            }
+            onCancel={() =>
+              setShowLabelForm(false)
+            }
+            onUnauthorized={
+              handleUnauthorized
+            }
+          />
+        )}
+
         {showTaskForm && (
           <TaskForm
             projects={projects}
             labels={labels}
+
             defaultProjectId={
               activeView === "project"
                 ? selectedProject?.id ?? null
                 : null
             }
-            onTaskCreated={handleTaskCreated}
+
+            defaultToToday={
+              activeView === "today"
+            }
+
+            onTaskCreated={
+              handleTaskCreated
+            }
+
             onCancel={() =>
               setShowTaskForm(false)
             }
+
             onUnauthorized={
               handleUnauthorized
             }
@@ -456,7 +524,9 @@ function DashboardPage() {
           onToggleStatus={
             handleToggleTaskStatus
           }
-          updatingTaskId={updatingTaskId}
+          updatingTaskId={
+            updatingTaskId
+          }
         />
       </section>
     </main>

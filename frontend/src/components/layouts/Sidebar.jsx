@@ -9,6 +9,7 @@ function Sidebar({
   onViewChange,
   onProjectSelect,
   onLabelSelect,
+  onAddLabel,
   onLogout,
 }) {
   return (
@@ -87,7 +88,17 @@ function Sidebar({
       </section>
 
       <section>
-        <h3>Labels</h3>
+        <div>
+          <h3>Labels</h3>
+
+          <button
+            type="button"
+            onClick={onAddLabel}
+            aria-label="Create label"
+          >
+            + Add label
+          </button>
+        </div>
 
         {labelsLoading ? (
           <p>Loading labels...</p>
