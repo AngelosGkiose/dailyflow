@@ -1,10 +1,14 @@
 function Sidebar({
   activeView,
   selectedProjectId,
+  selectedLabelId,
   projects,
+  labels,
   projectsLoading,
+  labelsLoading,
   onViewChange,
   onProjectSelect,
+  onLabelSelect,
   onLogout,
 }) {
   return (
@@ -18,7 +22,9 @@ function Sidebar({
           type="button"
           onClick={() => onViewChange("inbox")}
           aria-current={
-            activeView === "inbox" ? "page" : undefined
+            activeView === "inbox"
+              ? "page"
+              : undefined
           }
         >
           Inbox
@@ -28,7 +34,9 @@ function Sidebar({
           type="button"
           onClick={() => onViewChange("today")}
           aria-current={
-            activeView === "today" ? "page" : undefined
+            activeView === "today"
+              ? "page"
+              : undefined
           }
         >
           Today
@@ -38,7 +46,9 @@ function Sidebar({
           type="button"
           onClick={() => onViewChange("upcoming")}
           aria-current={
-            activeView === "upcoming" ? "page" : undefined
+            activeView === "upcoming"
+              ? "page"
+              : undefined
           }
         >
           Upcoming
@@ -58,7 +68,9 @@ function Sidebar({
               <li key={project.id}>
                 <button
                   type="button"
-                  onClick={() => onProjectSelect(project)}
+                  onClick={() =>
+                    onProjectSelect(project)
+                  }
                   aria-current={
                     activeView === "project" &&
                     selectedProjectId === project.id
@@ -76,7 +88,33 @@ function Sidebar({
 
       <section>
         <h3>Labels</h3>
-        <p>Labels will appear here.</p>
+
+        {labelsLoading ? (
+          <p>Loading labels...</p>
+        ) : labels.length === 0 ? (
+          <p>No labels yet.</p>
+        ) : (
+          <ul>
+            {labels.map((label) => (
+              <li key={label.id}>
+                <button
+                  type="button"
+                  onClick={() =>
+                    onLabelSelect(label)
+                  }
+                  aria-current={
+                    activeView === "label" &&
+                    selectedLabelId === label.id
+                      ? "page"
+                      : undefined
+                  }
+                >
+                  #{label.name}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <button
