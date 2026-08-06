@@ -13,48 +13,96 @@ function getCurrentLocalDateTime() {
     .slice(0, 16);
 }
 
+function formatDateTimeLocal(dateValue) {
+  if (!dateValue) {
+    return "";
+  }
+
+  const date = new Date(dateValue);
+
+  const timezoneOffset =
+    date.getTimezoneOffset() * 60 * 1000;
+
+  return new Date(
+    date.getTime() - timezoneOffset
+  )
+    .toISOString()
+    .slice(0, 16);
+}
+
 function TaskForm({
+  task = null,
   projects,
   labels,
   defaultProjectId,
   defaultToToday,
-  onTaskCreated,
+  onTaskSaved,
   onCancel,
   onUnauthorized,
 }) {
+  const isEditing = task !== null;
+
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    priority: "medium",
-    due_date: defaultToToday
-      ? getCurrentLocalDateTime()
-      : "",
-    project_id:
-      defaultProjectId !== null &&
-      defaultProjectId !== undefined
-        ? String(defaultProjectId)
+    title: task?.title ?? "",
+    description: task?.description ?? "",
+    priority: task?.priority ?? "medium",
+
+    due_date: task
+      ? formatDateTimeLocal(task.due_date)
+      : defaultToToday
+        ? getCurrentLocalDateTime()
         : "",
-    label_ids: [],
-  });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    setFormData((currentFormData) => ({
-      ...currentFormData,
-
-      project_id:
-        defaultProjectId !== null &&
-        defaultProjectId !== undefined
+    project_id:
+      task?.project_id !== null &&
+      task?.project_id !== undefined
+        ? String(task.project_id)
+        : defaultProjectId !== null &&
+            defaultProjectId !== undefined
           ? String(defaultProjectId)
           : "",
 
-      due_date: defaultToToday
-        ? getCurrentLocalDateTime()
-        : "",
-    }));
-  }, [defaultProjectId, defaultToToday]);
+    label_ids:
+      task?.labels?.map((label) => label.id) ?? [],
+  });
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  useEffect(() => {
+    setFormData({
+      title: task?.title ?? "",
+      description: task?.description ?? "",
+      priority: task?.priority ?? "medium",
+
+      due_date: task
+        ? formatDateTimeLocal(task.due_date)
+        : defaultToToday
+          ? getCurrentLocalDateTime()
+          : "",
+
+      project_id:
+        task?.project_id !== null &&
+        task?.project_id !== undefined
+          ? String(task.project_id)
+          : defaultProjectId !== null &&
+              defaultProjectId !== undefined
+            ? String(defaultProjectId)
+            : "",
+
+      label_ids:
+        task?.labels?.map((label) => label.id) ?? [],
+    });
+
+    setError("");
+  }, [
+    task,
+    defaultProjectId,
+    defaultToToday,
+  ]);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -84,12 +132,98 @@ function TaskForm({
     }));
   }
 
+  async function updateTaskLabels(
+    accessToken,
+    taskId,
+    originalLabelIds,
+    selectedLabelIds
+  ) {
+    const labelsToAdd = selectedLabelIds.filter(
+      (labelId) =>
+        !originalLabelIds.includes(labelId)
+    );
+
+    const labelsToRemove =
+      originalLabelIds.filter(
+        (labelId) =>
+          !selectedLabelIds.includes(labelId)
+      );
+
+    for (const labelId of labelsToAdd) {
+      const response = await fetch(
+        `http://127.0.0.1:8000/tasks/${taskId}/labels/${labelId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization:
+              `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (response.status === 401) {
+        onUnauthorized();
+        throw new Error(
+          "Authentication required"
+        );
+      }
+
+      if (!response.ok) {
+        const data = await response.json();
+
+        throw new Error(
+          typeof data.detail === "string"
+            ? data.detail
+            : "Could not add label to task"
+        );
+      }
+    }
+
+    for (const labelId of labelsToRemove) {
+      const response = await fetch(
+        `http://127.0.0.1:8000/tasks/${taskId}/labels/${labelId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization:
+              `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (response.status === 401) {
+        onUnauthorized();
+        throw new Error(
+          "Authentication required"
+        );
+      }
+
+      if (!response.ok) {
+        let errorMessage =
+          "Could not remove label from task";
+
+        try {
+          const data = await response.json();
+
+          if (
+            typeof data.detail === "string"
+          ) {
+            errorMessage = data.detail;
+          }
+        } catch {
+          // Το 204 response δεν έχει body.
+        }
+
+        throw new Error(errorMessage);
+      }
+    }
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
 
-    const accessToken = localStorage.getItem(
-      "access_token"
-    );
+    const accessToken =
+      localStorage.getItem("access_token");
 
     if (!accessToken) {
       onUnauthorized();
@@ -99,7 +233,9 @@ function TaskForm({
     const title = formData.title.trim();
 
     if (!title) {
-      setError("Task title cannot be empty.");
+      setError(
+        "Task title cannot be empty."
+      );
       return;
     }
 
@@ -122,18 +258,29 @@ function TaskForm({
         : null,
     };
 
+    const endpoint = isEditing
+      ? `http://127.0.0.1:8000/tasks/${task.id}`
+      : "http://127.0.0.1:8000/tasks/";
+
+    const method = isEditing
+      ? "PATCH"
+      : "POST";
+
     setLoading(true);
     setError("");
 
     try {
       const taskResponse = await fetch(
-        "http://127.0.0.1:8000/tasks/",
+        endpoint,
         {
-          method: "POST",
+          method,
 
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
+            "Content-Type":
+              "application/json",
+
+            Authorization:
+              `Bearer ${accessToken}`,
           },
 
           body: JSON.stringify(requestData),
@@ -145,45 +292,31 @@ function TaskForm({
         return;
       }
 
-      const createdTask =
+      const savedTask =
         await taskResponse.json();
 
       if (!taskResponse.ok) {
         throw new Error(
-          typeof createdTask.detail === "string"
-            ? createdTask.detail
-            : "Could not create task"
+          typeof savedTask.detail === "string"
+            ? savedTask.detail
+            : isEditing
+              ? "Could not update task"
+              : "Could not create task"
         );
       }
 
-      for (const labelId of formData.label_ids) {
-        const labelResponse = await fetch(
-          `http://127.0.0.1:8000/tasks/${createdTask.id}/labels/${labelId}`,
-          {
-            method: "POST",
+      const originalLabelIds = isEditing
+        ? task.labels?.map(
+            (label) => label.id
+          ) ?? []
+        : [];
 
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
-
-        if (labelResponse.status === 401) {
-          onUnauthorized();
-          return;
-        }
-
-        if (!labelResponse.ok) {
-          const labelError =
-            await labelResponse.json();
-
-          throw new Error(
-            typeof labelError.detail === "string"
-              ? labelError.detail
-              : "Task was created, but a label could not be assigned"
-          );
-        }
-      }
+      await updateTaskLabels(
+        accessToken,
+        savedTask.id,
+        originalLabelIds,
+        formData.label_ids
+      );
 
       setFormData({
         title: "",
@@ -203,7 +336,7 @@ function TaskForm({
         label_ids: [],
       });
 
-      onTaskCreated(createdTask);
+      onTaskSaved(savedTask);
     } catch (requestError) {
       setError(
         requestError instanceof Error
@@ -217,7 +350,11 @@ function TaskForm({
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2>Add task</h2>
+      <h2>
+        {isEditing
+          ? "Edit task"
+          : "Add task"}
+      </h2>
 
       <div>
         <label htmlFor="task-title">
@@ -356,8 +493,12 @@ function TaskForm({
           disabled={loading}
         >
           {loading
-            ? "Creating task..."
-            : "Add task"}
+            ? isEditing
+              ? "Saving changes..."
+              : "Creating task..."
+            : isEditing
+              ? "Save changes"
+              : "Add task"}
         </button>
 
         <button

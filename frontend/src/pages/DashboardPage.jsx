@@ -24,6 +24,9 @@ function DashboardPage() {
   const [selectedLabel, setSelectedLabel] =
     useState(null);
 
+  const [editingTask, setEditingTask] =
+    useState(null);
+
   const [editingProject, setEditingProject] =
     useState(null);
 
@@ -62,6 +65,9 @@ function DashboardPage() {
     useState("");
 
   const [updatingTaskId, setUpdatingTaskId] =
+    useState(null);
+
+  const [deletingTaskId, setDeletingTaskId] =
     useState(null);
 
   const [deletingProjectId, setDeletingProjectId] =
@@ -378,6 +384,83 @@ function DashboardPage() {
     }
   }
 
+  async function handleDeleteTask(task) {
+    const shouldDelete = window.confirm(
+      `Delete task "${task.title}"?`
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    const accessToken = getAccessToken();
+
+    if (!accessToken) {
+      handleUnauthorized();
+      return;
+    }
+
+    setDeletingTaskId(task.id);
+    setError("");
+
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/tasks/${task.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization:
+              `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (response.status === 401) {
+        handleUnauthorized();
+        return;
+      }
+
+      if (!response.ok) {
+        let errorMessage =
+          "Could not delete task";
+
+        try {
+          const data = await response.json();
+
+          if (
+            typeof data.detail === "string"
+          ) {
+            errorMessage = data.detail;
+          }
+        } catch {
+          // Το 204 response δεν έχει JSON body.
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      setTasks((currentTasks) =>
+        currentTasks.filter(
+          (currentTask) =>
+            currentTask.id !== task.id
+        )
+      );
+
+      if (editingTask?.id === task.id) {
+        setEditingTask(null);
+        setShowTaskForm(false);
+      }
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Something went wrong"
+      );
+    } finally {
+      setDeletingTaskId(null);
+    }
+  }
+
   async function handleDeleteProject(project) {
     const shouldDelete = window.confirm(
       `Delete project "${project.name}"?`
@@ -427,7 +510,7 @@ function DashboardPage() {
             errorMessage = data.detail;
           }
         } catch {
-          // Το response μπορεί να μην έχει JSON.
+          // Το 204 response μπορεί να μην έχει JSON.
         }
 
         throw new Error(errorMessage);
@@ -514,7 +597,7 @@ function DashboardPage() {
             errorMessage = data.detail;
           }
         } catch {
-          // Το response μπορεί να μην έχει JSON.
+          // Το 204 response μπορεί να μην έχει JSON.
         }
 
         throw new Error(errorMessage);
@@ -552,8 +635,9 @@ function DashboardPage() {
     }
   }
 
-  async function handleTaskCreated() {
+  async function handleTaskSaved() {
     setShowTaskForm(false);
+    setEditingTask(null);
 
     await loadTasks();
   }
@@ -595,6 +679,7 @@ function DashboardPage() {
     setShowProjectForm(false);
     setShowLabelForm(false);
 
+    setEditingTask(null);
     setEditingProject(null);
     setEditingLabel(null);
   }
@@ -624,15 +709,27 @@ function DashboardPage() {
   }
 
   function handleAddTask() {
+    setEditingTask(null);
+    setEditingProject(null);
+    setEditingLabel(null);
+
     setShowTaskForm(true);
     setShowProjectForm(false);
     setShowLabelForm(false);
+  }
 
+  function handleEditTask(task) {
+    setEditingTask(task);
     setEditingProject(null);
     setEditingLabel(null);
+
+    setShowTaskForm(true);
+    setShowProjectForm(false);
+    setShowLabelForm(false);
   }
 
   function handleAddProject() {
+    setEditingTask(null);
     setEditingProject(null);
     setEditingLabel(null);
 
@@ -642,6 +739,7 @@ function DashboardPage() {
   }
 
   function handleEditProject(project) {
+    setEditingTask(null);
     setEditingProject(project);
     setEditingLabel(null);
 
@@ -651,8 +749,9 @@ function DashboardPage() {
   }
 
   function handleAddLabel() {
-    setEditingLabel(null);
+    setEditingTask(null);
     setEditingProject(null);
+    setEditingLabel(null);
 
     setShowLabelForm(true);
     setShowTaskForm(false);
@@ -660,6 +759,7 @@ function DashboardPage() {
   }
 
   function handleEditLabel(label) {
+    setEditingTask(null);
     setEditingLabel(label);
     setEditingProject(null);
 
@@ -711,8 +811,12 @@ function DashboardPage() {
         }
         projects={projects}
         labels={labels}
-        projectsLoading={projectsLoading}
-        labelsLoading={labelsLoading}
+        projectsLoading={
+          projectsLoading
+        }
+        labelsLoading={
+          labelsLoading
+        }
         deletingProjectId={
           deletingProjectId
         }
@@ -811,6 +915,7 @@ function DashboardPage() {
 
         {showTaskForm && (
           <TaskForm
+            task={editingTask}
             projects={projects}
             labels={labels}
             defaultProjectId={
@@ -821,12 +926,13 @@ function DashboardPage() {
             defaultToToday={
               activeView === "today"
             }
-            onTaskCreated={
-              handleTaskCreated
+            onTaskSaved={
+              handleTaskSaved
             }
-            onCancel={() =>
-              setShowTaskForm(false)
-            }
+            onCancel={() => {
+              setShowTaskForm(false);
+              setEditingTask(null);
+            }}
             onUnauthorized={
               handleUnauthorized
             }
@@ -840,8 +946,17 @@ function DashboardPage() {
           onToggleStatus={
             handleToggleTaskStatus
           }
+          onEditTask={
+            handleEditTask
+          }
+          onDeleteTask={
+            handleDeleteTask
+          }
           updatingTaskId={
             updatingTaskId
+          }
+          deletingTaskId={
+            deletingTaskId
           }
         />
       </section>

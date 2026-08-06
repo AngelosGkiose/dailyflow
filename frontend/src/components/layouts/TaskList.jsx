@@ -5,7 +5,10 @@ function TaskList({
   loading,
   error,
   onToggleStatus,
+  onEditTask,
+  onDeleteTask,
   updatingTaskId,
+  deletingTaskId,
 }) {
   if (loading) {
     return <p>Loading tasks...</p>;
@@ -29,8 +32,21 @@ function TaskList({
         <TaskItem
           key={task.id}
           task={task}
-          onToggleStatus={onToggleStatus}
-          updatingTaskId={updatingTaskId}
+          onToggleStatus={
+            onToggleStatus
+          }
+          onEditTask={
+            onEditTask
+          }
+          onDeleteTask={
+            onDeleteTask
+          }
+          updatingTaskId={
+            updatingTaskId
+          }
+          deletingTaskId={
+            deletingTaskId
+          }
         />
       ))}
     </ul>
