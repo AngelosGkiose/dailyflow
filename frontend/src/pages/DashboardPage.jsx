@@ -7,8 +7,10 @@ import {
 import { useNavigate } from "react-router";
 
 import LabelForm from "../components/layouts/LabelForm.jsx";
+import PaginationControls from "../components/layouts/PaginationControls.jsx";
 import ProjectForm from "../components/layouts/ProjectForm.jsx";
 import Sidebar from "../components/layouts/Sidebar.jsx";
+import TaskFilters from "../components/layouts/TaskFilters.jsx";
 import TaskForm from "../components/layouts/TaskForm.jsx";
 import TaskList from "../components/layouts/TaskList.jsx";
 
@@ -20,6 +22,23 @@ function DashboardPage() {
 
   const [searchQuery, setSearchQuery] =
     useState("");
+
+  const [filters, setFilters] = useState({
+    priority: "",
+    dueDate: "",
+    sortBy: "created_at",
+    order: "desc",
+  });
+
+  const [showFilters, setShowFilters] =
+    useState(false);
+
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] =
+    useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] =
+    useState(0);
 
   const [selectedProject, setSelectedProject] =
     useState(null);
@@ -37,7 +56,8 @@ function DashboardPage() {
     useState(null);
 
   const [tasks, setTasks] = useState([]);
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] =
+    useState([]);
   const [labels, setLabels] = useState([]);
 
   const [showTaskForm, setShowTaskForm] =
@@ -52,14 +72,15 @@ function DashboardPage() {
   const [loading, setLoading] =
     useState(true);
 
-  const [projectsLoading, setProjectsLoading] =
-    useState(true);
+  const [
+    projectsLoading,
+    setProjectsLoading,
+  ] = useState(true);
 
   const [labelsLoading, setLabelsLoading] =
     useState(true);
 
-  const [error, setError] =
-    useState("");
+  const [error, setError] = useState("");
 
   const [projectsError, setProjectsError] =
     useState("");
@@ -73,11 +94,15 @@ function DashboardPage() {
   const [deletingTaskId, setDeletingTaskId] =
     useState(null);
 
-  const [deletingProjectId, setDeletingProjectId] =
-    useState(null);
+  const [
+    deletingProjectId,
+    setDeletingProjectId,
+  ] = useState(null);
 
-  const [deletingLabelId, setDeletingLabelId] =
-    useState(null);
+  const [
+    deletingLabelId,
+    setDeletingLabelId,
+  ] = useState(null);
 
   function getAccessToken() {
     return localStorage.getItem(
@@ -85,58 +110,135 @@ function DashboardPage() {
     );
   }
 
-  const handleUnauthorized = useCallback(() => {
-    localStorage.removeItem("access_token");
+  const handleUnauthorized =
+    useCallback(() => {
+      localStorage.removeItem(
+        "access_token"
+      );
 
-    navigate("/login", {
-      replace: true,
-    });
-  }, [navigate]);
+      navigate("/login", {
+        replace: true,
+      });
+    }, [navigate]);
 
   function handleLogout() {
     handleUnauthorized();
   }
 
+  function isServerPaginatedView() {
+    return (
+      activeView === "project" ||
+      activeView === "label" ||
+      activeView === "completed" ||
+      activeView === "search"
+    );
+  }
+
+  const buildTaskQuery = useCallback(
+    (baseParameters = {}) => {
+      const queryParameters =
+        new URLSearchParams();
+
+      for (
+        const [name, value] of
+        Object.entries(baseParameters)
+      ) {
+        if (
+          value !== null &&
+          value !== undefined &&
+          value !== ""
+        ) {
+          queryParameters.set(
+            name,
+            String(value)
+          );
+        }
+      }
+
+      if (filters.priority) {
+        queryParameters.set(
+          "priority",
+          filters.priority
+        );
+      }
+
+      if (filters.dueDate) {
+        queryParameters.set(
+          "due_date",
+          filters.dueDate
+        );
+      }
+
+      queryParameters.set(
+        "sort_by",
+        filters.sortBy
+      );
+
+      queryParameters.set(
+        "order",
+        filters.order
+      );
+
+      queryParameters.set(
+        "page",
+        String(page)
+      );
+
+      queryParameters.set(
+        "page_size",
+        String(pageSize)
+      );
+
+      return queryParameters.toString();
+    },
+    [filters, page, pageSize]
+  );
+
   const getTasksEndpoint = useCallback(() => {
+    const tasksUrl =
+      "http://127.0.0.1:8000/tasks/";
+
     if (
       activeView === "project" &&
       selectedProject
     ) {
-      return (
-        "http://127.0.0.1:8000/tasks/" +
-        `?project_id=${selectedProject.id}` +
-        "&status=pending"
-      );
+      const query = buildTaskQuery({
+        project_id: selectedProject.id,
+        status: "pending",
+      });
+
+      return `${tasksUrl}?${query}`;
     }
 
     if (
       activeView === "label" &&
       selectedLabel
     ) {
-      return (
-        "http://127.0.0.1:8000/tasks/" +
-        `?label_id=${selectedLabel.id}` +
-        "&status=pending"
-      );
+      const query = buildTaskQuery({
+        label_id: selectedLabel.id,
+        status: "pending",
+      });
+
+      return `${tasksUrl}?${query}`;
     }
 
     if (
       activeView === "search" &&
       searchQuery
     ) {
-      return (
-        "http://127.0.0.1:8000/tasks/" +
-        `?search=${encodeURIComponent(
-          searchQuery
-        )}`
-      );
+      const query = buildTaskQuery({
+        search: searchQuery,
+      });
+
+      return `${tasksUrl}?${query}`;
     }
 
     if (activeView === "completed") {
-      return (
-        "http://127.0.0.1:8000/tasks/" +
-        "?status=completed"
-      );
+      const query = buildTaskQuery({
+        status: "completed",
+      });
+
+      return `${tasksUrl}?${query}`;
     }
 
     if (activeView === "inbox") {
@@ -153,184 +255,419 @@ function DashboardPage() {
     selectedProject,
     selectedLabel,
     searchQuery,
+    buildTaskQuery,
   ]);
 
-  const loadTasks = useCallback(async () => {
-    const accessToken = getAccessToken();
+  const applyLocalFiltersAndSorting =
+    useCallback(
+      (taskItems) => {
+        let filteredTasks = [
+          ...taskItems,
+        ];
 
-    if (!accessToken) {
-      handleUnauthorized();
-      return;
-    }
-
-    setTasks([]);
-    setLoading(true);
-    setError("");
-
-    try {
-      const response = await fetch(
-        getTasksEndpoint(),
-        {
-          headers: {
-            Authorization:
-              `Bearer ${accessToken}`,
-          },
+        if (filters.priority) {
+          filteredTasks =
+            filteredTasks.filter(
+              (task) =>
+                task.priority ===
+                filters.priority
+            );
         }
-      );
 
-      if (response.status === 401) {
+        if (filters.dueDate) {
+          filteredTasks =
+            filteredTasks.filter(
+              (task) => {
+                if (!task.due_date) {
+                  return false;
+                }
+
+                const taskDate =
+                  new Date(
+                    task.due_date
+                  ).toLocaleDateString(
+                    "en-CA"
+                  );
+
+                return (
+                  taskDate ===
+                  filters.dueDate
+                );
+              }
+            );
+        }
+
+        filteredTasks.sort(
+          (
+            firstTask,
+            secondTask
+          ) => {
+            let firstValue;
+            let secondValue;
+
+            if (
+              filters.sortBy ===
+              "title"
+            ) {
+              firstValue =
+                firstTask.title.toLowerCase();
+
+              secondValue =
+                secondTask.title.toLowerCase();
+            } else if (
+              filters.sortBy ===
+              "due_date"
+            ) {
+              firstValue =
+                firstTask.due_date
+                  ? new Date(
+                      firstTask.due_date
+                    ).getTime()
+                  : Number.POSITIVE_INFINITY;
+
+              secondValue =
+                secondTask.due_date
+                  ? new Date(
+                      secondTask.due_date
+                    ).getTime()
+                  : Number.POSITIVE_INFINITY;
+            } else {
+              firstValue =
+                firstTask[
+                  filters.sortBy
+                ]
+                  ? new Date(
+                      firstTask[
+                        filters.sortBy
+                      ]
+                    ).getTime()
+                  : 0;
+
+              secondValue =
+                secondTask[
+                  filters.sortBy
+                ]
+                  ? new Date(
+                      secondTask[
+                        filters.sortBy
+                      ]
+                    ).getTime()
+                  : 0;
+            }
+
+            if (
+              firstValue <
+              secondValue
+            ) {
+              return filters.order ===
+                "asc"
+                ? -1
+                : 1;
+            }
+
+            if (
+              firstValue >
+              secondValue
+            ) {
+              return filters.order ===
+                "asc"
+                ? 1
+                : -1;
+            }
+
+            return (
+              firstTask.id -
+              secondTask.id
+            );
+          }
+        );
+
+        return filteredTasks;
+      },
+      [filters]
+    );
+
+  const paginateLocalTasks =
+    useCallback(
+      (taskItems) => {
+        const itemTotal =
+          taskItems.length;
+
+        const calculatedTotalPages =
+          itemTotal === 0
+            ? 0
+            : Math.ceil(
+                itemTotal / pageSize
+              );
+
+        if (
+          calculatedTotalPages > 0 &&
+          page > calculatedTotalPages
+        ) {
+          setPage(
+            calculatedTotalPages
+          );
+
+          return null;
+        }
+
+        const offset =
+          (page - 1) * pageSize;
+
+        setTotal(itemTotal);
+        setTotalPages(
+          calculatedTotalPages
+        );
+
+        return taskItems.slice(
+          offset,
+          offset + pageSize
+        );
+      },
+      [page, pageSize]
+    );
+
+  const loadTasks = useCallback(
+    async () => {
+      const accessToken =
+        getAccessToken();
+
+      if (!accessToken) {
         handleUnauthorized();
         return;
       }
 
-      const data = await response.json();
+      setTasks([]);
+      setLoading(true);
+      setError("");
 
-      if (!response.ok) {
-        throw new Error(
-          typeof data.detail === "string"
-            ? data.detail
-            : "Could not load tasks"
+      try {
+        const response = await fetch(
+          getTasksEndpoint(),
+          {
+            headers: {
+              Authorization:
+                `Bearer ${accessToken}`,
+            },
+          }
         );
+
+        if (response.status === 401) {
+          handleUnauthorized();
+          return;
+        }
+
+        const data =
+          await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            typeof data.detail ===
+              "string"
+              ? data.detail
+              : "Could not load tasks"
+          );
+        }
+
+        if (
+          activeView === "project" ||
+          activeView === "label" ||
+          activeView === "completed" ||
+          activeView === "search"
+        ) {
+          const responseTotalPages =
+            typeof data.total_pages ===
+            "number"
+              ? data.total_pages
+              : 0;
+
+          if (
+            responseTotalPages > 0 &&
+            page > responseTotalPages
+          ) {
+            setPage(
+              responseTotalPages
+            );
+
+            return;
+          }
+
+          setTasks(
+            Array.isArray(data.items)
+              ? data.items
+              : []
+          );
+
+          setTotal(
+            typeof data.total ===
+              "number"
+              ? data.total
+              : 0
+          );
+
+          setTotalPages(
+            responseTotalPages
+          );
+        } else {
+          const taskItems =
+            Array.isArray(data)
+              ? data
+              : [];
+
+          const filteredTasks =
+            applyLocalFiltersAndSorting(
+              taskItems
+            );
+
+          const paginatedTasks =
+            paginateLocalTasks(
+              filteredTasks
+            );
+
+          if (
+            paginatedTasks !== null
+          ) {
+            setTasks(
+              paginatedTasks
+            );
+          }
+        }
+      } catch (requestError) {
+        setError(
+          requestError instanceof Error
+            ? requestError.message
+            : "Something went wrong"
+        );
+
+        setTotal(0);
+        setTotalPages(0);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [
+      activeView,
+      page,
+      getTasksEndpoint,
+      handleUnauthorized,
+      applyLocalFiltersAndSorting,
+      paginateLocalTasks,
+    ]
+  );
+
+  const loadProjects =
+    useCallback(async () => {
+      const accessToken =
+        getAccessToken();
+
+      if (!accessToken) {
+        handleUnauthorized();
+        return;
       }
 
-      if (
-        activeView === "project" ||
-        activeView === "label" ||
-        activeView === "completed" ||
-        activeView === "search"
-      ) {
-        setTasks(
-          Array.isArray(data.items)
-            ? data.items
-            : []
+      setProjectsLoading(true);
+      setProjectsError("");
+
+      try {
+        const response = await fetch(
+          "http://127.0.0.1:8000/projects/",
+          {
+            headers: {
+              Authorization:
+                `Bearer ${accessToken}`,
+            },
+          }
         );
-      } else {
-        setTasks(
+
+        if (response.status === 401) {
+          handleUnauthorized();
+          return;
+        }
+
+        const data =
+          await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            typeof data.detail ===
+              "string"
+              ? data.detail
+              : "Could not load projects"
+          );
+        }
+
+        setProjects(
           Array.isArray(data)
             ? data
             : []
         );
+      } catch (requestError) {
+        setProjectsError(
+          requestError instanceof Error
+            ? requestError.message
+            : "Something went wrong"
+        );
+      } finally {
+        setProjectsLoading(false);
       }
-    } catch (requestError) {
-      setError(
-        requestError instanceof Error
-          ? requestError.message
-          : "Something went wrong"
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    activeView,
-    getTasksEndpoint,
-    handleUnauthorized,
-  ]);
+    }, [handleUnauthorized]);
 
-  const loadProjects = useCallback(async () => {
-    const accessToken = getAccessToken();
+  const loadLabels =
+    useCallback(async () => {
+      const accessToken =
+        getAccessToken();
 
-    if (!accessToken) {
-      handleUnauthorized();
-      return;
-    }
-
-    setProjectsLoading(true);
-    setProjectsError("");
-
-    try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/projects/",
-        {
-          headers: {
-            Authorization:
-              `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      if (response.status === 401) {
+      if (!accessToken) {
         handleUnauthorized();
         return;
       }
 
-      const data = await response.json();
+      setLabelsLoading(true);
+      setLabelsError("");
 
-      if (!response.ok) {
-        throw new Error(
-          typeof data.detail === "string"
-            ? data.detail
-            : "Could not load projects"
+      try {
+        const response = await fetch(
+          "http://127.0.0.1:8000/labels/",
+          {
+            headers: {
+              Authorization:
+                `Bearer ${accessToken}`,
+            },
+          }
         );
-      }
 
-      setProjects(
-        Array.isArray(data)
-          ? data
-          : []
-      );
-    } catch (requestError) {
-      setProjectsError(
-        requestError instanceof Error
-          ? requestError.message
-          : "Something went wrong"
-      );
-    } finally {
-      setProjectsLoading(false);
-    }
-  }, [handleUnauthorized]);
-
-  const loadLabels = useCallback(async () => {
-    const accessToken = getAccessToken();
-
-    if (!accessToken) {
-      handleUnauthorized();
-      return;
-    }
-
-    setLabelsLoading(true);
-    setLabelsError("");
-
-    try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/labels/",
-        {
-          headers: {
-            Authorization:
-              `Bearer ${accessToken}`,
-          },
+        if (response.status === 401) {
+          handleUnauthorized();
+          return;
         }
-      );
 
-      if (response.status === 401) {
-        handleUnauthorized();
-        return;
-      }
+        const data =
+          await response.json();
 
-      const data = await response.json();
+        if (!response.ok) {
+          throw new Error(
+            typeof data.detail ===
+              "string"
+              ? data.detail
+              : "Could not load labels"
+          );
+        }
 
-      if (!response.ok) {
-        throw new Error(
-          typeof data.detail === "string"
-            ? data.detail
-            : "Could not load labels"
+        setLabels(
+          Array.isArray(data)
+            ? data
+            : []
         );
+      } catch (requestError) {
+        setLabelsError(
+          requestError instanceof Error
+            ? requestError.message
+            : "Something went wrong"
+        );
+      } finally {
+        setLabelsLoading(false);
       }
-
-      setLabels(
-        Array.isArray(data)
-          ? data
-          : []
-      );
-    } catch (requestError) {
-      setLabelsError(
-        requestError instanceof Error
-          ? requestError.message
-          : "Something went wrong"
-      );
-    } finally {
-      setLabelsLoading(false);
-    }
-  }, [handleUnauthorized]);
+    }, [handleUnauthorized]);
 
   useEffect(() => {
     loadProjects();
@@ -344,8 +681,11 @@ function DashboardPage() {
     loadTasks();
   }, [loadTasks]);
 
-  async function handleToggleTaskStatus(task) {
-    const accessToken = getAccessToken();
+  async function handleToggleTaskStatus(
+    task
+  ) {
+    const accessToken =
+      getAccessToken();
 
     if (!accessToken) {
       handleUnauthorized();
@@ -365,14 +705,17 @@ function DashboardPage() {
     setError("");
 
     try {
-      const response = await fetch(endpoint, {
-        method: "PATCH",
+      const response = await fetch(
+        endpoint,
+        {
+          method: "PATCH",
 
-        headers: {
-          Authorization:
-            `Bearer ${accessToken}`,
-        },
-      });
+          headers: {
+            Authorization:
+              `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (response.status === 401) {
         handleUnauthorized();
@@ -384,13 +727,24 @@ function DashboardPage() {
 
       if (!response.ok) {
         throw new Error(
-          typeof updatedTask.detail === "string"
+          typeof updatedTask.detail ===
+            "string"
             ? updatedTask.detail
             : "Could not update task"
         );
       }
 
-      await loadTasks();
+      if (
+        tasks.length === 1 &&
+        page > 1
+      ) {
+        setPage(
+          (currentPage) =>
+            currentPage - 1
+        );
+      } else {
+        await loadTasks();
+      }
     } catch (requestError) {
       setError(
         requestError instanceof Error
@@ -402,16 +756,20 @@ function DashboardPage() {
     }
   }
 
-  async function handleDeleteTask(task) {
-    const shouldDelete = window.confirm(
-      `Delete task "${task.title}"?`
-    );
+  async function handleDeleteTask(
+    task
+  ) {
+    const shouldDelete =
+      window.confirm(
+        `Delete task "${task.title}"?`
+      );
 
     if (!shouldDelete) {
       return;
     }
 
-    const accessToken = getAccessToken();
+    const accessToken =
+      getAccessToken();
 
     if (!accessToken) {
       handleUnauthorized();
@@ -444,12 +802,15 @@ function DashboardPage() {
           "Could not delete task";
 
         try {
-          const data = await response.json();
+          const data =
+            await response.json();
 
           if (
-            typeof data.detail === "string"
+            typeof data.detail ===
+            "string"
           ) {
-            errorMessage = data.detail;
+            errorMessage =
+              data.detail;
           }
         } catch {
           // Το 204 response δεν έχει body.
@@ -458,16 +819,23 @@ function DashboardPage() {
         throw new Error(errorMessage);
       }
 
-      setTasks((currentTasks) =>
-        currentTasks.filter(
-          (currentTask) =>
-            currentTask.id !== task.id
-        )
-      );
-
-      if (editingTask?.id === task.id) {
+      if (
+        editingTask?.id === task.id
+      ) {
         setEditingTask(null);
         setShowTaskForm(false);
+      }
+
+      if (
+        tasks.length === 1 &&
+        page > 1
+      ) {
+        setPage(
+          (currentPage) =>
+            currentPage - 1
+        );
+      } else {
+        await loadTasks();
       }
     } catch (requestError) {
       setError(
@@ -480,16 +848,20 @@ function DashboardPage() {
     }
   }
 
-  async function handleDeleteProject(project) {
-    const shouldDelete = window.confirm(
-      `Delete project "${project.name}"?`
-    );
+  async function handleDeleteProject(
+    project
+  ) {
+    const shouldDelete =
+      window.confirm(
+        `Delete project "${project.name}"?`
+      );
 
     if (!shouldDelete) {
       return;
     }
 
-    const accessToken = getAccessToken();
+    const accessToken =
+      getAccessToken();
 
     if (!accessToken) {
       handleUnauthorized();
@@ -522,12 +894,15 @@ function DashboardPage() {
           "Could not delete project";
 
         try {
-          const data = await response.json();
+          const data =
+            await response.json();
 
           if (
-            typeof data.detail === "string"
+            typeof data.detail ===
+            "string"
           ) {
-            errorMessage = data.detail;
+            errorMessage =
+              data.detail;
           }
         } catch {
           // Το 204 response δεν έχει body.
@@ -536,23 +911,28 @@ function DashboardPage() {
         throw new Error(errorMessage);
       }
 
-      setProjects((currentProjects) =>
-        currentProjects.filter(
-          (currentProject) =>
-            currentProject.id !== project.id
-        )
+      setProjects(
+        (currentProjects) =>
+          currentProjects.filter(
+            (currentProject) =>
+              currentProject.id !==
+              project.id
+          )
       );
 
       if (
-        selectedProject?.id === project.id
+        selectedProject?.id ===
+        project.id
       ) {
         setSelectedProject(null);
         setActiveView("today");
+        setPage(1);
         setTasks([]);
       }
 
       if (
-        editingProject?.id === project.id
+        editingProject?.id ===
+        project.id
       ) {
         setEditingProject(null);
         setShowProjectForm(false);
@@ -568,16 +948,20 @@ function DashboardPage() {
     }
   }
 
-  async function handleDeleteLabel(label) {
-    const shouldDelete = window.confirm(
-      `Delete label "#${label.name}"?`
-    );
+  async function handleDeleteLabel(
+    label
+  ) {
+    const shouldDelete =
+      window.confirm(
+        `Delete label "#${label.name}"?`
+      );
 
     if (!shouldDelete) {
       return;
     }
 
-    const accessToken = getAccessToken();
+    const accessToken =
+      getAccessToken();
 
     if (!accessToken) {
       handleUnauthorized();
@@ -610,12 +994,15 @@ function DashboardPage() {
           "Could not delete label";
 
         try {
-          const data = await response.json();
+          const data =
+            await response.json();
 
           if (
-            typeof data.detail === "string"
+            typeof data.detail ===
+            "string"
           ) {
-            errorMessage = data.detail;
+            errorMessage =
+              data.detail;
           }
         } catch {
           // Το 204 response δεν έχει body.
@@ -624,23 +1011,28 @@ function DashboardPage() {
         throw new Error(errorMessage);
       }
 
-      setLabels((currentLabels) =>
-        currentLabels.filter(
-          (currentLabel) =>
-            currentLabel.id !== label.id
-        )
+      setLabels(
+        (currentLabels) =>
+          currentLabels.filter(
+            (currentLabel) =>
+              currentLabel.id !==
+              label.id
+          )
       );
 
       if (
-        selectedLabel?.id === label.id
+        selectedLabel?.id ===
+        label.id
       ) {
         setSelectedLabel(null);
         setActiveView("today");
+        setPage(1);
         setTasks([]);
       }
 
       if (
-        editingLabel?.id === label.id
+        editingLabel?.id ===
+        label.id
       ) {
         setEditingLabel(null);
         setShowLabelForm(false);
@@ -659,6 +1051,7 @@ function DashboardPage() {
   async function handleTaskSaved() {
     setShowTaskForm(false);
     setEditingTask(null);
+    setPage(1);
 
     await loadTasks();
   }
@@ -675,7 +1068,9 @@ function DashboardPage() {
       selectedProject?.id ===
       savedProject.id
     ) {
-      setSelectedProject(savedProject);
+      setSelectedProject(
+        savedProject
+      );
     }
   }
 
@@ -691,8 +1086,55 @@ function DashboardPage() {
       selectedLabel?.id ===
       savedLabel.id
     ) {
-      setSelectedLabel(savedLabel);
+      setSelectedLabel(
+        savedLabel
+      );
     }
+  }
+
+  function handleFilterChange(
+    name,
+    value
+  ) {
+    setFilters(
+      (currentFilters) => ({
+        ...currentFilters,
+        [name]: value,
+      })
+    );
+
+    setPage(1);
+  }
+
+  function handleClearFilters() {
+    setFilters({
+      priority: "",
+      dueDate: "",
+      sortBy: "created_at",
+      order: "desc",
+    });
+
+    setPage(1);
+  }
+
+  function handlePageChange(
+    nextPage
+  ) {
+    if (
+      nextPage < 1 ||
+      nextPage > totalPages
+    ) {
+      return;
+    }
+
+    setPage(nextPage);
+  }
+
+  function handlePageSizeChange(
+    nextPageSize
+  ) {
+    setPageSize(nextPageSize);
+    setPage(1);
   }
 
   function closeAllForms() {
@@ -710,15 +1152,19 @@ function DashboardPage() {
     setSearchQuery("");
     setSelectedProject(null);
     setSelectedLabel(null);
+    setPage(1);
 
     closeAllForms();
   }
 
-  function handleProjectSelect(project) {
+  function handleProjectSelect(
+    project
+  ) {
     setActiveView("project");
     setSearchQuery("");
     setSelectedProject(project);
     setSelectedLabel(null);
+    setPage(1);
 
     closeAllForms();
   }
@@ -728,6 +1174,7 @@ function DashboardPage() {
     setSearchQuery("");
     setSelectedLabel(label);
     setSelectedProject(null);
+    setPage(1);
 
     closeAllForms();
   }
@@ -738,6 +1185,7 @@ function DashboardPage() {
 
     setSelectedProject(null);
     setSelectedLabel(null);
+    setPage(1);
 
     closeAllForms();
   }
@@ -748,6 +1196,7 @@ function DashboardPage() {
 
     setSelectedProject(null);
     setSelectedLabel(null);
+    setPage(1);
 
     closeAllForms();
   }
@@ -782,7 +1231,9 @@ function DashboardPage() {
     setShowLabelForm(false);
   }
 
-  function handleEditProject(project) {
+  function handleEditProject(
+    project
+  ) {
     setEditingTask(null);
     setEditingProject(project);
     setEditingLabel(null);
@@ -890,9 +1341,7 @@ function DashboardPage() {
         onLabelSelect={
           handleLabelSelect
         }
-        onSearch={
-          handleSearch
-        }
+        onSearch={handleSearch}
         onClearSearch={
           handleClearSearch
         }
@@ -914,24 +1363,53 @@ function DashboardPage() {
         onDeleteLabel={
           handleDeleteLabel
         }
-        onLogout={
-          handleLogout
-        }
+        onLogout={handleLogout}
       />
 
       <section>
         <header>
           <h1>{getPageTitle()}</h1>
 
-          {canCreateTask && (
+          <div>
             <button
               type="button"
-              onClick={handleAddTask}
+              onClick={() =>
+                setShowFilters(
+                  (
+                    currentValue
+                  ) => !currentValue
+                )
+              }
             >
-              + Add task
+              {showFilters
+                ? "Hide view options"
+                : "View options"}
             </button>
-          )}
+
+            {canCreateTask && (
+              <button
+                type="button"
+                onClick={
+                  handleAddTask
+                }
+              >
+                + Add task
+              </button>
+            )}
+          </div>
         </header>
+
+        {showFilters && (
+          <TaskFilters
+            filters={filters}
+            onFilterChange={
+              handleFilterChange
+            }
+            onClearFilters={
+              handleClearFilters
+            }
+          />
+        )}
 
         {projectsError && (
           <div role="alert">
@@ -952,8 +1430,13 @@ function DashboardPage() {
               handleProjectSaved
             }
             onCancel={() => {
-              setShowProjectForm(false);
-              setEditingProject(null);
+              setShowProjectForm(
+                false
+              );
+
+              setEditingProject(
+                null
+              );
             }}
             onUnauthorized={
               handleUnauthorized
@@ -968,8 +1451,13 @@ function DashboardPage() {
               handleLabelSaved
             }
             onCancel={() => {
-              setShowLabelForm(false);
-              setEditingLabel(null);
+              setShowLabelForm(
+                false
+              );
+
+              setEditingLabel(
+                null
+              );
             }}
             onUnauthorized={
               handleUnauthorized
@@ -983,18 +1471,24 @@ function DashboardPage() {
             projects={projects}
             labels={labels}
             defaultProjectId={
-              activeView === "project"
-                ? selectedProject?.id ?? null
+              activeView ===
+              "project"
+                ? selectedProject
+                    ?.id ?? null
                 : null
             }
             defaultToToday={
-              activeView === "today"
+              activeView ===
+              "today"
             }
             onTaskSaved={
               handleTaskSaved
             }
             onCancel={() => {
-              setShowTaskForm(false);
+              setShowTaskForm(
+                false
+              );
+
               setEditingTask(null);
             }}
             onUnauthorized={
@@ -1023,6 +1517,23 @@ function DashboardPage() {
             deletingTaskId
           }
         />
+
+        {!loading && !error && (
+          <PaginationControls
+            page={page}
+            pageSize={pageSize}
+            total={total}
+            totalPages={
+              totalPages
+            }
+            onPageChange={
+              handlePageChange
+            }
+            onPageSizeChange={
+              handlePageSizeChange
+            }
+          />
+        )}
       </section>
     </main>
   );
