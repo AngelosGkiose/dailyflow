@@ -1,34 +1,56 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  addLabelToTask,
+  createTask,
+  removeLabelFromTask,
+  updateTask,
+} from "../../api/tasksApi.js";
+
 
 function getCurrentLocalDateTime() {
   const now = new Date();
 
   const timezoneOffset =
-    now.getTimezoneOffset() * 60 * 1000;
+    now.getTimezoneOffset() *
+    60 *
+    1000;
 
   return new Date(
-    now.getTime() - timezoneOffset
+    now.getTime() -
+    timezoneOffset
   )
     .toISOString()
     .slice(0, 16);
 }
 
-function formatDateTimeLocal(dateValue) {
+
+function formatDateTimeLocal(
+  dateValue
+) {
   if (!dateValue) {
     return "";
   }
 
-  const date = new Date(dateValue);
+  const date =
+    new Date(dateValue);
 
   const timezoneOffset =
-    date.getTimezoneOffset() * 60 * 1000;
+    date.getTimezoneOffset() *
+    60 *
+    1000;
 
   return new Date(
-    date.getTime() - timezoneOffset
+    date.getTime() -
+    timezoneOffset
   )
     .toISOString()
     .slice(0, 16);
 }
+
 
 function TaskForm({
   task = null,
@@ -40,46 +62,24 @@ function TaskForm({
   onCancel,
   onUnauthorized,
 }) {
-  const isEditing = task !== null;
+  const isEditing =
+    task !== null;
 
-  const [formData, setFormData] = useState({
-    title: task?.title ?? "",
-    description: task?.description ?? "",
-    priority: task?.priority ?? "medium",
+  const [formData, setFormData] =
+    useState({
+      title:
+        task?.title ?? "",
 
-    due_date: task
-      ? formatDateTimeLocal(task.due_date)
-      : defaultToToday
-        ? getCurrentLocalDateTime()
-        : "",
+      description:
+        task?.description ?? "",
 
-    project_id:
-      task?.project_id !== null &&
-      task?.project_id !== undefined
-        ? String(task.project_id)
-        : defaultProjectId !== null &&
-            defaultProjectId !== undefined
-          ? String(defaultProjectId)
-          : "",
-
-    label_ids:
-      task?.labels?.map((label) => label.id) ?? [],
-  });
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [error, setError] =
-    useState("");
-
-  useEffect(() => {
-    setFormData({
-      title: task?.title ?? "",
-      description: task?.description ?? "",
-      priority: task?.priority ?? "medium",
+      priority:
+        task?.priority ?? "medium",
 
       due_date: task
-        ? formatDateTimeLocal(task.due_date)
+        ? formatDateTimeLocal(
+            task.due_date
+          )
         : defaultToToday
           ? getCurrentLocalDateTime()
           : "",
@@ -94,7 +94,50 @@ function TaskForm({
             : "",
 
       label_ids:
-        task?.labels?.map((label) => label.id) ?? [],
+        task?.labels?.map(
+          (label) => label.id
+        ) ?? [],
+    });
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+
+  useEffect(() => {
+    setFormData({
+      title:
+        task?.title ?? "",
+
+      description:
+        task?.description ?? "",
+
+      priority:
+        task?.priority ?? "medium",
+
+      due_date: task
+        ? formatDateTimeLocal(
+            task.due_date
+          )
+        : defaultToToday
+          ? getCurrentLocalDateTime()
+          : "",
+
+      project_id:
+        task?.project_id !== null &&
+        task?.project_id !== undefined
+          ? String(task.project_id)
+          : defaultProjectId !== null &&
+              defaultProjectId !== undefined
+            ? String(defaultProjectId)
+            : "",
+
+      label_ids:
+        task?.labels?.map(
+          (label) => label.id
+        ) ?? [],
     });
 
     setError("");
@@ -104,215 +147,152 @@ function TaskForm({
     defaultToToday,
   ]);
 
-  function handleChange(event) {
-    const { name, value } = event.target;
 
-    setFormData((currentFormData) => ({
-      ...currentFormData,
-      [name]: value,
-    }));
+  function handleChange(event) {
+    const { name, value } =
+      event.target;
+
+    setFormData(
+      (currentFormData) => ({
+        ...currentFormData,
+        [name]: value,
+      })
+    );
   }
+
 
   function handleLabelChange(event) {
-    const labelId = Number(event.target.value);
-    const isChecked = event.target.checked;
+    const labelId =
+      Number(event.target.value);
 
-    setFormData((currentFormData) => ({
-      ...currentFormData,
+    const isChecked =
+      event.target.checked;
 
-      label_ids: isChecked
-        ? [
-            ...currentFormData.label_ids,
-            labelId,
-          ]
-        : currentFormData.label_ids.filter(
-            (currentLabelId) =>
-              currentLabelId !== labelId
-          ),
-    }));
+    setFormData(
+      (currentFormData) => ({
+        ...currentFormData,
+
+        label_ids: isChecked
+          ? [
+              ...currentFormData.label_ids,
+              labelId,
+            ]
+          : currentFormData.label_ids.filter(
+              (currentLabelId) =>
+                currentLabelId !==
+                labelId
+            ),
+      })
+    );
   }
 
-  async function updateTaskLabels(
-    accessToken,
+
+  async function synchronizeTaskLabels(
     taskId,
     originalLabelIds,
     selectedLabelIds
   ) {
-    const labelsToAdd = selectedLabelIds.filter(
-      (labelId) =>
-        !originalLabelIds.includes(labelId)
-    );
+    const labelsToAdd =
+      selectedLabelIds.filter(
+        (labelId) =>
+          !originalLabelIds.includes(
+            labelId
+          )
+      );
 
     const labelsToRemove =
       originalLabelIds.filter(
         (labelId) =>
-          !selectedLabelIds.includes(labelId)
+          !selectedLabelIds.includes(
+            labelId
+          )
       );
 
-    for (const labelId of labelsToAdd) {
-      const response = await fetch(
-        `http://127.0.0.1:8000/tasks/${taskId}/labels/${labelId}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization:
-              `Bearer ${accessToken}`,
-          },
-        }
+    for (
+      const labelId of labelsToAdd
+    ) {
+      await addLabelToTask(
+        taskId,
+        labelId,
+        onUnauthorized
       );
-
-      if (response.status === 401) {
-        onUnauthorized();
-        throw new Error(
-          "Authentication required"
-        );
-      }
-
-      if (!response.ok) {
-        const data = await response.json();
-
-        throw new Error(
-          typeof data.detail === "string"
-            ? data.detail
-            : "Could not add label to task"
-        );
-      }
     }
 
-    for (const labelId of labelsToRemove) {
-      const response = await fetch(
-        `http://127.0.0.1:8000/tasks/${taskId}/labels/${labelId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization:
-              `Bearer ${accessToken}`,
-          },
-        }
+    for (
+      const labelId of labelsToRemove
+    ) {
+      await removeLabelFromTask(
+        taskId,
+        labelId,
+        onUnauthorized
       );
-
-      if (response.status === 401) {
-        onUnauthorized();
-        throw new Error(
-          "Authentication required"
-        );
-      }
-
-      if (!response.ok) {
-        let errorMessage =
-          "Could not remove label from task";
-
-        try {
-          const data = await response.json();
-
-          if (
-            typeof data.detail === "string"
-          ) {
-            errorMessage = data.detail;
-          }
-        } catch {
-          // Το 204 response δεν έχει body.
-        }
-
-        throw new Error(errorMessage);
-      }
     }
   }
+
 
   async function handleSubmit(event) {
     event.preventDefault();
 
-    const accessToken =
-      localStorage.getItem("access_token");
-
-    if (!accessToken) {
-      onUnauthorized();
-      return;
-    }
-
-    const title = formData.title.trim();
+    const title =
+      formData.title.trim();
 
     if (!title) {
       setError(
         "Task title cannot be empty."
       );
+
       return;
     }
 
-    const requestData = {
+    const taskData = {
       title,
 
       description:
-        formData.description.trim() || null,
+        formData.description.trim() ||
+        null,
 
-      priority: formData.priority,
+      priority:
+        formData.priority,
 
-      due_date: formData.due_date
-        ? new Date(
-            formData.due_date
-          ).toISOString()
-        : null,
+      due_date:
+        formData.due_date
+          ? new Date(
+              formData.due_date
+            ).toISOString()
+          : null,
 
-      project_id: formData.project_id
-        ? Number(formData.project_id)
-        : null,
+      project_id:
+        formData.project_id
+          ? Number(
+              formData.project_id
+            )
+          : null,
     };
-
-    const endpoint = isEditing
-      ? `http://127.0.0.1:8000/tasks/${task.id}`
-      : "http://127.0.0.1:8000/tasks/";
-
-    const method = isEditing
-      ? "PATCH"
-      : "POST";
 
     setLoading(true);
     setError("");
 
     try {
-      const taskResponse = await fetch(
-        endpoint,
-        {
-          method,
-
-          headers: {
-            "Content-Type":
-              "application/json",
-
-            Authorization:
-              `Bearer ${accessToken}`,
-          },
-
-          body: JSON.stringify(requestData),
-        }
-      );
-
-      if (taskResponse.status === 401) {
-        onUnauthorized();
-        return;
-      }
-
       const savedTask =
-        await taskResponse.json();
+        isEditing
+          ? await updateTask(
+              task.id,
+              taskData,
+              onUnauthorized
+            )
+          : await createTask(
+              taskData,
+              onUnauthorized
+            );
 
-      if (!taskResponse.ok) {
-        throw new Error(
-          typeof savedTask.detail === "string"
-            ? savedTask.detail
-            : isEditing
-              ? "Could not update task"
-              : "Could not create task"
-        );
-      }
+      const originalLabelIds =
+        isEditing
+          ? task.labels?.map(
+              (label) => label.id
+            ) ?? []
+          : [];
 
-      const originalLabelIds = isEditing
-        ? task.labels?.map(
-            (label) => label.id
-          ) ?? []
-        : [];
-
-      await updateTaskLabels(
-        accessToken,
+      await synchronizeTaskLabels(
         savedTask.id,
         originalLabelIds,
         formData.label_ids
@@ -323,9 +303,10 @@ function TaskForm({
         description: "",
         priority: "medium",
 
-        due_date: defaultToToday
-          ? getCurrentLocalDateTime()
-          : "",
+        due_date:
+          defaultToToday
+            ? getCurrentLocalDateTime()
+            : "",
 
         project_id:
           defaultProjectId !== null &&
@@ -338,6 +319,10 @@ function TaskForm({
 
       onTaskSaved(savedTask);
     } catch (requestError) {
+      if (requestError.status === 401) {
+        return;
+      }
+
       setError(
         requestError instanceof Error
           ? requestError.message
@@ -347,6 +332,7 @@ function TaskForm({
       setLoading(false);
     }
   }
+
 
   return (
     <form onSubmit={handleSubmit}>
@@ -446,14 +432,18 @@ function TaskForm({
             No project — Inbox
           </option>
 
-          {projects.map((project) => (
-            <option
-              key={project.id}
-              value={String(project.id)}
-            >
-              {project.name}
-            </option>
-          ))}
+          {projects.map(
+            (project) => (
+              <option
+                key={project.id}
+                value={String(
+                  project.id
+                )}
+              >
+                {project.name}
+              </option>
+            )
+          )}
         </select>
       </div>
 
@@ -461,17 +451,23 @@ function TaskForm({
         <legend>Labels</legend>
 
         {labels.length === 0 ? (
-          <p>No labels available.</p>
+          <p>
+            No labels available.
+          </p>
         ) : (
           labels.map((label) => (
             <label key={label.id}>
               <input
                 type="checkbox"
                 value={label.id}
-                checked={formData.label_ids.includes(
-                  label.id
-                )}
-                onChange={handleLabelChange}
+                checked={
+                  formData.label_ids.includes(
+                    label.id
+                  )
+                }
+                onChange={
+                  handleLabelChange
+                }
                 disabled={loading}
               />
 
@@ -512,5 +508,6 @@ function TaskForm({
     </form>
   );
 }
+
 
 export default TaskForm;

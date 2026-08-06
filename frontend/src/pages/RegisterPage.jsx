@@ -1,27 +1,50 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import {
+  Link,
+  useNavigate,
+} from "react-router";
+
+import {
+  registerUser,
+} from "../api/authApi.js";
 
 import "./RegisterPage.css";
 
-function RegisterPage() {
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-  });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+function RegisterPage() {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] =
+    useState({
+      username: "",
+      email: "",
+      password: "",
+    });
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  const [
+    successMessage,
+    setSuccessMessage,
+  ] = useState("");
+
 
   function handleChange(event) {
-    const { name, value } = event.target;
+    const { name, value } =
+      event.target;
 
-    setFormData((currentFormData) => ({
-      ...currentFormData,
-      [name]: value,
-    }));
+    setFormData(
+      (currentFormData) => ({
+        ...currentFormData,
+        [name]: value,
+      })
+    );
   }
+
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -31,34 +54,35 @@ function RegisterPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/auth/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
+      await registerUser({
+        username:
+          formData.username.trim(),
+
+        email:
+          formData.email.trim(),
+
+        password:
+          formData.password,
+      });
+
+      setSuccessMessage(
+        "Account created successfully."
       );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          typeof data.detail === "string"
-            ? data.detail
-            : "Registration failed"
-        );
-      }
-
-      setSuccessMessage("Account created successfully.");
 
       setFormData({
         username: "",
         email: "",
         password: "",
       });
+
+      setTimeout(() => {
+        navigate(
+          "/login",
+          {
+            replace: true,
+          }
+        );
+      }, 1000);
     } catch (requestError) {
       setError(
         requestError instanceof Error
@@ -70,22 +94,32 @@ function RegisterPage() {
     }
   }
 
+
   return (
     <main className="register-page">
       <section className="register-card">
         <div className="register-header">
-          <div className="register-logo">D</div>
+          <div className="register-logo">
+            D
+          </div>
 
           <h1>Create your account</h1>
 
           <p>
-            Start organizing your tasks, projects and daily responsibilities.
+            Start organizing your tasks,
+            projects and daily
+            responsibilities.
           </p>
         </div>
 
-        <form className="register-form" onSubmit={handleSubmit}>
+        <form
+          className="register-form"
+          onSubmit={handleSubmit}
+        >
           <div className="form-group">
-            <label htmlFor="username">Username</label>
+            <label htmlFor="username">
+              Username
+            </label>
 
             <input
               id="username"
@@ -96,12 +130,16 @@ function RegisterPage() {
               onChange={handleChange}
               minLength={8}
               maxLength={30}
+              autoComplete="username"
+              disabled={loading}
               required
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">
+              Email
+            </label>
 
             <input
               id="email"
@@ -110,12 +148,16 @@ function RegisterPage() {
               placeholder="name@example.com"
               value={formData.email}
               onChange={handleChange}
+              autoComplete="email"
+              disabled={loading}
               required
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">
+              Password
+            </label>
 
             <input
               id="password"
@@ -126,12 +168,17 @@ function RegisterPage() {
               onChange={handleChange}
               minLength={8}
               maxLength={128}
+              autoComplete="new-password"
+              disabled={loading}
               required
             />
           </div>
 
           {error && (
-            <div className="form-message error-message" role="alert">
+            <div
+              className="form-message error-message"
+              role="alert"
+            >
               {error}
             </div>
           )}
@@ -147,16 +194,22 @@ function RegisterPage() {
             type="submit"
             disabled={loading}
           >
-            {loading ? "Creating account..." : "Create account"}
+            {loading
+              ? "Creating account..."
+              : "Create account"}
           </button>
         </form>
 
         <p className="login-link">
-          Already have an account? <Link to="/login">Sign in</Link>
+          Already have an account?{" "}
+          <Link to="/login">
+            Sign in
+          </Link>
         </p>
       </section>
     </main>
   );
 }
+
 
 export default RegisterPage;

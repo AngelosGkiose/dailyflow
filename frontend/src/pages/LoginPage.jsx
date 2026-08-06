@@ -1,112 +1,114 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import {
+  Link,
+  useNavigate,
+} from "react-router";
+
+import {
+  loginUser,
+} from "../api/authApi.js";
+
+import {
+  saveAccessToken,
+} from "../api/apiClient.js";
+
 
 function LoginPage() {
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] =
+    useState({
+      email: "",
+      password: "",
+    });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [loading, setLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
 
   function handleChange(event) {
-    const { name, value } = event.target;
+    const { name, value } =
+      event.target;
 
-    setFormData((currentFormData) => ({
-      ...currentFormData,
-      [name]: value,
-    }));
+    setFormData(
+      (currentFormData) => ({
+        ...currentFormData,
+        [name]: value,
+      })
+    );
   }
 
-  function getErrorMessage(data) {
-    if (typeof data?.detail === "string") {
-      return data.detail;
-    }
-
-    if (Array.isArray(data?.detail) && data.detail.length > 0) {
-      return data.detail[0]?.msg || "Login failed.";
-    }
-
-    return "Login failed.";
-  }
 
   async function handleSubmit(event) {
     event.preventDefault();
 
-    setError("");
     setLoading(true);
+    setError("");
 
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/auth/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const data = await loginUser({
+        email: formData.email.trim(),
+        password: formData.password,
+      });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(getErrorMessage(data));
-      }
-
-      if (!data.access_token) {
+      if (!data?.access_token) {
         throw new Error(
-          "The server did not return an access token."
+          "The server did not return an access token"
         );
       }
 
-      localStorage.setItem(
-        "access_token",
+      saveAccessToken(
         data.access_token
       );
 
-      navigate("/dashboard", {
-        replace: true,
-      });
+      navigate(
+        "/dashboard",
+        {
+          replace: true,
+        }
+      );
     } catch (requestError) {
       setError(
         requestError instanceof Error
           ? requestError.message
-          : "Something went wrong. Please try again."
+          : "Something went wrong"
       );
     } finally {
       setLoading(false);
     }
   }
 
+
   return (
     <main>
       <section>
-        <h1>Login</h1>
+        <div>
+          <div>D</div>
 
-        <p>Sign in to continue to DailyFlow.</p>
+          <h1>Welcome back</h1>
 
-        {error && (
-          <p role="alert">
-            {error}
+          <p>
+            Sign in to manage your tasks,
+            projects and daily responsibilities.
           </p>
-        )}
+        </div>
 
         <form onSubmit={handleSubmit}>
           <div>
-            <label htmlFor="email">
+            <label htmlFor="login-email">
               Email
             </label>
 
             <input
-              id="email"
+              id="login-email"
               name="email"
               type="email"
               value={formData.email}
               onChange={handleChange}
+              placeholder="name@example.com"
               autoComplete="email"
               disabled={loading}
               required
@@ -114,36 +116,45 @@ function LoginPage() {
           </div>
 
           <div>
-            <label htmlFor="password">
+            <label htmlFor="login-password">
               Password
             </label>
 
             <input
-              id="password"
+              id="login-password"
               name="password"
               type="password"
               value={formData.password}
               onChange={handleChange}
+              placeholder="Enter your password"
+              autoComplete="current-password"
               minLength={8}
               maxLength={128}
-              autoComplete="current-password"
               disabled={loading}
               required
             />
           </div>
 
+          {error && (
+            <div role="alert">
+              {error}
+            </div>
+          )}
+
           <button
             type="submit"
             disabled={loading}
           >
-            {loading ? "Signing in..." : "Login"}
+            {loading
+              ? "Signing in..."
+              : "Sign in"}
           </button>
         </form>
 
         <p>
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link to="/register">
-            Register
+            Create account
           </Link>
         </p>
       </section>
@@ -151,4 +162,5 @@ function LoginPage() {
   );
 }
 
-export default LoginPage
+
+export default LoginPage;
