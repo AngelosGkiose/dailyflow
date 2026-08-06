@@ -767,8 +767,7 @@ function DashboardPage() {
       );
 
       if (
-        selectedLabel?.id ===
-        label.id
+        selectedLabel?.id === label.id
       ) {
         setSelectedLabel(null);
         setActiveView("today");
@@ -777,8 +776,7 @@ function DashboardPage() {
       }
 
       if (
-        editingLabel?.id ===
-        label.id
+        editingLabel?.id === label.id
       ) {
         setEditingLabel(null);
         setShowLabelForm(false);
