@@ -7,6 +7,7 @@ import {
 import { useNavigate } from "react-router";
 
 import LabelForm from "../components/layouts/LabelForm.jsx";
+import ProjectForm from "../components/layouts/ProjectForm.jsx";
 import Sidebar from "../components/layouts/Sidebar.jsx";
 import TaskForm from "../components/layouts/TaskForm.jsx";
 import TaskList from "../components/layouts/TaskList.jsx";
@@ -28,6 +29,9 @@ function DashboardPage() {
   const [labels, setLabels] = useState([]);
 
   const [showTaskForm, setShowTaskForm] =
+    useState(false);
+
+  const [showProjectForm, setShowProjectForm] =
     useState(false);
 
   const [showLabelForm, setShowLabelForm] =
@@ -312,7 +316,6 @@ function DashboardPage() {
     try {
       const response = await fetch(endpoint, {
         method: "PATCH",
-
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -359,34 +362,60 @@ function DashboardPage() {
 
   async function handleTaskCreated() {
     setShowTaskForm(false);
+
     await loadTasks();
+  }
+
+  async function handleProjectCreated() {
+    setShowProjectForm(false);
+
+    await loadProjects();
   }
 
   async function handleLabelCreated() {
     setShowLabelForm(false);
+
     await loadLabels();
+  }
+
+  function closeAllForms() {
+    setShowTaskForm(false);
+    setShowProjectForm(false);
+    setShowLabelForm(false);
   }
 
   function handleViewChange(view) {
     setActiveView(view);
     setSelectedProject(null);
     setSelectedLabel(null);
-    setShowTaskForm(false);
-    setShowLabelForm(false);
+
+    closeAllForms();
   }
 
   function handleProjectSelect(project) {
     setActiveView("project");
     setSelectedProject(project);
     setSelectedLabel(null);
-    setShowTaskForm(false);
-    setShowLabelForm(false);
+
+    closeAllForms();
   }
 
   function handleLabelSelect(label) {
     setActiveView("label");
     setSelectedLabel(label);
     setSelectedProject(null);
+
+    closeAllForms();
+  }
+
+  function handleAddTask() {
+    setShowTaskForm(true);
+    setShowProjectForm(false);
+    setShowLabelForm(false);
+  }
+
+  function handleAddProject() {
+    setShowProjectForm(true);
     setShowTaskForm(false);
     setShowLabelForm(false);
   }
@@ -394,11 +423,7 @@ function DashboardPage() {
   function handleAddLabel() {
     setShowLabelForm(true);
     setShowTaskForm(false);
-  }
-
-  function handleAddTask() {
-    setShowTaskForm(true);
-    setShowLabelForm(false);
+    setShowProjectForm(false);
   }
 
   function getPageTitle() {
@@ -427,6 +452,11 @@ function DashboardPage() {
     return "Today";
   }
 
+  const isAnyFormOpen =
+    showTaskForm ||
+    showProjectForm ||
+    showLabelForm;
+
   return (
     <main>
       <Sidebar
@@ -444,6 +474,7 @@ function DashboardPage() {
         onViewChange={handleViewChange}
         onProjectSelect={handleProjectSelect}
         onLabelSelect={handleLabelSelect}
+        onAddProject={handleAddProject}
         onAddLabel={handleAddLabel}
         onLogout={handleLogout}
       />
@@ -452,7 +483,7 @@ function DashboardPage() {
         <header>
           <h1>{getPageTitle()}</h1>
 
-          {!showTaskForm && (
+          {!isAnyFormOpen && (
             <button
               type="button"
               onClick={handleAddTask}
@@ -474,6 +505,20 @@ function DashboardPage() {
           </div>
         )}
 
+        {showProjectForm && (
+          <ProjectForm
+            onProjectCreated={
+              handleProjectCreated
+            }
+            onCancel={() =>
+              setShowProjectForm(false)
+            }
+            onUnauthorized={
+              handleUnauthorized
+            }
+          />
+        )}
+
         {showLabelForm && (
           <LabelForm
             onLabelCreated={
@@ -492,25 +537,20 @@ function DashboardPage() {
           <TaskForm
             projects={projects}
             labels={labels}
-
             defaultProjectId={
               activeView === "project"
                 ? selectedProject?.id ?? null
                 : null
             }
-
             defaultToToday={
               activeView === "today"
             }
-
             onTaskCreated={
               handleTaskCreated
             }
-
             onCancel={() =>
               setShowTaskForm(false)
             }
-
             onUnauthorized={
               handleUnauthorized
             }
