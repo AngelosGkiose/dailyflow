@@ -34,7 +34,7 @@ def delete_task_repo(db: Session,task):
     db.commit()
 
 def get_tasks_inbox_repo(db: Session, current_user_id:int):
-    return db.query(TaskModel).filter(TaskModel.user_id == current_user_id,TaskModel.project_id.is_(None)).all()
+    return db.query(TaskModel).filter(TaskModel.user_id == current_user_id,TaskModel.project_id.is_(None),TaskModel.status==TaskStatus.PENDING).all()
 
 def get_tasks_by_project_id_repo(db: Session, project_id:int,current_user_id:int):
     return db.query(TaskModel).filter(TaskModel.project_id == project_id,TaskModel.user_id==current_user_id).all()

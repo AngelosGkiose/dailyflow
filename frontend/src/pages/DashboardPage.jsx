@@ -101,7 +101,7 @@ function DashboardPage() {
     ) {
       return (
         "http://127.0.0.1:8000/tasks/" +
-        `?project_id=${selectedProject.id}`
+        `?project_id=${selectedProject.id}&status=pending`
       );
     }
 
@@ -111,7 +111,14 @@ function DashboardPage() {
     ) {
       return (
         "http://127.0.0.1:8000/tasks/" +
-        `?label_id=${selectedLabel.id}`
+        `?label_id=${selectedLabel.id}&status=pending`
+      );
+    }
+
+    if (activeView === "completed") {
+      return (
+        "http://127.0.0.1:8000/tasks/" +
+        "?status=completed"
       );
     }
 
@@ -170,7 +177,8 @@ function DashboardPage() {
 
       if (
         activeView === "project" ||
-        activeView === "label"
+        activeView === "label" ||
+        activeView === "completed"
       ) {
         setTasks(
           Array.isArray(data.items)
@@ -361,18 +369,7 @@ function DashboardPage() {
         );
       }
 
-      setTasks((currentTasks) =>
-        currentTasks
-          .map((currentTask) =>
-            currentTask.id === updatedTask.id
-              ? updatedTask
-              : currentTask
-          )
-          .filter(
-            (currentTask) =>
-              currentTask.status === "pending"
-          )
-      );
+      await loadTasks();
     } catch (requestError) {
       setError(
         requestError instanceof Error
@@ -510,7 +507,7 @@ function DashboardPage() {
             errorMessage = data.detail;
           }
         } catch {
-          // Το 204 response μπορεί να μην έχει JSON.
+          // Το 204 response δεν έχει JSON body.
         }
 
         throw new Error(errorMessage);
@@ -597,7 +594,7 @@ function DashboardPage() {
             errorMessage = data.detail;
           }
         } catch {
-          // Το 204 response μπορεί να μην έχει JSON.
+          // Το 204 response δεν έχει JSON body.
         }
 
         throw new Error(errorMessage);
@@ -791,6 +788,10 @@ function DashboardPage() {
       return "Upcoming";
     }
 
+    if (activeView === "completed") {
+      return "Completed";
+    }
+
     return "Today";
   }
 
@@ -811,12 +812,8 @@ function DashboardPage() {
         }
         projects={projects}
         labels={labels}
-        projectsLoading={
-          projectsLoading
-        }
-        labelsLoading={
-          labelsLoading
-        }
+        projectsLoading={projectsLoading}
+        labelsLoading={labelsLoading}
         deletingProjectId={
           deletingProjectId
         }
@@ -859,14 +856,15 @@ function DashboardPage() {
         <header>
           <h1>{getPageTitle()}</h1>
 
-          {!isAnyFormOpen && (
-            <button
-              type="button"
-              onClick={handleAddTask}
-            >
-              + Add task
-            </button>
-          )}
+          {!isAnyFormOpen &&
+            activeView !== "completed" && (
+              <button
+                type="button"
+                onClick={handleAddTask}
+              >
+                + Add task
+              </button>
+            )}
         </header>
 
         {projectsError && (

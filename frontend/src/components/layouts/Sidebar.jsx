@@ -61,6 +61,18 @@ function Sidebar({
         >
           Upcoming
         </button>
+
+        <button
+          type="button"
+          onClick={() => onViewChange("completed")}
+          aria-current={
+            activeView === "completed"
+              ? "page"
+              : undefined
+          }
+        >
+          Completed
+        </button>
       </nav>
 
       <section>
