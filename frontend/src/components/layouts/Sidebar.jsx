@@ -1,7 +1,10 @@
+import { useEffect, useState } from "react";
+
 function Sidebar({
   activeView,
   selectedProjectId,
   selectedLabelId,
+  searchQuery,
   projects,
   labels,
   projectsLoading,
@@ -11,6 +14,8 @@ function Sidebar({
   onViewChange,
   onProjectSelect,
   onLabelSelect,
+  onSearch,
+  onClearSearch,
   onAddProject,
   onEditProject,
   onDeleteProject,
@@ -19,16 +24,76 @@ function Sidebar({
   onDeleteLabel,
   onLogout,
 }) {
+  const [searchInput, setSearchInput] = useState(
+    searchQuery
+  );
+
+  useEffect(() => {
+    setSearchInput(searchQuery);
+  }, [searchQuery]);
+
+  function handleSearchSubmit(event) {
+    event.preventDefault();
+
+    const normalizedSearch =
+      searchInput.trim();
+
+    if (!normalizedSearch) {
+      return;
+    }
+
+    onSearch(normalizedSearch);
+  }
+
+  function handleClearSearch() {
+    setSearchInput("");
+    onClearSearch();
+  }
+
   return (
     <aside>
       <div>
         <h2>DailyFlow</h2>
       </div>
 
+      <form onSubmit={handleSearchSubmit}>
+        <label htmlFor="task-search">
+          Search tasks
+        </label>
+
+        <input
+          id="task-search"
+          name="search"
+          type="search"
+          value={searchInput}
+          onChange={(event) =>
+            setSearchInput(event.target.value)
+          }
+          placeholder="Search tasks..."
+          maxLength={100}
+        />
+
+        <button type="submit">
+          Search
+        </button>
+
+        {(searchInput ||
+          activeView === "search") && (
+          <button
+            type="button"
+            onClick={handleClearSearch}
+          >
+            Clear
+          </button>
+        )}
+      </form>
+
       <nav aria-label="Main navigation">
         <button
           type="button"
-          onClick={() => onViewChange("inbox")}
+          onClick={() =>
+            onViewChange("inbox")
+          }
           aria-current={
             activeView === "inbox"
               ? "page"
@@ -40,7 +105,9 @@ function Sidebar({
 
         <button
           type="button"
-          onClick={() => onViewChange("today")}
+          onClick={() =>
+            onViewChange("today")
+          }
           aria-current={
             activeView === "today"
               ? "page"
@@ -52,7 +119,9 @@ function Sidebar({
 
         <button
           type="button"
-          onClick={() => onViewChange("upcoming")}
+          onClick={() =>
+            onViewChange("upcoming")
+          }
           aria-current={
             activeView === "upcoming"
               ? "page"
@@ -64,7 +133,9 @@ function Sidebar({
 
         <button
           type="button"
-          onClick={() => onViewChange("completed")}
+          onClick={() =>
+            onViewChange("completed")
+          }
           aria-current={
             activeView === "completed"
               ? "page"
@@ -96,7 +167,8 @@ function Sidebar({
           <ul>
             {projects.map((project) => {
               const isDeleting =
-                deletingProjectId === project.id;
+                deletingProjectId ===
+                project.id;
 
               return (
                 <li key={project.id}>
@@ -106,8 +178,10 @@ function Sidebar({
                       onProjectSelect(project)
                     }
                     aria-current={
-                      activeView === "project" &&
-                      selectedProjectId === project.id
+                      activeView ===
+                        "project" &&
+                      selectedProjectId ===
+                        project.id
                         ? "page"
                         : undefined
                     }
@@ -177,8 +251,10 @@ function Sidebar({
                       onLabelSelect(label)
                     }
                     aria-current={
-                      activeView === "label" &&
-                      selectedLabelId === label.id
+                      activeView ===
+                        "label" &&
+                      selectedLabelId ===
+                        label.id
                         ? "page"
                         : undefined
                     }

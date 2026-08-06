@@ -18,6 +18,9 @@ function DashboardPage() {
   const [activeView, setActiveView] =
     useState("today");
 
+  const [searchQuery, setSearchQuery] =
+    useState("");
+
   const [selectedProject, setSelectedProject] =
     useState(null);
 
@@ -101,7 +104,8 @@ function DashboardPage() {
     ) {
       return (
         "http://127.0.0.1:8000/tasks/" +
-        `?project_id=${selectedProject.id}&status=pending`
+        `?project_id=${selectedProject.id}` +
+        "&status=pending"
       );
     }
 
@@ -111,7 +115,20 @@ function DashboardPage() {
     ) {
       return (
         "http://127.0.0.1:8000/tasks/" +
-        `?label_id=${selectedLabel.id}&status=pending`
+        `?label_id=${selectedLabel.id}` +
+        "&status=pending"
+      );
+    }
+
+    if (
+      activeView === "search" &&
+      searchQuery
+    ) {
+      return (
+        "http://127.0.0.1:8000/tasks/" +
+        `?search=${encodeURIComponent(
+          searchQuery
+        )}`
       );
     }
 
@@ -135,6 +152,7 @@ function DashboardPage() {
     activeView,
     selectedProject,
     selectedLabel,
+    searchQuery,
   ]);
 
   const loadTasks = useCallback(async () => {
@@ -178,7 +196,8 @@ function DashboardPage() {
       if (
         activeView === "project" ||
         activeView === "label" ||
-        activeView === "completed"
+        activeView === "completed" ||
+        activeView === "search"
       ) {
         setTasks(
           Array.isArray(data.items)
@@ -339,7 +358,8 @@ function DashboardPage() {
         : "complete";
 
     const endpoint =
-      `http://127.0.0.1:8000/tasks/${task.id}/${action}`;
+      `http://127.0.0.1:8000/tasks/` +
+      `${task.id}/${action}`;
 
     setUpdatingTaskId(task.id);
     setError("");
@@ -347,6 +367,7 @@ function DashboardPage() {
     try {
       const response = await fetch(endpoint, {
         method: "PATCH",
+
         headers: {
           Authorization:
             `Bearer ${accessToken}`,
@@ -405,6 +426,7 @@ function DashboardPage() {
         `http://127.0.0.1:8000/tasks/${task.id}`,
         {
           method: "DELETE",
+
           headers: {
             Authorization:
               `Bearer ${accessToken}`,
@@ -430,7 +452,7 @@ function DashboardPage() {
             errorMessage = data.detail;
           }
         } catch {
-          // Το 204 response δεν έχει JSON body.
+          // Το 204 response δεν έχει body.
         }
 
         throw new Error(errorMessage);
@@ -482,6 +504,7 @@ function DashboardPage() {
         `http://127.0.0.1:8000/projects/${project.id}`,
         {
           method: "DELETE",
+
           headers: {
             Authorization:
               `Bearer ${accessToken}`,
@@ -507,7 +530,7 @@ function DashboardPage() {
             errorMessage = data.detail;
           }
         } catch {
-          // Το 204 response δεν έχει JSON body.
+          // Το 204 response δεν έχει body.
         }
 
         throw new Error(errorMessage);
@@ -569,6 +592,7 @@ function DashboardPage() {
         `http://127.0.0.1:8000/labels/${label.id}`,
         {
           method: "DELETE",
+
           headers: {
             Authorization:
               `Bearer ${accessToken}`,
@@ -594,7 +618,7 @@ function DashboardPage() {
             errorMessage = data.detail;
           }
         } catch {
-          // Το 204 response δεν έχει JSON body.
+          // Το 204 response δεν έχει body.
         }
 
         throw new Error(errorMessage);
@@ -683,6 +707,7 @@ function DashboardPage() {
 
   function handleViewChange(view) {
     setActiveView(view);
+    setSearchQuery("");
     setSelectedProject(null);
     setSelectedLabel(null);
 
@@ -691,6 +716,7 @@ function DashboardPage() {
 
   function handleProjectSelect(project) {
     setActiveView("project");
+    setSearchQuery("");
     setSelectedProject(project);
     setSelectedLabel(null);
 
@@ -699,8 +725,29 @@ function DashboardPage() {
 
   function handleLabelSelect(label) {
     setActiveView("label");
+    setSearchQuery("");
     setSelectedLabel(label);
     setSelectedProject(null);
+
+    closeAllForms();
+  }
+
+  function handleSearch(query) {
+    setSearchQuery(query);
+    setActiveView("search");
+
+    setSelectedProject(null);
+    setSelectedLabel(null);
+
+    closeAllForms();
+  }
+
+  function handleClearSearch() {
+    setSearchQuery("");
+    setActiveView("today");
+
+    setSelectedProject(null);
+    setSelectedLabel(null);
 
     closeAllForms();
   }
@@ -780,6 +827,10 @@ function DashboardPage() {
       return `#${selectedLabel.name}`;
     }
 
+    if (activeView === "search") {
+      return `Search: ${searchQuery}`;
+    }
+
     if (activeView === "inbox") {
       return "Inbox";
     }
@@ -800,6 +851,11 @@ function DashboardPage() {
     showProjectForm ||
     showLabelForm;
 
+  const canCreateTask =
+    !isAnyFormOpen &&
+    activeView !== "completed" &&
+    activeView !== "search";
+
   return (
     <main>
       <Sidebar
@@ -810,10 +866,15 @@ function DashboardPage() {
         selectedLabelId={
           selectedLabel?.id ?? null
         }
+        searchQuery={searchQuery}
         projects={projects}
         labels={labels}
-        projectsLoading={projectsLoading}
-        labelsLoading={labelsLoading}
+        projectsLoading={
+          projectsLoading
+        }
+        labelsLoading={
+          labelsLoading
+        }
         deletingProjectId={
           deletingProjectId
         }
@@ -828,6 +889,12 @@ function DashboardPage() {
         }
         onLabelSelect={
           handleLabelSelect
+        }
+        onSearch={
+          handleSearch
+        }
+        onClearSearch={
+          handleClearSearch
         }
         onAddProject={
           handleAddProject
@@ -856,15 +923,14 @@ function DashboardPage() {
         <header>
           <h1>{getPageTitle()}</h1>
 
-          {!isAnyFormOpen &&
-            activeView !== "completed" && (
-              <button
-                type="button"
-                onClick={handleAddTask}
-              >
-                + Add task
-              </button>
-            )}
+          {canCreateTask && (
+            <button
+              type="button"
+              onClick={handleAddTask}
+            >
+              + Add task
+            </button>
+          )}
         </header>
 
         {projectsError && (
