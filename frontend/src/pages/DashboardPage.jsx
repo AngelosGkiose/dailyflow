@@ -24,6 +24,9 @@ function DashboardPage() {
   const [selectedLabel, setSelectedLabel] =
     useState(null);
 
+  const [editingProject, setEditingProject] =
+    useState(null);
+
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
   const [labels, setLabels] = useState([]);
@@ -54,6 +57,9 @@ function DashboardPage() {
     useState("");
 
   const [updatingTaskId, setUpdatingTaskId] =
+    useState(null);
+
+  const [deletingProjectId, setDeletingProjectId] =
     useState(null);
 
   function getAccessToken() {
@@ -360,21 +366,104 @@ function DashboardPage() {
     }
   }
 
+  async function handleDeleteProject(project) {
+    const shouldDelete = window.confirm(
+      `Delete project "${project.name}"?`
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    const accessToken = getAccessToken();
+
+    if (!accessToken) {
+      handleUnauthorized();
+      return;
+    }
+
+    setDeletingProjectId(project.id);
+    setProjectsError("");
+
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/projects/${project.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (response.status === 401) {
+        handleUnauthorized();
+        return;
+      }
+
+      if (!response.ok) {
+        let errorMessage =
+          "Could not delete project";
+
+        try {
+          const data = await response.json();
+
+          if (typeof data.detail === "string") {
+            errorMessage = data.detail;
+          }
+        } catch {
+          // Η απάντηση ενδέχεται να μην έχει JSON body.
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      setProjects((currentProjects) =>
+        currentProjects.filter(
+          (currentProject) =>
+            currentProject.id !== project.id
+        )
+      );
+
+      if (selectedProject?.id === project.id) {
+        setSelectedProject(null);
+        setActiveView("today");
+        setTasks([]);
+      }
+
+      if (editingProject?.id === project.id) {
+        setEditingProject(null);
+        setShowProjectForm(false);
+      }
+    } catch (requestError) {
+      setProjectsError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Something went wrong"
+      );
+    } finally {
+      setDeletingProjectId(null);
+    }
+  }
+
   async function handleTaskCreated() {
     setShowTaskForm(false);
-
     await loadTasks();
   }
 
-  async function handleProjectCreated() {
+  async function handleProjectSaved(savedProject) {
     setShowProjectForm(false);
+    setEditingProject(null);
 
     await loadProjects();
+
+    if (selectedProject?.id === savedProject.id) {
+      setSelectedProject(savedProject);
+    }
   }
 
   async function handleLabelCreated() {
     setShowLabelForm(false);
-
     await loadLabels();
   }
 
@@ -382,6 +471,7 @@ function DashboardPage() {
     setShowTaskForm(false);
     setShowProjectForm(false);
     setShowLabelForm(false);
+    setEditingProject(null);
   }
 
   function handleViewChange(view) {
@@ -412,9 +502,18 @@ function DashboardPage() {
     setShowTaskForm(true);
     setShowProjectForm(false);
     setShowLabelForm(false);
+    setEditingProject(null);
   }
 
   function handleAddProject() {
+    setEditingProject(null);
+    setShowProjectForm(true);
+    setShowTaskForm(false);
+    setShowLabelForm(false);
+  }
+
+  function handleEditProject(project) {
+    setEditingProject(project);
     setShowProjectForm(true);
     setShowTaskForm(false);
     setShowLabelForm(false);
@@ -424,6 +523,7 @@ function DashboardPage() {
     setShowLabelForm(true);
     setShowTaskForm(false);
     setShowProjectForm(false);
+    setEditingProject(null);
   }
 
   function getPageTitle() {
@@ -471,10 +571,13 @@ function DashboardPage() {
         labels={labels}
         projectsLoading={projectsLoading}
         labelsLoading={labelsLoading}
+        deletingProjectId={deletingProjectId}
         onViewChange={handleViewChange}
         onProjectSelect={handleProjectSelect}
         onLabelSelect={handleLabelSelect}
         onAddProject={handleAddProject}
+        onEditProject={handleEditProject}
+        onDeleteProject={handleDeleteProject}
         onAddLabel={handleAddLabel}
         onLogout={handleLogout}
       />
@@ -507,12 +610,14 @@ function DashboardPage() {
 
         {showProjectForm && (
           <ProjectForm
-            onProjectCreated={
-              handleProjectCreated
+            project={editingProject}
+            onProjectSaved={
+              handleProjectSaved
             }
-            onCancel={() =>
-              setShowProjectForm(false)
-            }
+            onCancel={() => {
+              setShowProjectForm(false);
+              setEditingProject(null);
+            }}
             onUnauthorized={
               handleUnauthorized
             }

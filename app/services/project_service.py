@@ -6,7 +6,7 @@ from app.models.project_model import ProjectModel
 from app.models.user_model import UserModel
 from app.repositories.project_repository import get_project_by_name, add_project, get_all_projects_by_user, \
     get_project_by_id_repo, updated_project_repo, delete_project_repo
-from app.schemas.projects import ProjectCreate
+from app.schemas.projects import ProjectCreate, ProjectUpdate
 
 
 def create_project_service(request:ProjectCreate,current_user:UserModel,db:Session):
@@ -30,7 +30,7 @@ def get_project_by_id_service(project_id:int,current_user:UserModel,db:Session):
 
     return project
 
-def update_project_service(project_id:int,updated_project,current_user:UserModel,db:Session):
+def update_project_service(project_id:int,updated_project:ProjectUpdate,current_user:UserModel,db:Session):
     project= get_project_by_id_repo(db, project_id, current_user.id)
     if project is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Project not found")

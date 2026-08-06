@@ -6,10 +6,13 @@ function Sidebar({
   labels,
   projectsLoading,
   labelsLoading,
+  deletingProjectId,
   onViewChange,
   onProjectSelect,
   onLabelSelect,
   onAddProject,
+  onEditProject,
+  onDeleteProject,
   onAddLabel,
   onLogout,
 }) {
@@ -76,24 +79,54 @@ function Sidebar({
           <p>No projects yet.</p>
         ) : (
           <ul>
-            {projects.map((project) => (
-              <li key={project.id}>
-                <button
-                  type="button"
-                  onClick={() =>
-                    onProjectSelect(project)
-                  }
-                  aria-current={
-                    activeView === "project" &&
-                    selectedProjectId === project.id
-                      ? "page"
-                      : undefined
-                  }
-                >
-                  {project.name}
-                </button>
-              </li>
-            ))}
+            {projects.map((project) => {
+              const isDeleting =
+                deletingProjectId === project.id;
+
+              return (
+                <li key={project.id}>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onProjectSelect(project)
+                    }
+                    aria-current={
+                      activeView === "project" &&
+                      selectedProjectId === project.id
+                        ? "page"
+                        : undefined
+                    }
+                    disabled={isDeleting}
+                  >
+                    {project.name}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onEditProject(project)
+                    }
+                    disabled={isDeleting}
+                    aria-label={`Edit ${project.name}`}
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onDeleteProject(project)
+                    }
+                    disabled={isDeleting}
+                    aria-label={`Delete ${project.name}`}
+                  >
+                    {isDeleting
+                      ? "Deleting..."
+                      : "Delete"}
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>

@@ -1,17 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function ProjectForm({
-  onProjectCreated,
+  project = null,
+  onProjectSaved,
   onCancel,
   onUnauthorized,
 }) {
+  const isEditing = project !== null;
+
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
+    name: project?.name ?? "",
+    description: project?.description ?? "",
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    setFormData({
+      name: project?.name ?? "",
+      description: project?.description ?? "",
+    });
+
+    setError("");
+  }, [project]);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -47,21 +59,26 @@ function ProjectForm({
         formData.description.trim() || null,
     };
 
+    const endpoint = isEditing
+      ? `http://127.0.0.1:8000/projects/${project.id}`
+      : "http://127.0.0.1:8000/projects/";
+
+    const method = isEditing
+      ? "PATCH"
+      : "POST";
+
     setLoading(true);
     setError("");
 
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/projects/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify(requestData),
-        }
-      );
+      const response = await fetch(endpoint, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(requestData),
+      });
 
       if (response.status === 401) {
         onUnauthorized();
@@ -74,7 +91,9 @@ function ProjectForm({
         throw new Error(
           typeof data.detail === "string"
             ? data.detail
-            : "Could not create project"
+            : isEditing
+              ? "Could not update project"
+              : "Could not create project"
         );
       }
 
@@ -83,7 +102,7 @@ function ProjectForm({
         description: "",
       });
 
-      onProjectCreated(data);
+      onProjectSaved(data);
     } catch (requestError) {
       setError(
         requestError instanceof Error
@@ -97,7 +116,11 @@ function ProjectForm({
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2>Create project</h2>
+      <h2>
+        {isEditing
+          ? "Edit project"
+          : "Create project"}
+      </h2>
 
       <div>
         <label htmlFor="project-name">
@@ -146,8 +169,12 @@ function ProjectForm({
           disabled={loading}
         >
           {loading
-            ? "Creating project..."
-            : "Create project"}
+            ? isEditing
+              ? "Saving changes..."
+              : "Creating project..."
+            : isEditing
+              ? "Save changes"
+              : "Create project"}
         </button>
 
         <button
