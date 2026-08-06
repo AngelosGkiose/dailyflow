@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import {
   Link,
   useNavigate,
@@ -66,7 +67,7 @@ function RegisterPage() {
       });
 
       setSuccessMessage(
-        "Account created successfully."
+        "Account created successfully. Redirecting to login..."
       );
 
       setFormData({
@@ -75,14 +76,15 @@ function RegisterPage() {
         password: "",
       });
 
-      setTimeout(() => {
-        navigate(
-          "/login",
-          {
-            replace: true,
-          }
-        );
-      }, 1000);
+      navigate(
+        "/login",
+        {
+          replace: true,
+          state: {
+            registrationSuccessful: true,
+          },
+        }
+      );
     } catch (requestError) {
       setError(
         requestError instanceof Error
@@ -107,8 +109,7 @@ function RegisterPage() {
 
           <p>
             Start organizing your tasks,
-            projects and daily
-            responsibilities.
+            projects and daily responsibilities.
           </p>
         </div>
 

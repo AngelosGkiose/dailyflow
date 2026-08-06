@@ -5,6 +5,8 @@ import {
 } from "react-router";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute.jsx";
+import PublicRoute from "./components/auth/PublicRoute.jsx";
+
 import DashboardPage from "./pages/DashboardPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
@@ -17,7 +19,7 @@ function App() {
         path="/"
         element={
           <Navigate
-            to="/login"
+            to="/dashboard"
             replace
           />
         }
@@ -25,12 +27,20 @@ function App() {
 
       <Route
         path="/register"
-        element={<RegisterPage />}
+        element={
+          <PublicRoute>
+            <RegisterPage />
+          </PublicRoute>
+        }
       />
 
       <Route
         path="/login"
-        element={<LoginPage />}
+        element={
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        }
       />
 
       <Route
@@ -46,7 +56,7 @@ function App() {
         path="*"
         element={
           <Navigate
-            to="/login"
+            to="/dashboard"
             replace
           />
         }

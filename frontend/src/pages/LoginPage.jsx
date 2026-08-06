@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import {
   Link,
   useNavigate,
@@ -9,12 +10,14 @@ import {
 } from "../api/authApi.js";
 
 import {
-  saveAccessToken,
-} from "../api/apiClient.js";
+  useAuth,
+} from "../context/AuthContext.jsx";
 
 
 function LoginPage() {
   const navigate = useNavigate();
+
+  const { login } = useAuth();
 
   const [formData, setFormData] =
     useState({
@@ -60,9 +63,7 @@ function LoginPage() {
         );
       }
 
-      saveAccessToken(
-        data.access_token
-      );
+      login(data.access_token);
 
       navigate(
         "/dashboard",

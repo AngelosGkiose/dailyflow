@@ -1,5 +1,8 @@
 const API_BASE_URL = "http://127.0.0.1:8000";
 
+export const AUTH_CHANGED_EVENT =
+  "dailyflow-auth-changed";
+
 
 export class ApiError extends Error {
   constructor(message, status, data = null) {
@@ -12,8 +15,97 @@ export class ApiError extends Error {
 }
 
 
+function notifyAuthChanged() {
+  window.dispatchEvent(
+    new Event(AUTH_CHANGED_EVENT)
+  );
+}
+
+
+function decodeJwtPayload(token) {
+  try {
+    const tokenParts = token.split(".");
+
+    if (tokenParts.length !== 3) {
+      return null;
+    }
+
+    const base64Url = tokenParts[1];
+
+    const base64 = base64Url
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+
+    const paddedBase64 = base64.padEnd(
+      Math.ceil(base64.length / 4) * 4,
+      "="
+    );
+
+    const decodedPayload =
+      decodeURIComponent(
+        window
+          .atob(paddedBase64)
+          .split("")
+          .map((character) => {
+            const characterCode =
+              character.charCodeAt(0);
+
+            return (
+              "%" +
+              characterCode
+                .toString(16)
+                .padStart(2, "0")
+            );
+          })
+          .join("")
+      );
+
+    return JSON.parse(decodedPayload);
+  } catch {
+    return null;
+  }
+}
+
+
+export function isAccessTokenValid(token) {
+  if (!token) {
+    return false;
+  }
+
+  const payload = decodeJwtPayload(token);
+
+  if (!payload) {
+    return false;
+  }
+
+  if (typeof payload.exp !== "number") {
+    return false;
+  }
+
+  const currentTimeInSeconds =
+    Math.floor(Date.now() / 1000);
+
+  return payload.exp > currentTimeInSeconds;
+}
+
+
 export function getAccessToken() {
-  return localStorage.getItem("access_token");
+  const accessToken =
+    localStorage.getItem("access_token");
+
+  if (!accessToken) {
+    return null;
+  }
+
+  if (!isAccessTokenValid(accessToken)) {
+    localStorage.removeItem("access_token");
+
+    notifyAuthChanged();
+
+    return null;
+  }
+
+  return accessToken;
 }
 
 
@@ -22,11 +114,15 @@ export function saveAccessToken(accessToken) {
     "access_token",
     accessToken
   );
+
+  notifyAuthChanged();
 }
 
 
 export function removeAccessToken() {
   localStorage.removeItem("access_token");
+
+  notifyAuthChanged();
 }
 
 
@@ -43,6 +139,8 @@ export async function apiRequest(
   const accessToken = getAccessToken();
 
   if (requiresAuth && !accessToken) {
+    removeAccessToken();
+
     if (onUnauthorized) {
       onUnauthorized();
     }
@@ -90,6 +188,8 @@ export async function apiRequest(
   }
 
   if (response.status === 401) {
+    removeAccessToken();
+
     if (requiresAuth && onUnauthorized) {
       onUnauthorized();
     }

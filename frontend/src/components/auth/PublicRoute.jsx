@@ -5,13 +5,13 @@ import {
 } from "../../context/AuthContext.jsx";
 
 
-function ProtectedRoute({ children }) {
+function PublicRoute({ children }) {
   const { isAuthenticated } = useAuth();
 
-  if (!isAuthenticated) {
+  if (isAuthenticated) {
     return (
       <Navigate
-        to="/login"
+        to="/dashboard"
         replace
       />
     );
@@ -21,4 +21,4 @@ function ProtectedRoute({ children }) {
 }
 
 
-export default ProtectedRoute;
+export default PublicRoute;
