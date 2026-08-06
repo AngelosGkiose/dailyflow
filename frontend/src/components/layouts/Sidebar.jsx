@@ -7,6 +7,7 @@ function Sidebar({
   projectsLoading,
   labelsLoading,
   deletingProjectId,
+  deletingLabelId,
   onViewChange,
   onProjectSelect,
   onLabelSelect,
@@ -14,6 +15,8 @@ function Sidebar({
   onEditProject,
   onDeleteProject,
   onAddLabel,
+  onEditLabel,
+  onDeleteLabel,
   onLogout,
 }) {
   return (
@@ -150,24 +153,54 @@ function Sidebar({
           <p>No labels yet.</p>
         ) : (
           <ul>
-            {labels.map((label) => (
-              <li key={label.id}>
-                <button
-                  type="button"
-                  onClick={() =>
-                    onLabelSelect(label)
-                  }
-                  aria-current={
-                    activeView === "label" &&
-                    selectedLabelId === label.id
-                      ? "page"
-                      : undefined
-                  }
-                >
-                  #{label.name}
-                </button>
-              </li>
-            ))}
+            {labels.map((label) => {
+              const isDeleting =
+                deletingLabelId === label.id;
+
+              return (
+                <li key={label.id}>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onLabelSelect(label)
+                    }
+                    aria-current={
+                      activeView === "label" &&
+                      selectedLabelId === label.id
+                        ? "page"
+                        : undefined
+                    }
+                    disabled={isDeleting}
+                  >
+                    #{label.name}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onEditLabel(label)
+                    }
+                    disabled={isDeleting}
+                    aria-label={`Edit ${label.name}`}
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onDeleteLabel(label)
+                    }
+                    disabled={isDeleting}
+                    aria-label={`Delete ${label.name}`}
+                  >
+                    {isDeleting
+                      ? "Deleting..."
+                      : "Delete"}
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>

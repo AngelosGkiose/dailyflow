@@ -1,44 +1,70 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function LabelForm({
-  onLabelCreated,
+  label = null,
+  onLabelSaved,
   onCancel,
   onUnauthorized,
 }) {
-  const [name, setName] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const isEditing = label !== null;
+
+  const [name, setName] = useState(
+    label?.name ?? ""
+  );
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  useEffect(() => {
+    setName(label?.name ?? "");
+    setError("");
+  }, [label]);
 
   async function handleSubmit(event) {
     event.preventDefault();
 
-    const accessToken = localStorage.getItem(
-      "access_token"
-    );
+    const accessToken =
+      localStorage.getItem("access_token");
 
     if (!accessToken) {
       onUnauthorized();
       return;
     }
 
-    const normalizedName = name.trim();
+    const normalizedName =
+      name.trim().toLowerCase();
 
     if (!normalizedName) {
-      setError("Label name cannot be empty.");
+      setError(
+        "Label name cannot be empty."
+      );
       return;
     }
+
+    const endpoint = isEditing
+      ? `http://127.0.0.1:8000/labels/${label.id}`
+      : "http://127.0.0.1:8000/labels/";
+
+    const method = isEditing
+      ? "PATCH"
+      : "POST";
 
     setLoading(true);
     setError("");
 
     try {
       const response = await fetch(
-        "http://127.0.0.1:8000/labels/",
+        endpoint,
         {
-          method: "POST",
+          method,
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
+            "Content-Type":
+              "application/json",
+            Authorization:
+              `Bearer ${accessToken}`,
           },
           body: JSON.stringify({
             name: normalizedName,
@@ -51,18 +77,21 @@ function LabelForm({
         return;
       }
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!response.ok) {
         throw new Error(
           typeof data.detail === "string"
             ? data.detail
-            : "Could not create label"
+            : isEditing
+              ? "Could not update label"
+              : "Could not create label"
         );
       }
 
       setName("");
-      onLabelCreated(data);
+      onLabelSaved(data);
     } catch (requestError) {
       setError(
         requestError instanceof Error
@@ -76,7 +105,11 @@ function LabelForm({
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2>Create label</h2>
+      <h2>
+        {isEditing
+          ? "Edit label"
+          : "Create label"}
+      </h2>
 
       <div>
         <label htmlFor="label-name">
@@ -93,8 +126,8 @@ function LabelForm({
           }
           minLength={1}
           maxLength={50}
-          disabled={loading}
           placeholder="For example: urgent"
+          disabled={loading}
           required
         />
       </div>
@@ -111,8 +144,12 @@ function LabelForm({
           disabled={loading}
         >
           {loading
-            ? "Creating label..."
-            : "Create label"}
+            ? isEditing
+              ? "Saving changes..."
+              : "Creating label..."
+            : isEditing
+              ? "Save changes"
+              : "Create label"}
         </button>
 
         <button

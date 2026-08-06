@@ -27,6 +27,9 @@ function DashboardPage() {
   const [editingProject, setEditingProject] =
     useState(null);
 
+  const [editingLabel, setEditingLabel] =
+    useState(null);
+
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
   const [labels, setLabels] = useState([]);
@@ -40,7 +43,8 @@ function DashboardPage() {
   const [showLabelForm, setShowLabelForm] =
     useState(false);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] =
+    useState(true);
 
   const [projectsLoading, setProjectsLoading] =
     useState(true);
@@ -48,7 +52,8 @@ function DashboardPage() {
   const [labelsLoading, setLabelsLoading] =
     useState(true);
 
-  const [error, setError] = useState("");
+  const [error, setError] =
+    useState("");
 
   const [projectsError, setProjectsError] =
     useState("");
@@ -60,6 +65,9 @@ function DashboardPage() {
     useState(null);
 
   const [deletingProjectId, setDeletingProjectId] =
+    useState(null);
+
+  const [deletingLabelId, setDeletingLabelId] =
     useState(null);
 
   function getAccessToken() {
@@ -133,7 +141,8 @@ function DashboardPage() {
         getTasksEndpoint(),
         {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization:
+              `Bearer ${accessToken}`,
           },
         }
       );
@@ -200,7 +209,8 @@ function DashboardPage() {
         "http://127.0.0.1:8000/projects/",
         {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization:
+              `Bearer ${accessToken}`,
           },
         }
       );
@@ -252,7 +262,8 @@ function DashboardPage() {
         "http://127.0.0.1:8000/labels/",
         {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization:
+              `Bearer ${accessToken}`,
           },
         }
       );
@@ -323,7 +334,8 @@ function DashboardPage() {
       const response = await fetch(endpoint, {
         method: "PATCH",
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          Authorization:
+            `Bearer ${accessToken}`,
         },
       });
 
@@ -391,7 +403,8 @@ function DashboardPage() {
         {
           method: "DELETE",
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization:
+              `Bearer ${accessToken}`,
           },
         }
       );
@@ -408,11 +421,13 @@ function DashboardPage() {
         try {
           const data = await response.json();
 
-          if (typeof data.detail === "string") {
+          if (
+            typeof data.detail === "string"
+          ) {
             errorMessage = data.detail;
           }
         } catch {
-          // Η απάντηση ενδέχεται να μην έχει JSON body.
+          // Το response μπορεί να μην έχει JSON.
         }
 
         throw new Error(errorMessage);
@@ -425,13 +440,17 @@ function DashboardPage() {
         )
       );
 
-      if (selectedProject?.id === project.id) {
+      if (
+        selectedProject?.id === project.id
+      ) {
         setSelectedProject(null);
         setActiveView("today");
         setTasks([]);
       }
 
-      if (editingProject?.id === project.id) {
+      if (
+        editingProject?.id === project.id
+      ) {
         setEditingProject(null);
         setShowProjectForm(false);
       }
@@ -446,32 +465,138 @@ function DashboardPage() {
     }
   }
 
+  async function handleDeleteLabel(label) {
+    const shouldDelete = window.confirm(
+      `Delete label "#${label.name}"?`
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    const accessToken = getAccessToken();
+
+    if (!accessToken) {
+      handleUnauthorized();
+      return;
+    }
+
+    setDeletingLabelId(label.id);
+    setLabelsError("");
+
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/labels/${label.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization:
+              `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (response.status === 401) {
+        handleUnauthorized();
+        return;
+      }
+
+      if (!response.ok) {
+        let errorMessage =
+          "Could not delete label";
+
+        try {
+          const data = await response.json();
+
+          if (
+            typeof data.detail === "string"
+          ) {
+            errorMessage = data.detail;
+          }
+        } catch {
+          // Το response μπορεί να μην έχει JSON.
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      setLabels((currentLabels) =>
+        currentLabels.filter(
+          (currentLabel) =>
+            currentLabel.id !== label.id
+        )
+      );
+
+      if (
+        selectedLabel?.id === label.id
+      ) {
+        setSelectedLabel(null);
+        setActiveView("today");
+        setTasks([]);
+      }
+
+      if (
+        editingLabel?.id === label.id
+      ) {
+        setEditingLabel(null);
+        setShowLabelForm(false);
+      }
+    } catch (requestError) {
+      setLabelsError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Something went wrong"
+      );
+    } finally {
+      setDeletingLabelId(null);
+    }
+  }
+
   async function handleTaskCreated() {
     setShowTaskForm(false);
+
     await loadTasks();
   }
 
-  async function handleProjectSaved(savedProject) {
+  async function handleProjectSaved(
+    savedProject
+  ) {
     setShowProjectForm(false);
     setEditingProject(null);
 
     await loadProjects();
 
-    if (selectedProject?.id === savedProject.id) {
+    if (
+      selectedProject?.id ===
+      savedProject.id
+    ) {
       setSelectedProject(savedProject);
     }
   }
 
-  async function handleLabelCreated() {
+  async function handleLabelSaved(
+    savedLabel
+  ) {
     setShowLabelForm(false);
+    setEditingLabel(null);
+
     await loadLabels();
+
+    if (
+      selectedLabel?.id ===
+      savedLabel.id
+    ) {
+      setSelectedLabel(savedLabel);
+    }
   }
 
   function closeAllForms() {
     setShowTaskForm(false);
     setShowProjectForm(false);
     setShowLabelForm(false);
+
     setEditingProject(null);
+    setEditingLabel(null);
   }
 
   function handleViewChange(view) {
@@ -502,11 +627,15 @@ function DashboardPage() {
     setShowTaskForm(true);
     setShowProjectForm(false);
     setShowLabelForm(false);
+
     setEditingProject(null);
+    setEditingLabel(null);
   }
 
   function handleAddProject() {
     setEditingProject(null);
+    setEditingLabel(null);
+
     setShowProjectForm(true);
     setShowTaskForm(false);
     setShowLabelForm(false);
@@ -514,16 +643,29 @@ function DashboardPage() {
 
   function handleEditProject(project) {
     setEditingProject(project);
+    setEditingLabel(null);
+
     setShowProjectForm(true);
     setShowTaskForm(false);
     setShowLabelForm(false);
   }
 
   function handleAddLabel() {
+    setEditingLabel(null);
+    setEditingProject(null);
+
     setShowLabelForm(true);
     setShowTaskForm(false);
     setShowProjectForm(false);
+  }
+
+  function handleEditLabel(label) {
+    setEditingLabel(label);
     setEditingProject(null);
+
+    setShowLabelForm(true);
+    setShowTaskForm(false);
+    setShowProjectForm(false);
   }
 
   function getPageTitle() {
@@ -571,15 +713,42 @@ function DashboardPage() {
         labels={labels}
         projectsLoading={projectsLoading}
         labelsLoading={labelsLoading}
-        deletingProjectId={deletingProjectId}
-        onViewChange={handleViewChange}
-        onProjectSelect={handleProjectSelect}
-        onLabelSelect={handleLabelSelect}
-        onAddProject={handleAddProject}
-        onEditProject={handleEditProject}
-        onDeleteProject={handleDeleteProject}
-        onAddLabel={handleAddLabel}
-        onLogout={handleLogout}
+        deletingProjectId={
+          deletingProjectId
+        }
+        deletingLabelId={
+          deletingLabelId
+        }
+        onViewChange={
+          handleViewChange
+        }
+        onProjectSelect={
+          handleProjectSelect
+        }
+        onLabelSelect={
+          handleLabelSelect
+        }
+        onAddProject={
+          handleAddProject
+        }
+        onEditProject={
+          handleEditProject
+        }
+        onDeleteProject={
+          handleDeleteProject
+        }
+        onAddLabel={
+          handleAddLabel
+        }
+        onEditLabel={
+          handleEditLabel
+        }
+        onDeleteLabel={
+          handleDeleteLabel
+        }
+        onLogout={
+          handleLogout
+        }
       />
 
       <section>
@@ -626,12 +795,14 @@ function DashboardPage() {
 
         {showLabelForm && (
           <LabelForm
-            onLabelCreated={
-              handleLabelCreated
+            label={editingLabel}
+            onLabelSaved={
+              handleLabelSaved
             }
-            onCancel={() =>
-              setShowLabelForm(false)
-            }
+            onCancel={() => {
+              setShowLabelForm(false);
+              setEditingLabel(null);
+            }}
             onUnauthorized={
               handleUnauthorized
             }
