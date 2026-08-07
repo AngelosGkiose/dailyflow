@@ -1,0 +1,326 @@
+.entity-form {
+  width: 100%;
+
+  background:
+    var(--color-surface);
+}
+
+
+.entity-form-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 24px 26px 20px;
+
+  border-bottom:
+    1px solid
+    var(--color-border);
+}
+
+
+.entity-form-header h2 {
+  margin: 0 0 5px;
+
+  color:
+    var(--color-text-primary);
+
+  font-size: 21px;
+  font-weight: 700;
+}
+
+
+.entity-form-header p {
+  margin: 0;
+
+  color:
+    var(--color-text-secondary);
+
+  font-size: 13px;
+}
+
+
+.entity-form-close {
+  display: grid;
+  place-items: center;
+
+  width: 34px;
+  height: 34px;
+
+  flex-shrink: 0;
+
+  padding: 0;
+
+  border: 0;
+  border-radius:
+    var(--radius-small);
+
+  background: transparent;
+
+  color:
+    var(--color-text-secondary);
+
+  font-size: 24px;
+  line-height: 1;
+}
+
+
+.entity-form-close:hover {
+  background:
+    var(--color-surface-secondary);
+
+  color:
+    var(--color-text-primary);
+}
+
+
+.entity-form-body {
+  display: flex;
+  flex-direction: column;
+
+  gap: 20px;
+
+  padding: 24px 26px;
+}
+
+
+.entity-form-field {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+
+.entity-form-field label {
+  color:
+    var(--color-text-primary);
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+
+.entity-form-field input,
+.entity-form-field textarea {
+  width: 100%;
+
+  padding: 10px 12px;
+
+  border:
+    1px solid
+    var(--color-border-strong);
+
+  border-radius:
+    var(--radius-medium);
+
+  outline: none;
+
+  background:
+    var(--color-surface);
+
+  color:
+    var(--color-text-primary);
+
+  transition:
+    border-color
+      var(--transition-fast),
+    box-shadow
+      var(--transition-fast);
+}
+
+
+.entity-form-field textarea {
+  min-height: 100px;
+
+  resize: vertical;
+}
+
+
+.entity-form-field input:focus,
+.entity-form-field textarea:focus {
+  border-color:
+    var(--color-primary);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(108, 92, 231, 0.10);
+}
+
+
+.entity-form-field input::placeholder,
+.entity-form-field textarea::placeholder {
+  color:
+    var(--color-text-muted);
+}
+
+
+.entity-label-input {
+  display: flex;
+  align-items: center;
+
+  border:
+    1px solid
+    var(--color-border-strong);
+
+  border-radius:
+    var(--radius-medium);
+
+  background:
+    var(--color-surface);
+
+  transition:
+    border-color
+      var(--transition-fast),
+    box-shadow
+      var(--transition-fast);
+}
+
+
+.entity-label-input:focus-within {
+  border-color:
+    var(--color-primary);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(108, 92, 231, 0.10);
+}
+
+
+.entity-label-input span {
+  padding-left: 12px;
+
+  color:
+    var(--color-primary);
+
+  font-weight: 700;
+}
+
+
+.entity-label-input input {
+  border: 0;
+
+  box-shadow: none;
+}
+
+
+.entity-label-input input:focus {
+  border: 0;
+
+  box-shadow: none;
+}
+
+
+.entity-form-error {
+  padding: 11px 13px;
+
+  border:
+    1px solid
+    var(--color-danger);
+
+  border-radius:
+    var(--radius-medium);
+
+  background:
+    var(--color-danger-light);
+
+  color:
+    var(--color-danger);
+
+  font-size: 13px;
+}
+
+
+.entity-form-footer {
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  padding: 18px 26px;
+
+  border-top:
+    1px solid
+    var(--color-border);
+
+  background: #fafafe;
+}
+
+
+.entity-form-button {
+  min-height: 40px;
+
+  padding: 8px 16px;
+
+  border-radius:
+    var(--radius-medium);
+
+  font-weight: 600;
+
+  transition:
+    background
+      var(--transition-fast),
+    border-color
+      var(--transition-fast);
+}
+
+
+.entity-form-button-secondary {
+  border:
+    1px solid
+    var(--color-border-strong);
+
+  background:
+    var(--color-surface);
+
+  color:
+    var(--color-text-primary);
+}
+
+
+.entity-form-button-secondary:hover {
+  background:
+    var(--color-surface-secondary);
+}
+
+
+.entity-form-button-primary {
+  border:
+    1px solid
+    var(--color-primary);
+
+  background:
+    var(--color-primary);
+
+  color: white;
+}
+
+
+.entity-form-button-primary:hover {
+  border-color:
+    var(--color-primary-hover);
+
+  background:
+    var(--color-primary-hover);
+}
+
+
+@media (max-width: 600px) {
+  .entity-form-header {
+    padding: 20px 18px 16px;
+  }
+
+  .entity-form-body {
+    padding: 20px 18px;
+  }
+
+  .entity-form-footer {
+    padding: 16px 18px;
+  }
+
+  .entity-form-footer button {
+    flex: 1;
+  }
+}

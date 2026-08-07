@@ -8,6 +8,8 @@ import {
   updateProject,
 } from "../../api/projectsApi.js";
 
+import "../../styles/entity-form.css";
+
 
 function ProjectForm({
   project = null,
@@ -94,16 +96,13 @@ function ProjectForm({
               onUnauthorized
             );
 
-      setFormData({
-        name: "",
-        description: "",
-      });
-
       onProjectSaved(
         savedProject
       );
     } catch (requestError) {
-      if (requestError.status === 401) {
+      if (
+        requestError?.status === 401
+      ) {
         return;
       }
 
@@ -119,74 +118,106 @@ function ProjectForm({
 
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>
-        {isEditing
-          ? "Edit project"
-          : "Create project"}
-      </h2>
-
-      <div>
-        <label htmlFor="project-name">
-          Project name
-        </label>
-
-        <input
-          id="project-name"
-          name="name"
-          type="text"
-          value={formData.name}
-          onChange={handleChange}
-          minLength={1}
-          maxLength={100}
-          placeholder="For example: University"
-          disabled={loading}
-          required
-        />
-      </div>
-
-      <div>
-        <label htmlFor="project-description">
-          Description
-        </label>
-
-        <textarea
-          id="project-description"
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          maxLength={500}
-          placeholder="Optional project description"
-          disabled={loading}
-        />
-      </div>
-
-      {error && (
-        <div role="alert">
-          {error}
-        </div>
-      )}
-
-      <div>
-        <button
-          type="submit"
-          disabled={loading}
-        >
-          {loading
-            ? isEditing
-              ? "Saving changes..."
-              : "Creating project..."
-            : isEditing
-              ? "Save changes"
+    <form
+      className="entity-form"
+      onSubmit={handleSubmit}
+    >
+      <div className="entity-form-header">
+        <div>
+          <h2>
+            {isEditing
+              ? "Edit project"
               : "Create project"}
-        </button>
+          </h2>
+
+          <p>
+            {isEditing
+              ? "Update your project details."
+              : "Create a space for related tasks."}
+          </p>
+        </div>
 
         <button
           type="button"
+          className="entity-form-close"
+          onClick={onCancel}
+          disabled={loading}
+          aria-label="Close project form"
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="entity-form-body">
+        <div className="entity-form-field">
+          <label htmlFor="project-name">
+            Project name
+          </label>
+
+          <input
+            id="project-name"
+            name="name"
+            type="text"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="e.g. University"
+            minLength={1}
+            maxLength={100}
+            disabled={loading}
+            autoFocus
+            required
+          />
+        </div>
+
+        <div className="entity-form-field">
+          <label htmlFor="project-description">
+            Description
+          </label>
+
+          <textarea
+            id="project-description"
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            placeholder="Optional description..."
+            maxLength={500}
+            rows={4}
+            disabled={loading}
+          />
+        </div>
+
+        {error && (
+          <div
+            className="entity-form-error"
+            role="alert"
+          >
+            {error}
+          </div>
+        )}
+      </div>
+
+      <div className="entity-form-footer">
+        <button
+          type="button"
+          className="entity-form-button entity-form-button-secondary"
           onClick={onCancel}
           disabled={loading}
         >
           Cancel
+        </button>
+
+        <button
+          type="submit"
+          className="entity-form-button entity-form-button-primary"
+          disabled={loading}
+        >
+          {loading
+            ? isEditing
+              ? "Saving..."
+              : "Creating..."
+            : isEditing
+              ? "Save changes"
+              : "Create project"}
         </button>
       </div>
     </form>

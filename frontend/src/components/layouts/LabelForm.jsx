@@ -8,6 +8,8 @@ import {
   updateLabel,
 } from "../../api/labelsApi.js";
 
+import "../../styles/entity-form.css";
+
 
 function LabelForm({
   label = null,
@@ -73,11 +75,13 @@ function LabelForm({
               onUnauthorized
             );
 
-      setName("");
-
-      onLabelSaved(savedLabel);
+      onLabelSaved(
+        savedLabel
+      );
     } catch (requestError) {
-      if (requestError.status === 401) {
+      if (
+        requestError?.status === 401
+      ) {
         return;
       }
 
@@ -93,60 +97,97 @@ function LabelForm({
 
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>
-        {isEditing
-          ? "Edit label"
-          : "Create label"}
-      </h2>
-
-      <div>
-        <label htmlFor="label-name">
-          Label name
-        </label>
-
-        <input
-          id="label-name"
-          name="name"
-          type="text"
-          value={name}
-          onChange={(event) =>
-            setName(event.target.value)
-          }
-          minLength={1}
-          maxLength={50}
-          placeholder="For example: urgent"
-          disabled={loading}
-          required
-        />
-      </div>
-
-      {error && (
-        <div role="alert">
-          {error}
-        </div>
-      )}
-
-      <div>
-        <button
-          type="submit"
-          disabled={loading}
-        >
-          {loading
-            ? isEditing
-              ? "Saving changes..."
-              : "Creating label..."
-            : isEditing
-              ? "Save changes"
+    <form
+      className="entity-form"
+      onSubmit={handleSubmit}
+    >
+      <div className="entity-form-header">
+        <div>
+          <h2>
+            {isEditing
+              ? "Edit label"
               : "Create label"}
-        </button>
+          </h2>
+
+          <p>
+            {isEditing
+              ? "Rename this label."
+              : "Use labels to group related tasks."}
+          </p>
+        </div>
 
         <button
           type="button"
+          className="entity-form-close"
+          onClick={onCancel}
+          disabled={loading}
+          aria-label="Close label form"
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="entity-form-body">
+        <div className="entity-form-field">
+          <label htmlFor="label-name">
+            Label name
+          </label>
+
+          <div className="entity-label-input">
+            <span>#</span>
+
+            <input
+              id="label-name"
+              name="name"
+              type="text"
+              value={name}
+              onChange={(event) =>
+                setName(
+                  event.target.value
+                )
+              }
+              placeholder="important"
+              minLength={1}
+              maxLength={50}
+              disabled={loading}
+              autoFocus
+              required
+            />
+          </div>
+        </div>
+
+        {error && (
+          <div
+            className="entity-form-error"
+            role="alert"
+          >
+            {error}
+          </div>
+        )}
+      </div>
+
+      <div className="entity-form-footer">
+        <button
+          type="button"
+          className="entity-form-button entity-form-button-secondary"
           onClick={onCancel}
           disabled={loading}
         >
           Cancel
+        </button>
+
+        <button
+          type="submit"
+          className="entity-form-button entity-form-button-primary"
+          disabled={loading}
+        >
+          {loading
+            ? isEditing
+              ? "Saving..."
+              : "Creating..."
+            : isEditing
+              ? "Save changes"
+              : "Create label"}
         </button>
       </div>
     </form>

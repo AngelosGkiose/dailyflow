@@ -430,7 +430,8 @@ function DashboardPage() {
           );
 
           setTotal(
-            typeof data?.total === "number"
+            typeof data?.total ===
+            "number"
               ? data.total
               : 0
           );
@@ -444,20 +445,25 @@ function DashboardPage() {
 
         let data;
 
-        if (activeView === "inbox") {
-          data = await getInboxTasks(
-            handleUnauthorized
-          );
+        if (
+          activeView === "inbox"
+        ) {
+          data =
+            await getInboxTasks(
+              handleUnauthorized
+            );
         } else if (
           activeView === "upcoming"
         ) {
-          data = await getUpcomingTasks(
-            handleUnauthorized
-          );
+          data =
+            await getUpcomingTasks(
+              handleUnauthorized
+            );
         } else {
-          data = await getTodayTasks(
-            handleUnauthorized
-          );
+          data =
+            await getTodayTasks(
+              handleUnauthorized
+            );
         }
 
         const taskItems =
@@ -475,7 +481,9 @@ function DashboardPage() {
             filteredTasks
           );
 
-        if (paginatedTasks !== null) {
+        if (
+          paginatedTasks !== null
+        ) {
           setTasks(
             paginatedTasks
           );
@@ -1091,6 +1099,18 @@ function DashboardPage() {
   }
 
 
+  function closeProjectModal() {
+    setShowProjectForm(false);
+    setEditingProject(null);
+  }
+
+
+  function closeLabelModal() {
+    setShowLabelForm(false);
+    setEditingLabel(null);
+  }
+
+
   function getPageTitle() {
     if (
       activeView === "project" &&
@@ -1150,7 +1170,9 @@ function DashboardPage() {
       <div className="dashboard-layout">
 
         <Sidebar
-          activeView={activeView}
+          activeView={
+            activeView
+          }
           selectedProjectId={
             selectedProject?.id ??
             null
@@ -1295,58 +1317,16 @@ function DashboardPage() {
             )}
 
 
-            {showProjectForm && (
-              <ProjectForm
-                project={
-                  editingProject
-                }
-                onProjectSaved={
-                  handleProjectSaved
-                }
-                onCancel={() => {
-                  setShowProjectForm(
-                    false
-                  );
-
-                  setEditingProject(
-                    null
-                  );
-                }}
-                onUnauthorized={
-                  handleUnauthorized
-                }
-              />
-            )}
-
-
-            {showLabelForm && (
-              <LabelForm
-                label={
-                  editingLabel
-                }
-                onLabelSaved={
-                  handleLabelSaved
-                }
-                onCancel={() => {
-                  setShowLabelForm(
-                    false
-                  );
-
-                  setEditingLabel(
-                    null
-                  );
-                }}
-                onUnauthorized={
-                  handleUnauthorized
-                }
-              />
-            )}
-
-
             <TaskList
-              tasks={tasks}
-              loading={loading}
-              error={error}
+              tasks={
+                tasks
+              }
+              loading={
+                loading
+              }
+              error={
+                error
+              }
               onToggleStatus={
                 handleToggleTaskStatus
               }
@@ -1368,7 +1348,9 @@ function DashboardPage() {
             {!loading &&
               !error && (
                 <PaginationControls
-                  page={page}
+                  page={
+                    page
+                  }
                   pageSize={
                     pageSize
                   }
@@ -1428,6 +1410,64 @@ function DashboardPage() {
               }
               onCancel={
                 closeTaskModal
+              }
+              onUnauthorized={
+                handleUnauthorized
+              }
+            />
+          </Modal>
+        )}
+
+
+        {showProjectForm && (
+          <Modal
+            onClose={
+              closeProjectModal
+            }
+            ariaLabel={
+              editingProject
+                ? "Edit project"
+                : "Create project"
+            }
+          >
+            <ProjectForm
+              project={
+                editingProject
+              }
+              onProjectSaved={
+                handleProjectSaved
+              }
+              onCancel={
+                closeProjectModal
+              }
+              onUnauthorized={
+                handleUnauthorized
+              }
+            />
+          </Modal>
+        )}
+
+
+        {showLabelForm && (
+          <Modal
+            onClose={
+              closeLabelModal
+            }
+            ariaLabel={
+              editingLabel
+                ? "Edit label"
+                : "Create label"
+            }
+          >
+            <LabelForm
+              label={
+                editingLabel
+              }
+              onLabelSaved={
+                handleLabelSaved
+              }
+              onCancel={
+                closeLabelModal
               }
               onUnauthorized={
                 handleUnauthorized
