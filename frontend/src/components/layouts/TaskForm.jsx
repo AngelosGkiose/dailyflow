@@ -10,6 +10,8 @@ import {
   updateTask,
 } from "../../api/tasksApi.js";
 
+import "../../styles/task-form.css";
+
 
 function getCurrentLocalDateTime() {
   const now = new Date();
@@ -298,28 +300,11 @@ function TaskForm({
         formData.label_ids
       );
 
-      setFormData({
-        title: "",
-        description: "",
-        priority: "medium",
-
-        due_date:
-          defaultToToday
-            ? getCurrentLocalDateTime()
-            : "",
-
-        project_id:
-          defaultProjectId !== null &&
-          defaultProjectId !== undefined
-            ? String(defaultProjectId)
-            : "",
-
-        label_ids: [],
-      });
-
       onTaskSaved(savedTask);
     } catch (requestError) {
-      if (requestError.status === 401) {
+      if (
+        requestError?.status === 401
+      ) {
         return;
       }
 
@@ -335,174 +320,238 @@ function TaskForm({
 
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>
-        {isEditing
-          ? "Edit task"
-          : "Add task"}
-      </h2>
-
-      <div>
-        <label htmlFor="task-title">
-          Title
-        </label>
-
-        <input
-          id="task-title"
-          name="title"
-          type="text"
-          value={formData.title}
-          onChange={handleChange}
-          minLength={1}
-          maxLength={100}
-          disabled={loading}
-          required
-        />
-      </div>
-
-      <div>
-        <label htmlFor="task-description">
-          Description
-        </label>
-
-        <textarea
-          id="task-description"
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          maxLength={500}
-          disabled={loading}
-        />
-      </div>
-
-      <div>
-        <label htmlFor="task-priority">
-          Priority
-        </label>
-
-        <select
-          id="task-priority"
-          name="priority"
-          value={formData.priority}
-          onChange={handleChange}
-          disabled={loading}
-        >
-          <option value="low">
-            Low
-          </option>
-
-          <option value="medium">
-            Medium
-          </option>
-
-          <option value="high">
-            High
-          </option>
-        </select>
-      </div>
-
-      <div>
-        <label htmlFor="task-due-date">
-          Due date
-        </label>
-
-        <input
-          id="task-due-date"
-          name="due_date"
-          type="datetime-local"
-          value={formData.due_date}
-          onChange={handleChange}
-          disabled={loading}
-        />
-      </div>
-
-      <div>
-        <label htmlFor="task-project">
-          Project
-        </label>
-
-        <select
-          id="task-project"
-          name="project_id"
-          value={formData.project_id}
-          onChange={handleChange}
-          disabled={loading}
-        >
-          <option value="">
-            No project — Inbox
-          </option>
-
-          {projects.map(
-            (project) => (
-              <option
-                key={project.id}
-                value={String(
-                  project.id
-                )}
-              >
-                {project.name}
-              </option>
-            )
-          )}
-        </select>
-      </div>
-
-      <fieldset>
-        <legend>Labels</legend>
-
-        {labels.length === 0 ? (
-          <p>
-            No labels available.
-          </p>
-        ) : (
-          labels.map((label) => (
-            <label key={label.id}>
-              <input
-                type="checkbox"
-                value={label.id}
-                checked={
-                  formData.label_ids.includes(
-                    label.id
-                  )
-                }
-                onChange={
-                  handleLabelChange
-                }
-                disabled={loading}
-              />
-
-              #{label.name}
-            </label>
-          ))
-        )}
-      </fieldset>
-
-      {error && (
-        <div role="alert">
-          {error}
-        </div>
-      )}
-
-      <div>
-        <button
-          type="submit"
-          disabled={loading}
-        >
-          {loading
-            ? isEditing
-              ? "Saving changes..."
-              : "Creating task..."
-            : isEditing
-              ? "Save changes"
+    <form
+      className="task-form"
+      onSubmit={handleSubmit}
+    >
+      <div className="task-form-header">
+        <div>
+          <h2>
+            {isEditing
+              ? "Edit task"
               : "Add task"}
-        </button>
+          </h2>
+
+          <p>
+            {isEditing
+              ? "Update the details of your task."
+              : "Create a new task and organize it."}
+          </p>
+        </div>
 
         <button
           type="button"
+          className="task-form-close"
+          onClick={onCancel}
+          disabled={loading}
+          aria-label="Close task form"
+        >
+          ×
+        </button>
+      </div>
+
+
+      <div className="task-form-body">
+        <div className="task-form-field">
+          <label htmlFor="task-title">
+            Task
+          </label>
+
+          <input
+            id="task-title"
+            name="title"
+            type="text"
+            value={formData.title}
+            onChange={handleChange}
+            placeholder="What needs to be done?"
+            minLength={1}
+            maxLength={100}
+            disabled={loading}
+            autoFocus
+            required
+          />
+        </div>
+
+
+        <div className="task-form-field">
+          <label htmlFor="task-description">
+            Description
+          </label>
+
+          <textarea
+            id="task-description"
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            maxLength={500}
+            placeholder="Add more details..."
+            rows={4}
+            disabled={loading}
+          />
+        </div>
+
+
+        <div className="task-form-grid">
+          <div className="task-form-field">
+            <label htmlFor="task-due-date">
+              Due date
+            </label>
+
+            <input
+              id="task-due-date"
+              name="due_date"
+              type="datetime-local"
+              value={formData.due_date}
+              onChange={handleChange}
+              disabled={loading}
+            />
+          </div>
+
+
+          <div className="task-form-field">
+            <label htmlFor="task-priority">
+              Priority
+            </label>
+
+            <select
+              id="task-priority"
+              name="priority"
+              value={formData.priority}
+              onChange={handleChange}
+              disabled={loading}
+            >
+              <option value="low">
+                Low
+              </option>
+
+              <option value="medium">
+                Medium
+              </option>
+
+              <option value="high">
+                High
+              </option>
+            </select>
+          </div>
+        </div>
+
+
+        <div className="task-form-field">
+          <label htmlFor="task-project">
+            Project
+          </label>
+
+          <select
+            id="task-project"
+            name="project_id"
+            value={formData.project_id}
+            onChange={handleChange}
+            disabled={loading}
+          >
+            <option value="">
+              Inbox — No project
+            </option>
+
+            {projects.map(
+              (project) => (
+                <option
+                  key={project.id}
+                  value={String(
+                    project.id
+                  )}
+                >
+                  {project.name}
+                </option>
+              )
+            )}
+          </select>
+        </div>
+
+
+        <fieldset className="task-form-labels">
+          <legend>
+            Labels
+          </legend>
+
+          {labels.length === 0 ? (
+            <p className="task-form-labels-empty">
+              No labels available.
+            </p>
+          ) : (
+            <div className="task-form-label-options">
+              {labels.map(
+                (label) => {
+                  const isSelected =
+                    formData.label_ids.includes(
+                      label.id
+                    );
+
+                  return (
+                    <label
+                      key={label.id}
+                      className={
+                        isSelected
+                          ? "task-form-label-option selected"
+                          : "task-form-label-option"
+                      }
+                    >
+                      <input
+                        type="checkbox"
+                        value={label.id}
+                        checked={
+                          isSelected
+                        }
+                        onChange={
+                          handleLabelChange
+                        }
+                        disabled={
+                          loading
+                        }
+                      />
+
+                      #{label.name}
+                    </label>
+                  );
+                }
+              )}
+            </div>
+          )}
+        </fieldset>
+
+
+        {error && (
+          <div
+            className="task-form-error"
+            role="alert"
+          >
+            {error}
+          </div>
+        )}
+      </div>
+
+
+      <div className="task-form-footer">
+        <button
+          type="button"
+          className="task-form-button task-form-button-secondary"
           onClick={onCancel}
           disabled={loading}
         >
           Cancel
+        </button>
+
+        <button
+          type="submit"
+          className="task-form-button task-form-button-primary"
+          disabled={loading}
+        >
+          {loading
+            ? isEditing
+              ? "Saving..."
+              : "Creating..."
+            : isEditing
+              ? "Save changes"
+              : "Add task"}
         </button>
       </div>
     </form>

@@ -1,5 +1,8 @@
 import TaskItem from "./TaskItem.jsx";
 
+import "../../styles/tasks.css";
+
+
 function TaskList({
   tasks,
   loading,
@@ -11,23 +14,42 @@ function TaskList({
   deletingTaskId,
 }) {
   if (loading) {
-    return <p>Loading tasks...</p>;
+    return (
+      <div className="task-state">
+        Loading tasks...
+      </div>
+    );
   }
 
   if (error) {
     return (
-      <div role="alert">
+      <div
+        className="task-state task-state-error"
+        role="alert"
+      >
         {error}
       </div>
     );
   }
 
   if (tasks.length === 0) {
-    return <p>No tasks found.</p>;
+    return (
+      <div className="task-empty-state">
+        <div className="task-empty-icon">
+          ✓
+        </div>
+
+        <h2>No tasks here</h2>
+
+        <p>
+          You&apos;re all caught up.
+        </p>
+      </div>
+    );
   }
 
   return (
-    <ul>
+    <ul className="task-list">
       {tasks.map((task) => (
         <TaskItem
           key={task.id}
@@ -52,5 +74,6 @@ function TaskList({
     </ul>
   );
 }
+
 
 export default TaskList;

@@ -31,6 +31,7 @@ import {
 } from "../api/tasksApi.js";
 
 import LabelForm from "../components/layouts/LabelForm.jsx";
+import Modal from "../components/layouts/Modal.jsx";
 import PaginationControls from "../components/layouts/PaginationControls.jsx";
 import ProjectForm from "../components/layouts/ProjectForm.jsx";
 import Sidebar from "../components/layouts/Sidebar.jsx";
@@ -415,7 +416,10 @@ function DashboardPage() {
             responseTotalPages > 0 &&
             page > responseTotalPages
           ) {
-            setPage(responseTotalPages);
+            setPage(
+              responseTotalPages
+            );
+
             return;
           }
 
@@ -472,10 +476,14 @@ function DashboardPage() {
           );
 
         if (paginatedTasks !== null) {
-          setTasks(paginatedTasks);
+          setTasks(
+            paginatedTasks
+          );
         }
       } catch (requestError) {
-        if (requestError?.status === 401) {
+        if (
+          requestError?.status === 401
+        ) {
           return;
         }
 
@@ -517,7 +525,9 @@ function DashboardPage() {
             : []
         );
       } catch (requestError) {
-        if (requestError?.status === 401) {
+        if (
+          requestError?.status === 401
+        ) {
           return;
         }
 
@@ -549,7 +559,9 @@ function DashboardPage() {
             : []
         );
       } catch (requestError) {
-        if (requestError?.status === 401) {
+        if (
+          requestError?.status === 401
+        ) {
           return;
         }
 
@@ -581,11 +593,16 @@ function DashboardPage() {
   async function handleToggleTaskStatus(
     task
   ) {
-    setUpdatingTaskId(task.id);
+    setUpdatingTaskId(
+      task.id
+    );
+
     setError("");
 
     try {
-      if (task.status === "completed") {
+      if (
+        task.status === "completed"
+      ) {
         await reopenTask(
           task.id,
           handleUnauthorized
@@ -609,7 +626,9 @@ function DashboardPage() {
         await loadTasks();
       }
     } catch (requestError) {
-      if (requestError?.status === 401) {
+      if (
+        requestError?.status === 401
+      ) {
         return;
       }
 
@@ -636,7 +655,10 @@ function DashboardPage() {
       return;
     }
 
-    setDeletingTaskId(task.id);
+    setDeletingTaskId(
+      task.id
+    );
+
     setError("");
 
     try {
@@ -645,7 +667,10 @@ function DashboardPage() {
         handleUnauthorized
       );
 
-      if (editingTask?.id === task.id) {
+      if (
+        editingTask?.id ===
+        task.id
+      ) {
         setEditingTask(null);
         setShowTaskForm(false);
       }
@@ -662,7 +687,9 @@ function DashboardPage() {
         await loadTasks();
       }
     } catch (requestError) {
-      if (requestError?.status === 401) {
+      if (
+        requestError?.status === 401
+      ) {
         return;
       }
 
@@ -689,7 +716,10 @@ function DashboardPage() {
       return;
     }
 
-    setDeletingProjectId(project.id);
+    setDeletingProjectId(
+      project.id
+    );
+
     setProjectsError("");
 
     try {
@@ -725,7 +755,9 @@ function DashboardPage() {
         setShowProjectForm(false);
       }
     } catch (requestError) {
-      if (requestError?.status === 401) {
+      if (
+        requestError?.status === 401
+      ) {
         return;
       }
 
@@ -752,7 +784,10 @@ function DashboardPage() {
       return;
     }
 
-    setDeletingLabelId(label.id);
+    setDeletingLabelId(
+      label.id
+    );
+
     setLabelsError("");
 
     try {
@@ -771,7 +806,8 @@ function DashboardPage() {
       );
 
       if (
-        selectedLabel?.id === label.id
+        selectedLabel?.id ===
+        label.id
       ) {
         setSelectedLabel(null);
         setActiveView("today");
@@ -780,13 +816,16 @@ function DashboardPage() {
       }
 
       if (
-        editingLabel?.id === label.id
+        editingLabel?.id ===
+        label.id
       ) {
         setEditingLabel(null);
         setShowLabelForm(false);
       }
     } catch (requestError) {
-      if (requestError?.status === 401) {
+      if (
+        requestError?.status === 401
+      ) {
         return;
       }
 
@@ -879,7 +918,9 @@ function DashboardPage() {
   }
 
 
-  function handlePageChange(nextPage) {
+  function handlePageChange(
+    nextPage
+  ) {
     if (
       nextPage < 1 ||
       nextPage > totalPages
@@ -894,7 +935,10 @@ function DashboardPage() {
   function handlePageSizeChange(
     nextPageSize
   ) {
-    setPageSize(nextPageSize);
+    setPageSize(
+      nextPageSize
+    );
+
     setPage(1);
   }
 
@@ -934,7 +978,9 @@ function DashboardPage() {
   }
 
 
-  function handleLabelSelect(label) {
+  function handleLabelSelect(
+    label
+  ) {
     setActiveView("label");
     setSearchQuery("");
     setSelectedLabel(label);
@@ -978,7 +1024,9 @@ function DashboardPage() {
   }
 
 
-  function handleEditTask(task) {
+  function handleEditTask(
+    task
+  ) {
     setEditingTask(task);
     setEditingProject(null);
     setEditingLabel(null);
@@ -1000,7 +1048,9 @@ function DashboardPage() {
   }
 
 
-  function handleEditProject(project) {
+  function handleEditProject(
+    project
+  ) {
     setEditingTask(null);
     setEditingProject(project);
     setEditingLabel(null);
@@ -1022,7 +1072,9 @@ function DashboardPage() {
   }
 
 
-  function handleEditLabel(label) {
+  function handleEditLabel(
+    label
+  ) {
     setEditingTask(null);
     setEditingLabel(label);
     setEditingProject(null);
@@ -1030,6 +1082,12 @@ function DashboardPage() {
     setShowLabelForm(true);
     setShowTaskForm(false);
     setShowProjectForm(false);
+  }
+
+
+  function closeTaskModal() {
+    setShowTaskForm(false);
+    setEditingTask(null);
   }
 
 
@@ -1048,19 +1106,27 @@ function DashboardPage() {
       return `#${selectedLabel.name}`;
     }
 
-    if (activeView === "search") {
+    if (
+      activeView === "search"
+    ) {
       return `Search: ${searchQuery}`;
     }
 
-    if (activeView === "inbox") {
+    if (
+      activeView === "inbox"
+    ) {
       return "Inbox";
     }
 
-    if (activeView === "upcoming") {
+    if (
+      activeView === "upcoming"
+    ) {
       return "Upcoming";
     }
 
-    if (activeView === "completed") {
+    if (
+      activeView === "completed"
+    ) {
       return "Completed";
     }
 
@@ -1086,14 +1152,22 @@ function DashboardPage() {
         <Sidebar
           activeView={activeView}
           selectedProjectId={
-            selectedProject?.id ?? null
+            selectedProject?.id ??
+            null
           }
           selectedLabelId={
-            selectedLabel?.id ?? null
+            selectedLabel?.id ??
+            null
           }
-          searchQuery={searchQuery}
-          projects={projects}
-          labels={labels}
+          searchQuery={
+            searchQuery
+          }
+          projects={
+            projects
+          }
+          labels={
+            labels
+          }
           projectsLoading={
             projectsLoading
           }
@@ -1159,7 +1233,9 @@ function DashboardPage() {
                   className="dashboard-button"
                   onClick={() =>
                     setShowFilters(
-                      (currentValue) =>
+                      (
+                        currentValue
+                      ) =>
                         !currentValue
                     )
                   }
@@ -1173,7 +1249,9 @@ function DashboardPage() {
                   <button
                     type="button"
                     className="dashboard-button dashboard-button-primary"
-                    onClick={handleAddTask}
+                    onClick={
+                      handleAddTask
+                    }
                   >
                     + Add task
                   </button>
@@ -1184,7 +1262,9 @@ function DashboardPage() {
 
             {showFilters && (
               <TaskFilters
-                filters={filters}
+                filters={
+                  filters
+                }
                 onFilterChange={
                   handleFilterChange
                 }
@@ -1263,44 +1343,6 @@ function DashboardPage() {
             )}
 
 
-            {showTaskForm && (
-              <TaskForm
-                task={
-                  editingTask
-                }
-                projects={
-                  projects
-                }
-                labels={
-                  labels
-                }
-                defaultProjectId={
-                  activeView === "project"
-                    ? selectedProject?.id ?? null
-                    : null
-                }
-                defaultToToday={
-                  activeView === "today"
-                }
-                onTaskSaved={
-                  handleTaskSaved
-                }
-                onCancel={() => {
-                  setShowTaskForm(
-                    false
-                  );
-
-                  setEditingTask(
-                    null
-                  );
-                }}
-                onUnauthorized={
-                  handleUnauthorized
-                }
-              />
-            )}
-
-
             <TaskList
               tasks={tasks}
               loading={loading}
@@ -1323,29 +1365,76 @@ function DashboardPage() {
             />
 
 
-            {!loading && !error && (
-              <PaginationControls
-                page={page}
-                pageSize={
-                  pageSize
-                }
-                total={
-                  total
-                }
-                totalPages={
-                  totalPages
-                }
-                onPageChange={
-                  handlePageChange
-                }
-                onPageSizeChange={
-                  handlePageSizeChange
-                }
-              />
-            )}
+            {!loading &&
+              !error && (
+                <PaginationControls
+                  page={page}
+                  pageSize={
+                    pageSize
+                  }
+                  total={
+                    total
+                  }
+                  totalPages={
+                    totalPages
+                  }
+                  onPageChange={
+                    handlePageChange
+                  }
+                  onPageSizeChange={
+                    handlePageSizeChange
+                  }
+                />
+              )}
 
           </div>
         </section>
+
+
+        {showTaskForm && (
+          <Modal
+            onClose={
+              closeTaskModal
+            }
+            ariaLabel={
+              editingTask
+                ? "Edit task"
+                : "Create task"
+            }
+          >
+            <TaskForm
+              task={
+                editingTask
+              }
+              projects={
+                projects
+              }
+              labels={
+                labels
+              }
+              defaultProjectId={
+                activeView ===
+                "project"
+                  ? selectedProject
+                      ?.id ?? null
+                  : null
+              }
+              defaultToToday={
+                activeView ===
+                "today"
+              }
+              onTaskSaved={
+                handleTaskSaved
+              }
+              onCancel={
+                closeTaskModal
+              }
+              onUnauthorized={
+                handleUnauthorized
+              }
+            />
+          </Modal>
+        )}
 
       </div>
     </main>
