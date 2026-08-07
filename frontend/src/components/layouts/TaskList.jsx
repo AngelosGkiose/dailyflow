@@ -15,11 +15,16 @@ function TaskList({
 }) {
   if (loading) {
     return (
-      <div className="task-state">
-        Loading tasks...
+      <div className="task-loading-state">
+        <div className="task-loading-spinner" />
+
+        <p>
+          Loading tasks...
+        </p>
       </div>
     );
   }
+
 
   if (error) {
     return (
@@ -27,10 +32,17 @@ function TaskList({
         className="task-state task-state-error"
         role="alert"
       >
-        {error}
+        <strong>
+          Could not load tasks
+        </strong>
+
+        <p>
+          {error}
+        </p>
       </div>
     );
   }
+
 
   if (tasks.length === 0) {
     return (
@@ -39,14 +51,17 @@ function TaskList({
           ✓
         </div>
 
-        <h2>No tasks here</h2>
+        <h2>
+          Nothing here
+        </h2>
 
         <p>
-          You&apos;re all caught up.
+          There are no tasks in this view.
         </p>
       </div>
     );
   }
+
 
   return (
     <ul className="task-list">

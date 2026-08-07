@@ -9,7 +9,7 @@ import {
   registerUser,
 } from "../api/authApi.js";
 
-import "./RegisterPage.css";
+import "../styles/auth.css";
 
 
 function RegisterPage() {
@@ -27,11 +27,6 @@ function RegisterPage() {
 
   const [error, setError] =
     useState("");
-
-  const [
-    successMessage,
-    setSuccessMessage,
-  ] = useState("");
 
 
   function handleChange(event) {
@@ -51,7 +46,6 @@ function RegisterPage() {
     event.preventDefault();
 
     setError("");
-    setSuccessMessage("");
     setLoading(true);
 
     try {
@@ -66,22 +60,14 @@ function RegisterPage() {
           formData.password,
       });
 
-      setSuccessMessage(
-        "Account created successfully. Redirecting to login..."
-      );
-
-      setFormData({
-        username: "",
-        email: "",
-        password: "",
-      });
-
       navigate(
         "/login",
         {
           replace: true,
+
           state: {
-            registrationSuccessful: true,
+            registrationSuccessful:
+              true,
           },
         }
       );
@@ -98,116 +84,204 @@ function RegisterPage() {
 
 
   return (
-    <main className="register-page">
-      <section className="register-card">
-        <div className="register-header">
-          <div className="register-logo">
+    <main className="auth-page">
+
+      <section className="auth-brand-panel">
+        <div className="auth-brand-header">
+          <div className="auth-logo">
             D
           </div>
 
-          <h1>Create your account</h1>
+          <div>
+            <h2 className="auth-brand-name">
+              DailyFlow
+            </h2>
 
-          <p>
-            Start organizing your tasks,
-            projects and daily responsibilities.
-          </p>
+            <p className="auth-brand-caption">
+              Task manager
+            </p>
+          </div>
         </div>
 
-        <form
-          className="register-form"
-          onSubmit={handleSubmit}
-        >
-          <div className="form-group">
-            <label htmlFor="username">
-              Username
-            </label>
 
-            <input
-              id="username"
-              name="username"
-              type="text"
-              placeholder="Enter your username"
-              value={formData.username}
-              onChange={handleChange}
-              minLength={8}
-              maxLength={30}
-              autoComplete="username"
-              disabled={loading}
-              required
-            />
-          </div>
+        <div className="auth-brand-content">
+          <h2>
+            Build a better
+            <br />
+            daily workflow.
+          </h2>
 
-          <div className="form-group">
-            <label htmlFor="email">
-              Email
-            </label>
+          <p>
+            Create one place for
+            your tasks, projects,
+            deadlines and priorities.
+          </p>
 
-            <input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="name@example.com"
-              value={formData.email}
-              onChange={handleChange}
-              autoComplete="email"
-              disabled={loading}
-              required
-            />
-          </div>
+          <div className="auth-brand-features">
+            <div className="auth-brand-feature">
+              <span className="auth-brand-feature-icon">
+                ✓
+              </span>
 
-          <div className="form-group">
-            <label htmlFor="password">
-              Password
-            </label>
-
-            <input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="At least 8 characters"
-              value={formData.password}
-              onChange={handleChange}
-              minLength={8}
-              maxLength={128}
-              autoComplete="new-password"
-              disabled={loading}
-              required
-            />
-          </div>
-
-          {error && (
-            <div
-              className="form-message error-message"
-              role="alert"
-            >
-              {error}
+              Capture everything
+              you need to do
             </div>
-          )}
 
-          {successMessage && (
-            <div className="form-message success-message">
-              {successMessage}
+            <div className="auth-brand-feature">
+              <span className="auth-brand-feature-icon">
+                ◉
+              </span>
+
+              Focus on today
+              and upcoming work
             </div>
-          )}
 
-          <button
-            className="register-button"
-            type="submit"
-            disabled={loading}
-          >
-            {loading
-              ? "Creating account..."
-              : "Create account"}
-          </button>
-        </form>
+            <div className="auth-brand-feature">
+              <span className="auth-brand-feature-icon">
+                #
+              </span>
 
-        <p className="login-link">
-          Already have an account?{" "}
-          <Link to="/login">
-            Sign in
-          </Link>
+              Organize tasks with
+              projects and labels
+            </div>
+          </div>
+        </div>
+
+
+        <p className="auth-brand-footer">
+          DailyFlow productivity
+          workspace
         </p>
       </section>
+
+
+      <section className="auth-form-panel">
+        <div className="auth-form-container">
+
+          <header className="auth-form-header">
+            <h1>
+              Create your account
+            </h1>
+
+            <p>
+              Start organizing your
+              tasks and daily
+              responsibilities.
+            </p>
+          </header>
+
+
+          <form
+            className="auth-form"
+            onSubmit={handleSubmit}
+          >
+            <div className="auth-field">
+              <label htmlFor="username">
+                Username
+              </label>
+
+              <input
+                id="username"
+                name="username"
+                type="text"
+                value={
+                  formData.username
+                }
+                onChange={
+                  handleChange
+                }
+                placeholder="Enter your username"
+                minLength={8}
+                maxLength={30}
+                autoComplete="username"
+                disabled={loading}
+                required
+              />
+            </div>
+
+
+            <div className="auth-field">
+              <label htmlFor="register-email">
+                Email
+              </label>
+
+              <input
+                id="register-email"
+                name="email"
+                type="email"
+                value={
+                  formData.email
+                }
+                onChange={
+                  handleChange
+                }
+                placeholder="name@example.com"
+                autoComplete="email"
+                disabled={loading}
+                required
+              />
+            </div>
+
+
+            <div className="auth-field">
+              <label htmlFor="register-password">
+                Password
+              </label>
+
+              <input
+                id="register-password"
+                name="password"
+                type="password"
+                value={
+                  formData.password
+                }
+                onChange={
+                  handleChange
+                }
+                placeholder="At least 8 characters"
+                minLength={8}
+                maxLength={128}
+                autoComplete="new-password"
+                disabled={loading}
+                required
+              />
+            </div>
+
+
+            {error && (
+              <div
+                className="auth-message auth-message-error"
+                role="alert"
+              >
+                {error}
+              </div>
+            )}
+
+
+            <button
+              type="submit"
+              className="auth-submit"
+              disabled={loading}
+            >
+              {loading
+                ? "Creating account..."
+                : "Create account"}
+            </button>
+          </form>
+
+
+          <p className="auth-switch">
+            Already have an
+            account?{" "}
+
+            <Link to="/login">
+              Sign in
+            </Link>
+          </p>
+
+        </div>
+      </section>
+
     </main>
   );
 }

@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import {
   Link,
+  useLocation,
   useNavigate,
 } from "react-router";
 
@@ -13,11 +14,23 @@ import {
   useAuth,
 } from "../context/AuthContext.jsx";
 
+import "../styles/auth.css";
+
 
 function LoginPage() {
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
-  const { login } = useAuth();
+  const location =
+    useLocation();
+
+  const { login } =
+    useAuth();
+
+  const registrationSuccessful =
+    location.state
+      ?.registrationSuccessful === true;
+
 
   const [formData, setFormData] =
     useState({
@@ -52,10 +65,14 @@ function LoginPage() {
     setError("");
 
     try {
-      const data = await loginUser({
-        email: formData.email.trim(),
-        password: formData.password,
-      });
+      const data =
+        await loginUser({
+          email:
+            formData.email.trim(),
+
+          password:
+            formData.password,
+        });
 
       if (!data?.access_token) {
         throw new Error(
@@ -63,7 +80,9 @@ function LoginPage() {
         );
       }
 
-      login(data.access_token);
+      login(
+        data.access_token
+      );
 
       navigate(
         "/dashboard",
@@ -84,81 +103,178 @@ function LoginPage() {
 
 
   return (
-    <main>
-      <section>
-        <div>
-          <div>D</div>
+    <main className="auth-page">
 
-          <h1>Welcome back</h1>
+      <section className="auth-brand-panel">
+        <div className="auth-brand-header">
+          <div className="auth-logo">
+            D
+          </div>
 
-          <p>
-            Sign in to manage your tasks,
-            projects and daily responsibilities.
-          </p>
+          <div>
+            <h2 className="auth-brand-name">
+              DailyFlow
+            </h2>
+
+            <p className="auth-brand-caption">
+              Task manager
+            </p>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="login-email">
-              Email
-            </label>
 
-            <input
-              id="login-email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="name@example.com"
-              autoComplete="email"
-              disabled={loading}
-              required
-            />
+        <div className="auth-brand-content">
+          <h2>
+            Organize your day.
+            <br />
+            Focus on what matters.
+          </h2>
+
+          <p>
+            Keep your tasks,
+            projects and priorities
+            together in one clean,
+            focused workspace.
+          </p>
+
+          <div className="auth-brand-features">
+            <div className="auth-brand-feature">
+              <span className="auth-brand-feature-icon">
+                ✓
+              </span>
+
+              Plan your daily tasks
+            </div>
+
+            <div className="auth-brand-feature">
+              <span className="auth-brand-feature-icon">
+                #
+              </span>
+
+              Organize with projects
+              and labels
+            </div>
+
+            <div className="auth-brand-feature">
+              <span className="auth-brand-feature-icon">
+                ↑
+              </span>
+
+              Stay focused on your
+              priorities
+            </div>
           </div>
+        </div>
 
-          <div>
-            <label htmlFor="login-password">
-              Password
-            </label>
 
-            <input
-              id="login-password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter your password"
-              autoComplete="current-password"
-              minLength={8}
-              maxLength={128}
-              disabled={loading}
-              required
-            />
-          </div>
+        <p className="auth-brand-footer">
+          DailyFlow productivity
+          workspace
+        </p>
+      </section>
 
-          {error && (
-            <div role="alert">
-              {error}
+
+      <section className="auth-form-panel">
+        <div className="auth-form-container">
+
+          <header className="auth-form-header">
+            <h1>
+              Welcome back
+            </h1>
+
+            <p>
+              Sign in to continue
+              organizing your day.
+            </p>
+          </header>
+
+
+          {registrationSuccessful && (
+            <div className="auth-message auth-message-success">
+              Account created successfully.
+              You can now sign in.
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-          >
-            {loading
-              ? "Signing in..."
-              : "Sign in"}
-          </button>
-        </form>
 
-        <p>
-          Don&apos;t have an account?{" "}
-          <Link to="/register">
-            Create account
-          </Link>
-        </p>
+          <form
+            className="auth-form"
+            onSubmit={handleSubmit}
+          >
+            <div className="auth-field">
+              <label htmlFor="login-email">
+                Email
+              </label>
+
+              <input
+                id="login-email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="name@example.com"
+                autoComplete="email"
+                disabled={loading}
+                required
+              />
+            </div>
+
+
+            <div className="auth-field">
+              <label htmlFor="login-password">
+                Password
+              </label>
+
+              <input
+                id="login-password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter your password"
+                autoComplete="current-password"
+                minLength={8}
+                maxLength={128}
+                disabled={loading}
+                required
+              />
+            </div>
+
+
+            {error && (
+              <div
+                className="auth-message auth-message-error"
+                role="alert"
+              >
+                {error}
+              </div>
+            )}
+
+
+            <button
+              type="submit"
+              className="auth-submit"
+              disabled={loading}
+            >
+              {loading
+                ? "Signing in..."
+                : "Sign in"}
+            </button>
+          </form>
+
+
+          <p className="auth-switch">
+            Don&apos;t have an
+            account?{" "}
+
+            <Link to="/register">
+              Create account
+            </Link>
+          </p>
+
+        </div>
       </section>
+
     </main>
   );
 }

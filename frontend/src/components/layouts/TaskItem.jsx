@@ -1,3 +1,38 @@
+function getDueDateState(dueDate) {
+  if (!dueDate) {
+    return null;
+  }
+
+  const due = new Date(dueDate);
+  const now = new Date();
+
+  const dueDateOnly = new Date(
+    due.getFullYear(),
+    due.getMonth(),
+    due.getDate()
+  );
+
+  const todayOnly = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  );
+
+  if (dueDateOnly < todayOnly) {
+    return "overdue";
+  }
+
+  if (
+    dueDateOnly.getTime() ===
+    todayOnly.getTime()
+  ) {
+    return "today";
+  }
+
+  return "future";
+}
+
+
 function formatDueDate(dueDate) {
   if (!dueDate) {
     return null;
@@ -37,6 +72,10 @@ function TaskItem({
   const formattedDueDate =
     formatDueDate(task.due_date);
 
+  const dueDateState =
+    getDueDateState(task.due_date);
+
+
   return (
     <li
       className={
@@ -62,11 +101,12 @@ function TaskItem({
         }
       >
         {isUpdating
-          ? "..."
+          ? "…"
           : isCompleted
             ? "✓"
             : ""}
       </button>
+
 
       <div className="task-content">
         <div className="task-main-row">
@@ -82,6 +122,7 @@ function TaskItem({
             )}
           </div>
 
+
           <div className="task-actions">
             <button
               type="button"
@@ -90,8 +131,9 @@ function TaskItem({
                 onEditTask(task)
               }
               disabled={isBusy}
+              aria-label={`Edit ${task.title}`}
             >
-              Edit
+              ✎
             </button>
 
             <button
@@ -101,20 +143,34 @@ function TaskItem({
                 onDeleteTask(task)
               }
               disabled={isBusy}
+              aria-label={`Delete ${task.title}`}
             >
               {isDeleting
-                ? "Deleting..."
-                : "Delete"}
+                ? "…"
+                : "×"}
             </button>
           </div>
         </div>
 
+
         <div className="task-meta">
           {formattedDueDate && (
-            <span className="task-due-date">
+            <span
+              className={
+                `task-due-date ` +
+                `task-due-${dueDateState}`
+              }
+            >
+              {dueDateState === "overdue"
+                ? "Overdue · "
+                : dueDateState === "today"
+                  ? "Today · "
+                  : ""}
+
               {formattedDueDate}
             </span>
           )}
+
 
           <span
             className={
@@ -124,6 +180,7 @@ function TaskItem({
           >
             {task.priority}
           </span>
+
 
           {task.labels?.map((label) => (
             <span
