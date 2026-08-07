@@ -7,6 +7,8 @@ import "../../styles/sidebar.css";
 
 
 function Sidebar({
+  isOpen,
+  onClose,
   activeView,
   selectedProjectId,
   selectedLabelId,
@@ -49,32 +51,70 @@ function Sidebar({
     }
 
     onSearch(normalizedSearch);
+    onClose();
   }
 
 
   function handleClearSearch() {
     setSearchInput("");
     onClearSearch();
+    onClose();
+  }
+
+
+  function handleViewClick(view) {
+    onViewChange(view);
+    onClose();
+  }
+
+
+  function handleProjectClick(project) {
+    onProjectSelect(project);
+    onClose();
+  }
+
+
+  function handleLabelClick(label) {
+    onLabelSelect(label);
+    onClose();
   }
 
 
   return (
-    <aside className="sidebar">
+    <aside
+      className={
+        isOpen
+          ? "sidebar sidebar-open"
+          : "sidebar"
+      }
+    >
       <div className="sidebar-header">
-        <div className="sidebar-logo">
-          D
+        <div className="sidebar-brand-group">
+          <div className="sidebar-logo">
+            D
+          </div>
+
+          <div>
+            <h2 className="sidebar-brand">
+              DailyFlow
+            </h2>
+
+            <p className="sidebar-subtitle">
+              Task manager
+            </p>
+          </div>
         </div>
 
-        <div>
-          <h2 className="sidebar-brand">
-            DailyFlow
-          </h2>
-
-          <p className="sidebar-subtitle">
-            Task manager
-          </p>
-        </div>
+        <button
+          type="button"
+          className="sidebar-mobile-close"
+          onClick={onClose}
+          aria-label="Close sidebar"
+        >
+          ×
+        </button>
       </div>
+
 
       <form
         className="sidebar-search"
@@ -112,6 +152,7 @@ function Sidebar({
         )}
       </form>
 
+
       <nav
         className="sidebar-navigation"
         aria-label="Main navigation"
@@ -124,7 +165,7 @@ function Sidebar({
               : "sidebar-nav-item"
           }
           onClick={() =>
-            onViewChange("inbox")
+            handleViewClick("inbox")
           }
         >
           <span>▣</span>
@@ -139,7 +180,7 @@ function Sidebar({
               : "sidebar-nav-item"
           }
           onClick={() =>
-            onViewChange("today")
+            handleViewClick("today")
           }
         >
           <span>◉</span>
@@ -154,7 +195,7 @@ function Sidebar({
               : "sidebar-nav-item"
           }
           onClick={() =>
-            onViewChange("upcoming")
+            handleViewClick("upcoming")
           }
         >
           <span>▤</span>
@@ -169,13 +210,14 @@ function Sidebar({
               : "sidebar-nav-item"
           }
           onClick={() =>
-            onViewChange("completed")
+            handleViewClick("completed")
           }
         >
           <span>✓</span>
           Completed
         </button>
       </nav>
+
 
       <section className="sidebar-section">
         <div className="sidebar-section-header">
@@ -184,7 +226,10 @@ function Sidebar({
           <button
             type="button"
             className="sidebar-add-button"
-            onClick={onAddProject}
+            onClick={() => {
+              onAddProject();
+              onClose();
+            }}
             aria-label="Add project"
           >
             +
@@ -207,8 +252,7 @@ function Sidebar({
                 project.id;
 
               const isActive =
-                activeView ===
-                  "project" &&
+                activeView === "project" &&
                 selectedProjectId ===
                   project.id;
 
@@ -225,7 +269,7 @@ function Sidebar({
                         : "sidebar-list-item"
                     }
                     onClick={() =>
-                      onProjectSelect(
+                      handleProjectClick(
                         project
                       )
                     }
@@ -241,14 +285,14 @@ function Sidebar({
                   <div className="sidebar-row-actions">
                     <button
                       type="button"
-                      onClick={() =>
+                      onClick={() => {
                         onEditProject(
                           project
-                        )
-                      }
-                      disabled={
-                        isDeleting
-                      }
+                        );
+
+                        onClose();
+                      }}
+                      disabled={isDeleting}
                       aria-label={`Edit ${project.name}`}
                     >
                       ···
@@ -261,9 +305,7 @@ function Sidebar({
                           project
                         )
                       }
-                      disabled={
-                        isDeleting
-                      }
+                      disabled={isDeleting}
                       aria-label={`Delete ${project.name}`}
                     >
                       ×
@@ -276,6 +318,7 @@ function Sidebar({
         )}
       </section>
 
+
       <section className="sidebar-section">
         <div className="sidebar-section-header">
           <h3>Labels</h3>
@@ -283,7 +326,10 @@ function Sidebar({
           <button
             type="button"
             className="sidebar-add-button"
-            onClick={onAddLabel}
+            onClick={() => {
+              onAddLabel();
+              onClose();
+            }}
             aria-label="Add label"
           >
             +
@@ -306,8 +352,7 @@ function Sidebar({
                 label.id;
 
               const isActive =
-                activeView ===
-                  "label" &&
+                activeView === "label" &&
                 selectedLabelId ===
                   label.id;
 
@@ -324,7 +369,7 @@ function Sidebar({
                         : "sidebar-list-item"
                     }
                     onClick={() =>
-                      onLabelSelect(
+                      handleLabelClick(
                         label
                       )
                     }
@@ -342,14 +387,14 @@ function Sidebar({
                   <div className="sidebar-row-actions">
                     <button
                       type="button"
-                      onClick={() =>
+                      onClick={() => {
                         onEditLabel(
                           label
-                        )
-                      }
-                      disabled={
-                        isDeleting
-                      }
+                        );
+
+                        onClose();
+                      }}
+                      disabled={isDeleting}
                     >
                       ···
                     </button>
@@ -361,9 +406,7 @@ function Sidebar({
                           label
                         )
                       }
-                      disabled={
-                        isDeleting
-                      }
+                      disabled={isDeleting}
                     >
                       ×
                     </button>
@@ -375,11 +418,15 @@ function Sidebar({
         )}
       </section>
 
+
       <div className="sidebar-footer">
         <button
           type="button"
           className="sidebar-logout"
-          onClick={onLogout}
+          onClick={() => {
+            onLogout();
+            onClose();
+          }}
         >
           Logout
         </button>

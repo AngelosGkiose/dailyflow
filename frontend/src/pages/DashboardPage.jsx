@@ -48,6 +48,9 @@ function DashboardPage() {
   const [activeView, setActiveView] =
     useState("today");
 
+  const [isSidebarOpen, setIsSidebarOpen] =
+    useState(false);
+
   const [searchQuery, setSearchQuery] =
     useState("");
 
@@ -298,7 +301,6 @@ function DashboardPage() {
           (page - 1) * pageSize;
 
         setTotal(itemTotal);
-
         setTotalPages(
           calculatedTotalPages
         );
@@ -430,8 +432,7 @@ function DashboardPage() {
           );
 
           setTotal(
-            typeof data?.total ===
-            "number"
+            typeof data?.total === "number"
               ? data.total
               : 0
           );
@@ -598,13 +599,31 @@ function DashboardPage() {
   }, [loadTasks]);
 
 
+  useEffect(() => {
+    function handleResize() {
+      if (window.innerWidth > 900) {
+        setIsSidebarOpen(false);
+      }
+    }
+
+    window.addEventListener(
+      "resize",
+      handleResize
+    );
+
+    return () => {
+      window.removeEventListener(
+        "resize",
+        handleResize
+      );
+    };
+  }, []);
+
+
   async function handleToggleTaskStatus(
     task
   ) {
-    setUpdatingTaskId(
-      task.id
-    );
-
+    setUpdatingTaskId(task.id);
     setError("");
 
     try {
@@ -663,10 +682,7 @@ function DashboardPage() {
       return;
     }
 
-    setDeletingTaskId(
-      task.id
-    );
-
+    setDeletingTaskId(task.id);
     setError("");
 
     try {
@@ -724,10 +740,7 @@ function DashboardPage() {
       return;
     }
 
-    setDeletingProjectId(
-      project.id
-    );
-
+    setDeletingProjectId(project.id);
     setProjectsError("");
 
     try {
@@ -792,10 +805,7 @@ function DashboardPage() {
       return;
     }
 
-    setDeletingLabelId(
-      label.id
-    );
-
+    setDeletingLabelId(label.id);
     setLabelsError("");
 
     try {
@@ -1169,10 +1179,24 @@ function DashboardPage() {
     <main className="dashboard-page">
       <div className="dashboard-layout">
 
+        {isSidebarOpen && (
+          <button
+            type="button"
+            className="dashboard-sidebar-overlay"
+            onClick={() =>
+              setIsSidebarOpen(false)
+            }
+            aria-label="Close sidebar"
+          />
+        )}
+
+
         <Sidebar
-          activeView={
-            activeView
+          isOpen={isSidebarOpen}
+          onClose={() =>
+            setIsSidebarOpen(false)
           }
+          activeView={activeView}
           selectedProjectId={
             selectedProject?.id ??
             null
@@ -1245,9 +1269,22 @@ function DashboardPage() {
           <div className="dashboard-content">
 
             <header className="dashboard-header">
-              <h1 className="dashboard-title">
-                {getPageTitle()}
-              </h1>
+              <div className="dashboard-header-left">
+                <button
+                  type="button"
+                  className="dashboard-mobile-menu"
+                  onClick={() =>
+                    setIsSidebarOpen(true)
+                  }
+                  aria-label="Open sidebar"
+                >
+                  ☰
+                </button>
+
+                <h1 className="dashboard-title">
+                  {getPageTitle()}
+                </h1>
+              </div>
 
               <div className="dashboard-actions">
                 <button
@@ -1284,9 +1321,7 @@ function DashboardPage() {
 
             {showFilters && (
               <TaskFilters
-                filters={
-                  filters
-                }
+                filters={filters}
                 onFilterChange={
                   handleFilterChange
                 }
@@ -1318,15 +1353,9 @@ function DashboardPage() {
 
 
             <TaskList
-              tasks={
-                tasks
-              }
-              loading={
-                loading
-              }
-              error={
-                error
-              }
+              tasks={tasks}
+              loading={loading}
+              error={error}
               onToggleStatus={
                 handleToggleTaskStatus
               }
@@ -1348,9 +1377,7 @@ function DashboardPage() {
             {!loading &&
               !error && (
                 <PaginationControls
-                  page={
-                    page
-                  }
+                  page={page}
                   pageSize={
                     pageSize
                   }
