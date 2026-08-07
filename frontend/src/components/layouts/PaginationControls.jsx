@@ -1,3 +1,6 @@
+import "../../styles/pagination.css";
+
+
 function PaginationControls({
   page,
   pageSize,
@@ -13,10 +16,12 @@ function PaginationControls({
   const firstItem =
     (page - 1) * pageSize + 1;
 
-  const lastItem = Math.min(
-    page * pageSize,
-    total
-  );
+  const lastItem =
+    Math.min(
+      page * pageSize,
+      total
+    );
+
 
   function handlePageSizeChange(event) {
     onPageSizeChange(
@@ -24,59 +29,85 @@ function PaginationControls({
     );
   }
 
+
   return (
-    <nav aria-label="Task pagination">
-      <p>
-        Showing {firstItem}-{lastItem} of{" "}
-        {total} tasks
-      </p>
-
-      <div>
-        <label htmlFor="page-size">
-          Tasks per page
-        </label>
-
-        <select
-          id="page-size"
-          value={pageSize}
-          onChange={handlePageSizeChange}
-        >
-          <option value={5}>5</option>
-          <option value={10}>10</option>
-          <option value={20}>20</option>
-          <option value={50}>50</option>
-        </select>
+    <div className="pagination">
+      <div className="pagination-summary">
+        Showing{" "}
+        <strong>{firstItem}</strong>
+        {" - "}
+        <strong>{lastItem}</strong>
+        {" of "}
+        <strong>{total}</strong>
       </div>
 
-      <div>
-        <button
-          type="button"
-          onClick={() =>
-            onPageChange(page - 1)
-          }
-          disabled={page <= 1}
-        >
-          Previous
-        </button>
+      <div className="pagination-controls">
+        <div className="pagination-size">
+          <label htmlFor="page-size">
+            Per page
+          </label>
 
-        <span>
-          Page {page} of {totalPages}
-        </span>
+          <select
+            id="page-size"
+            value={pageSize}
+            onChange={
+              handlePageSizeChange
+            }
+          >
+            <option value={5}>
+              5
+            </option>
 
-        <button
-          type="button"
-          onClick={() =>
-            onPageChange(page + 1)
-          }
-          disabled={
-            page >= totalPages
-          }
-        >
-          Next
-        </button>
+            <option value={10}>
+              10
+            </option>
+
+            <option value={20}>
+              20
+            </option>
+
+            <option value={50}>
+              50
+            </option>
+          </select>
+        </div>
+
+        <div className="pagination-navigation">
+          <button
+            type="button"
+            className="pagination-button"
+            onClick={() =>
+              onPageChange(page - 1)
+            }
+            disabled={page <= 1}
+          >
+            ←
+          </button>
+
+          <span className="pagination-page">
+            {totalPages === 0
+              ? "0 / 0"
+              : `${page} / ${totalPages}`}
+          </span>
+
+          <button
+            type="button"
+            className="pagination-button"
+            onClick={() =>
+              onPageChange(page + 1)
+            }
+            disabled={
+              totalPages === 0 ||
+              page >= totalPages
+            }
+          >
+            →
+          </button>
+        </div>
       </div>
-    </nav>
+    </div>
   );
 }
+
 
 export default PaginationControls;
