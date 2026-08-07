@@ -1,4 +1,10 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import "../../styles/sidebar.css";
+
 
 function Sidebar({
   activeView,
@@ -24,13 +30,13 @@ function Sidebar({
   onDeleteLabel,
   onLogout,
 }) {
-  const [searchInput, setSearchInput] = useState(
-    searchQuery
-  );
+  const [searchInput, setSearchInput] =
+    useState(searchQuery);
 
   useEffect(() => {
     setSearchInput(searchQuery);
   }, [searchQuery]);
+
 
   function handleSearchSubmit(event) {
     event.preventDefault();
@@ -45,35 +51,51 @@ function Sidebar({
     onSearch(normalizedSearch);
   }
 
+
   function handleClearSearch() {
     setSearchInput("");
     onClearSearch();
   }
 
+
   return (
-    <aside>
-      <div>
-        <h2>DailyFlow</h2>
+    <aside className="sidebar">
+      <div className="sidebar-header">
+        <div className="sidebar-logo">
+          D
+        </div>
+
+        <div>
+          <h2 className="sidebar-brand">
+            DailyFlow
+          </h2>
+
+          <p className="sidebar-subtitle">
+            Task manager
+          </p>
+        </div>
       </div>
 
-      <form onSubmit={handleSearchSubmit}>
-        <label htmlFor="task-search">
-          Search tasks
-        </label>
-
+      <form
+        className="sidebar-search"
+        onSubmit={handleSearchSubmit}
+      >
         <input
-          id="task-search"
-          name="search"
           type="search"
           value={searchInput}
           onChange={(event) =>
-            setSearchInput(event.target.value)
+            setSearchInput(
+              event.target.value
+            )
           }
           placeholder="Search tasks..."
-          maxLength={100}
+          aria-label="Search tasks"
         />
 
-        <button type="submit">
+        <button
+          type="submit"
+          aria-label="Search"
+        >
           Search
         </button>
 
@@ -81,138 +103,172 @@ function Sidebar({
           activeView === "search") && (
           <button
             type="button"
-            onClick={handleClearSearch}
+            onClick={
+              handleClearSearch
+            }
           >
             Clear
           </button>
         )}
       </form>
 
-      <nav aria-label="Main navigation">
+      <nav
+        className="sidebar-navigation"
+        aria-label="Main navigation"
+      >
         <button
           type="button"
+          className={
+            activeView === "inbox"
+              ? "sidebar-nav-item active"
+              : "sidebar-nav-item"
+          }
           onClick={() =>
             onViewChange("inbox")
           }
-          aria-current={
-            activeView === "inbox"
-              ? "page"
-              : undefined
-          }
         >
+          <span>▣</span>
           Inbox
         </button>
 
         <button
           type="button"
+          className={
+            activeView === "today"
+              ? "sidebar-nav-item active"
+              : "sidebar-nav-item"
+          }
           onClick={() =>
             onViewChange("today")
           }
-          aria-current={
-            activeView === "today"
-              ? "page"
-              : undefined
-          }
         >
+          <span>◉</span>
           Today
         </button>
 
         <button
           type="button"
+          className={
+            activeView === "upcoming"
+              ? "sidebar-nav-item active"
+              : "sidebar-nav-item"
+          }
           onClick={() =>
             onViewChange("upcoming")
           }
-          aria-current={
-            activeView === "upcoming"
-              ? "page"
-              : undefined
-          }
         >
+          <span>▤</span>
           Upcoming
         </button>
 
         <button
           type="button"
+          className={
+            activeView === "completed"
+              ? "sidebar-nav-item active"
+              : "sidebar-nav-item"
+          }
           onClick={() =>
             onViewChange("completed")
           }
-          aria-current={
-            activeView === "completed"
-              ? "page"
-              : undefined
-          }
         >
+          <span>✓</span>
           Completed
         </button>
       </nav>
 
-      <section>
-        <div>
+      <section className="sidebar-section">
+        <div className="sidebar-section-header">
           <h3>Projects</h3>
 
           <button
             type="button"
+            className="sidebar-add-button"
             onClick={onAddProject}
-            aria-label="Create project"
+            aria-label="Add project"
           >
-            + Add project
+            +
           </button>
         </div>
 
         {projectsLoading ? (
-          <p>Loading projects...</p>
+          <p className="sidebar-empty">
+            Loading projects...
+          </p>
         ) : projects.length === 0 ? (
-          <p>No projects yet.</p>
+          <p className="sidebar-empty">
+            No projects yet.
+          </p>
         ) : (
-          <ul>
+          <ul className="sidebar-list">
             {projects.map((project) => {
               const isDeleting =
                 deletingProjectId ===
                 project.id;
 
+              const isActive =
+                activeView ===
+                  "project" &&
+                selectedProjectId ===
+                  project.id;
+
               return (
-                <li key={project.id}>
+                <li
+                  key={project.id}
+                  className="sidebar-list-row"
+                >
                   <button
                     type="button"
-                    onClick={() =>
-                      onProjectSelect(project)
+                    className={
+                      isActive
+                        ? "sidebar-list-item active"
+                        : "sidebar-list-item"
                     }
-                    aria-current={
-                      activeView ===
-                        "project" &&
-                      selectedProjectId ===
-                        project.id
-                        ? "page"
-                        : undefined
+                    onClick={() =>
+                      onProjectSelect(
+                        project
+                      )
                     }
                     disabled={isDeleting}
                   >
-                    {project.name}
+                    <span className="sidebar-dot" />
+
+                    <span className="sidebar-item-name">
+                      {project.name}
+                    </span>
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onEditProject(project)
-                    }
-                    disabled={isDeleting}
-                    aria-label={`Edit ${project.name}`}
-                  >
-                    Edit
-                  </button>
+                  <div className="sidebar-row-actions">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onEditProject(
+                          project
+                        )
+                      }
+                      disabled={
+                        isDeleting
+                      }
+                      aria-label={`Edit ${project.name}`}
+                    >
+                      ···
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onDeleteProject(project)
-                    }
-                    disabled={isDeleting}
-                    aria-label={`Delete ${project.name}`}
-                  >
-                    {isDeleting
-                      ? "Deleting..."
-                      : "Delete"}
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onDeleteProject(
+                          project
+                        )
+                      }
+                      disabled={
+                        isDeleting
+                      }
+                      aria-label={`Delete ${project.name}`}
+                    >
+                      ×
+                    </button>
+                  </div>
                 </li>
               );
             })}
@@ -220,72 +276,98 @@ function Sidebar({
         )}
       </section>
 
-      <section>
-        <div>
+      <section className="sidebar-section">
+        <div className="sidebar-section-header">
           <h3>Labels</h3>
 
           <button
             type="button"
+            className="sidebar-add-button"
             onClick={onAddLabel}
-            aria-label="Create label"
+            aria-label="Add label"
           >
-            + Add label
+            +
           </button>
         </div>
 
         {labelsLoading ? (
-          <p>Loading labels...</p>
+          <p className="sidebar-empty">
+            Loading labels...
+          </p>
         ) : labels.length === 0 ? (
-          <p>No labels yet.</p>
+          <p className="sidebar-empty">
+            No labels yet.
+          </p>
         ) : (
-          <ul>
+          <ul className="sidebar-list">
             {labels.map((label) => {
               const isDeleting =
-                deletingLabelId === label.id;
+                deletingLabelId ===
+                label.id;
+
+              const isActive =
+                activeView ===
+                  "label" &&
+                selectedLabelId ===
+                  label.id;
 
               return (
-                <li key={label.id}>
+                <li
+                  key={label.id}
+                  className="sidebar-list-row"
+                >
                   <button
                     type="button"
-                    onClick={() =>
-                      onLabelSelect(label)
+                    className={
+                      isActive
+                        ? "sidebar-list-item active"
+                        : "sidebar-list-item"
                     }
-                    aria-current={
-                      activeView ===
-                        "label" &&
-                      selectedLabelId ===
-                        label.id
-                        ? "page"
-                        : undefined
+                    onClick={() =>
+                      onLabelSelect(
+                        label
+                      )
                     }
                     disabled={isDeleting}
                   >
-                    #{label.name}
+                    <span className="sidebar-label-icon">
+                      #
+                    </span>
+
+                    <span className="sidebar-item-name">
+                      {label.name}
+                    </span>
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onEditLabel(label)
-                    }
-                    disabled={isDeleting}
-                    aria-label={`Edit ${label.name}`}
-                  >
-                    Edit
-                  </button>
+                  <div className="sidebar-row-actions">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onEditLabel(
+                          label
+                        )
+                      }
+                      disabled={
+                        isDeleting
+                      }
+                    >
+                      ···
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onDeleteLabel(label)
-                    }
-                    disabled={isDeleting}
-                    aria-label={`Delete ${label.name}`}
-                  >
-                    {isDeleting
-                      ? "Deleting..."
-                      : "Delete"}
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onDeleteLabel(
+                          label
+                        )
+                      }
+                      disabled={
+                        isDeleting
+                      }
+                    >
+                      ×
+                    </button>
+                  </div>
                 </li>
               );
             })}
@@ -293,14 +375,18 @@ function Sidebar({
         )}
       </section>
 
-      <button
-        type="button"
-        onClick={onLogout}
-      >
-        Logout
-      </button>
+      <div className="sidebar-footer">
+        <button
+          type="button"
+          className="sidebar-logout"
+          onClick={onLogout}
+        >
+          Logout
+        </button>
+      </div>
     </aside>
   );
 }
+
 
 export default Sidebar;

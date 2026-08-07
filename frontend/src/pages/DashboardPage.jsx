@@ -38,6 +38,8 @@ import TaskFilters from "../components/layouts/TaskFilters.jsx";
 import TaskForm from "../components/layouts/TaskForm.jsx";
 import TaskList from "../components/layouts/TaskList.jsx";
 
+import "../styles/dashboard.css";
+
 
 function DashboardPage() {
   const navigate = useNavigate();
@@ -196,10 +198,12 @@ function DashboardPage() {
               filters.sortBy === "title"
             ) {
               firstValue =
-                firstTask.title.toLowerCase();
+                firstTask.title
+                  .toLowerCase();
 
               secondValue =
-                secondTask.title.toLowerCase();
+                secondTask.title
+                  .toLowerCase();
             } else if (
               filters.sortBy === "due_date"
             ) {
@@ -1076,216 +1080,274 @@ function DashboardPage() {
 
 
   return (
-    <main>
-      <Sidebar
-        activeView={activeView}
-        selectedProjectId={
-          selectedProject?.id ?? null
-        }
-        selectedLabelId={
-          selectedLabel?.id ?? null
-        }
-        searchQuery={searchQuery}
-        projects={projects}
-        labels={labels}
-        projectsLoading={
-          projectsLoading
-        }
-        labelsLoading={
-          labelsLoading
-        }
-        deletingProjectId={
-          deletingProjectId
-        }
-        deletingLabelId={
-          deletingLabelId
-        }
-        onViewChange={
-          handleViewChange
-        }
-        onProjectSelect={
-          handleProjectSelect
-        }
-        onLabelSelect={
-          handleLabelSelect
-        }
-        onSearch={
-          handleSearch
-        }
-        onClearSearch={
-          handleClearSearch
-        }
-        onAddProject={
-          handleAddProject
-        }
-        onEditProject={
-          handleEditProject
-        }
-        onDeleteProject={
-          handleDeleteProjectAction
-        }
-        onAddLabel={
-          handleAddLabel
-        }
-        onEditLabel={
-          handleEditLabel
-        }
-        onDeleteLabel={
-          handleDeleteLabelAction
-        }
-        onLogout={
-          handleLogout
-        }
-      />
+    <main className="dashboard-page">
+      <div className="dashboard-layout">
 
-      <section>
-        <header>
-          <h1>{getPageTitle()}</h1>
-
-          <div>
-            <button
-              type="button"
-              onClick={() =>
-                setShowFilters(
-                  (currentValue) =>
-                    !currentValue
-                )
-              }
-            >
-              {showFilters
-                ? "Hide view options"
-                : "View options"}
-            </button>
-
-            {canCreateTask && (
-              <button
-                type="button"
-                onClick={handleAddTask}
-              >
-                + Add task
-              </button>
-            )}
-          </div>
-        </header>
-
-        {showFilters && (
-          <TaskFilters
-            filters={filters}
-            onFilterChange={
-              handleFilterChange
-            }
-            onClearFilters={
-              handleClearFilters
-            }
-          />
-        )}
-
-        {projectsError && (
-          <div role="alert">
-            {projectsError}
-          </div>
-        )}
-
-        {labelsError && (
-          <div role="alert">
-            {labelsError}
-          </div>
-        )}
-
-        {showProjectForm && (
-          <ProjectForm
-            project={editingProject}
-            onProjectSaved={
-              handleProjectSaved
-            }
-            onCancel={() => {
-              setShowProjectForm(false);
-              setEditingProject(null);
-            }}
-            onUnauthorized={
-              handleUnauthorized
-            }
-          />
-        )}
-
-        {showLabelForm && (
-          <LabelForm
-            label={editingLabel}
-            onLabelSaved={
-              handleLabelSaved
-            }
-            onCancel={() => {
-              setShowLabelForm(false);
-              setEditingLabel(null);
-            }}
-            onUnauthorized={
-              handleUnauthorized
-            }
-          />
-        )}
-
-        {showTaskForm && (
-          <TaskForm
-            task={editingTask}
-            projects={projects}
-            labels={labels}
-            defaultProjectId={
-              activeView === "project"
-                ? selectedProject?.id ?? null
-                : null
-            }
-            defaultToToday={
-              activeView === "today"
-            }
-            onTaskSaved={
-              handleTaskSaved
-            }
-            onCancel={() => {
-              setShowTaskForm(false);
-              setEditingTask(null);
-            }}
-            onUnauthorized={
-              handleUnauthorized
-            }
-          />
-        )}
-
-        <TaskList
-          tasks={tasks}
-          loading={loading}
-          error={error}
-          onToggleStatus={
-            handleToggleTaskStatus
+        <Sidebar
+          activeView={activeView}
+          selectedProjectId={
+            selectedProject?.id ?? null
           }
-          onEditTask={
-            handleEditTask
+          selectedLabelId={
+            selectedLabel?.id ?? null
           }
-          onDeleteTask={
-            handleDeleteTaskAction
+          searchQuery={searchQuery}
+          projects={projects}
+          labels={labels}
+          projectsLoading={
+            projectsLoading
           }
-          updatingTaskId={
-            updatingTaskId
+          labelsLoading={
+            labelsLoading
           }
-          deletingTaskId={
-            deletingTaskId
+          deletingProjectId={
+            deletingProjectId
+          }
+          deletingLabelId={
+            deletingLabelId
+          }
+          onViewChange={
+            handleViewChange
+          }
+          onProjectSelect={
+            handleProjectSelect
+          }
+          onLabelSelect={
+            handleLabelSelect
+          }
+          onSearch={
+            handleSearch
+          }
+          onClearSearch={
+            handleClearSearch
+          }
+          onAddProject={
+            handleAddProject
+          }
+          onEditProject={
+            handleEditProject
+          }
+          onDeleteProject={
+            handleDeleteProjectAction
+          }
+          onAddLabel={
+            handleAddLabel
+          }
+          onEditLabel={
+            handleEditLabel
+          }
+          onDeleteLabel={
+            handleDeleteLabelAction
+          }
+          onLogout={
+            handleLogout
           }
         />
 
-        {!loading && !error && (
-          <PaginationControls
-            page={page}
-            pageSize={pageSize}
-            total={total}
-            totalPages={totalPages}
-            onPageChange={
-              handlePageChange
-            }
-            onPageSizeChange={
-              handlePageSizeChange
-            }
-          />
-        )}
-      </section>
+
+        <section className="dashboard-main">
+          <div className="dashboard-content">
+
+            <header className="dashboard-header">
+              <h1 className="dashboard-title">
+                {getPageTitle()}
+              </h1>
+
+              <div className="dashboard-actions">
+                <button
+                  type="button"
+                  className="dashboard-button"
+                  onClick={() =>
+                    setShowFilters(
+                      (currentValue) =>
+                        !currentValue
+                    )
+                  }
+                >
+                  {showFilters
+                    ? "Hide view options"
+                    : "View options"}
+                </button>
+
+                {canCreateTask && (
+                  <button
+                    type="button"
+                    className="dashboard-button dashboard-button-primary"
+                    onClick={handleAddTask}
+                  >
+                    + Add task
+                  </button>
+                )}
+              </div>
+            </header>
+
+
+            {showFilters && (
+              <TaskFilters
+                filters={filters}
+                onFilterChange={
+                  handleFilterChange
+                }
+                onClearFilters={
+                  handleClearFilters
+                }
+              />
+            )}
+
+
+            {projectsError && (
+              <div
+                className="dashboard-error"
+                role="alert"
+              >
+                {projectsError}
+              </div>
+            )}
+
+
+            {labelsError && (
+              <div
+                className="dashboard-error"
+                role="alert"
+              >
+                {labelsError}
+              </div>
+            )}
+
+
+            {showProjectForm && (
+              <ProjectForm
+                project={
+                  editingProject
+                }
+                onProjectSaved={
+                  handleProjectSaved
+                }
+                onCancel={() => {
+                  setShowProjectForm(
+                    false
+                  );
+
+                  setEditingProject(
+                    null
+                  );
+                }}
+                onUnauthorized={
+                  handleUnauthorized
+                }
+              />
+            )}
+
+
+            {showLabelForm && (
+              <LabelForm
+                label={
+                  editingLabel
+                }
+                onLabelSaved={
+                  handleLabelSaved
+                }
+                onCancel={() => {
+                  setShowLabelForm(
+                    false
+                  );
+
+                  setEditingLabel(
+                    null
+                  );
+                }}
+                onUnauthorized={
+                  handleUnauthorized
+                }
+              />
+            )}
+
+
+            {showTaskForm && (
+              <TaskForm
+                task={
+                  editingTask
+                }
+                projects={
+                  projects
+                }
+                labels={
+                  labels
+                }
+                defaultProjectId={
+                  activeView === "project"
+                    ? selectedProject?.id ?? null
+                    : null
+                }
+                defaultToToday={
+                  activeView === "today"
+                }
+                onTaskSaved={
+                  handleTaskSaved
+                }
+                onCancel={() => {
+                  setShowTaskForm(
+                    false
+                  );
+
+                  setEditingTask(
+                    null
+                  );
+                }}
+                onUnauthorized={
+                  handleUnauthorized
+                }
+              />
+            )}
+
+
+            <TaskList
+              tasks={tasks}
+              loading={loading}
+              error={error}
+              onToggleStatus={
+                handleToggleTaskStatus
+              }
+              onEditTask={
+                handleEditTask
+              }
+              onDeleteTask={
+                handleDeleteTaskAction
+              }
+              updatingTaskId={
+                updatingTaskId
+              }
+              deletingTaskId={
+                deletingTaskId
+              }
+            />
+
+
+            {!loading && !error && (
+              <PaginationControls
+                page={page}
+                pageSize={
+                  pageSize
+                }
+                total={
+                  total
+                }
+                totalPages={
+                  totalPages
+                }
+                onPageChange={
+                  handlePageChange
+                }
+                onPageSizeChange={
+                  handlePageSizeChange
+                }
+              />
+            )}
+
+          </div>
+        </section>
+
+      </div>
     </main>
   );
 }
