@@ -4,7 +4,9 @@ import {
   useState,
 } from "react";
 
-import { useNavigate } from "react-router";
+import {
+  useNavigate,
+} from "react-router";
 
 import {
   removeAccessToken,
@@ -48,18 +50,21 @@ function DashboardPage() {
   const [activeView, setActiveView] =
     useState("today");
 
-  const [isSidebarOpen, setIsSidebarOpen] =
-    useState(false);
+  const [
+    isSidebarOpen,
+    setIsSidebarOpen,
+  ] = useState(false);
 
   const [searchQuery, setSearchQuery] =
     useState("");
 
-  const [filters, setFilters] = useState({
-    priority: "",
-    dueDate: "",
-    sortBy: "created_at",
-    order: "desc",
-  });
+  const [filters, setFilters] =
+    useState({
+      priority: "",
+      dueDate: "",
+      sortBy: "created_at",
+      order: "desc",
+    });
 
   const [showFilters, setShowFilters] =
     useState(false);
@@ -73,23 +78,35 @@ function DashboardPage() {
   const [total, setTotal] =
     useState(0);
 
-  const [totalPages, setTotalPages] =
-    useState(0);
+  const [
+    totalPages,
+    setTotalPages,
+  ] = useState(0);
 
-  const [selectedProject, setSelectedProject] =
-    useState(null);
+  const [
+    selectedProject,
+    setSelectedProject,
+  ] = useState(null);
 
-  const [selectedLabel, setSelectedLabel] =
-    useState(null);
+  const [
+    selectedLabel,
+    setSelectedLabel,
+  ] = useState(null);
 
-  const [editingTask, setEditingTask] =
-    useState(null);
+  const [
+    editingTask,
+    setEditingTask,
+  ] = useState(null);
 
-  const [editingProject, setEditingProject] =
-    useState(null);
+  const [
+    editingProject,
+    setEditingProject,
+  ] = useState(null);
 
-  const [editingLabel, setEditingLabel] =
-    useState(null);
+  const [
+    editingLabel,
+    setEditingLabel,
+  ] = useState(null);
 
   const [tasks, setTasks] =
     useState([]);
@@ -100,53 +117,79 @@ function DashboardPage() {
   const [labels, setLabels] =
     useState([]);
 
-  const [showTaskForm, setShowTaskForm] =
-    useState(false);
+  const [
+    showTaskForm,
+    setShowTaskForm,
+  ] = useState(false);
 
-  const [showProjectForm, setShowProjectForm] =
-    useState(false);
+  const [
+    showProjectForm,
+    setShowProjectForm,
+  ] = useState(false);
 
-  const [showLabelForm, setShowLabelForm] =
-    useState(false);
+  const [
+    showLabelForm,
+    setShowLabelForm,
+  ] = useState(false);
 
   const [loading, setLoading] =
     useState(true);
 
-  const [projectsLoading, setProjectsLoading] =
-    useState(true);
+  const [
+    projectsLoading,
+    setProjectsLoading,
+  ] = useState(true);
 
-  const [labelsLoading, setLabelsLoading] =
-    useState(true);
+  const [
+    labelsLoading,
+    setLabelsLoading,
+  ] = useState(true);
 
   const [error, setError] =
     useState("");
 
-  const [projectsError, setProjectsError] =
-    useState("");
+  const [
+    projectsError,
+    setProjectsError,
+  ] = useState("");
 
-  const [labelsError, setLabelsError] =
-    useState("");
+  const [
+    labelsError,
+    setLabelsError,
+  ] = useState("");
 
-  const [updatingTaskId, setUpdatingTaskId] =
-    useState(null);
+  const [
+    updatingTaskId,
+    setUpdatingTaskId,
+  ] = useState(null);
 
-  const [deletingTaskId, setDeletingTaskId] =
-    useState(null);
+  const [
+    deletingTaskId,
+    setDeletingTaskId,
+  ] = useState(null);
 
-  const [deletingProjectId, setDeletingProjectId] =
-    useState(null);
+  const [
+    deletingProjectId,
+    setDeletingProjectId,
+  ] = useState(null);
 
-  const [deletingLabelId, setDeletingLabelId] =
-    useState(null);
+  const [
+    deletingLabelId,
+    setDeletingLabelId,
+  ] = useState(null);
 
 
-  const handleUnauthorized = useCallback(() => {
-    removeAccessToken();
+  const handleUnauthorized =
+    useCallback(() => {
+      removeAccessToken();
 
-    navigate("/login", {
-      replace: true,
-    });
-  }, [navigate]);
+      navigate(
+        "/login",
+        {
+          replace: true,
+        }
+      );
+    }, [navigate]);
 
 
   function handleLogout() {
@@ -161,6 +204,7 @@ function DashboardPage() {
           ...taskItems,
         ];
 
+
         if (filters.priority) {
           filteredTasks =
             filteredTasks.filter(
@@ -169,6 +213,7 @@ function DashboardPage() {
                 filters.priority
             );
         }
+
 
         if (filters.dueDate) {
           filteredTasks =
@@ -193,13 +238,19 @@ function DashboardPage() {
             );
         }
 
+
         filteredTasks.sort(
-          (firstTask, secondTask) => {
+          (
+            firstTask,
+            secondTask
+          ) => {
             let firstValue;
             let secondValue;
 
+
             if (
-              filters.sortBy === "title"
+              filters.sortBy ===
+              "title"
             ) {
               firstValue =
                 firstTask.title
@@ -209,21 +260,24 @@ function DashboardPage() {
                 secondTask.title
                   .toLowerCase();
             } else if (
-              filters.sortBy === "due_date"
+              filters.sortBy ===
+              "due_date"
             ) {
               firstValue =
                 firstTask.due_date
                   ? new Date(
                       firstTask.due_date
                     ).getTime()
-                  : Number.POSITIVE_INFINITY;
+                  : Number
+                      .POSITIVE_INFINITY;
 
               secondValue =
                 secondTask.due_date
                   ? new Date(
                       secondTask.due_date
                     ).getTime()
-                  : Number.POSITIVE_INFINITY;
+                  : Number
+                      .POSITIVE_INFINITY;
             } else {
               firstValue =
                 firstTask[
@@ -248,17 +302,32 @@ function DashboardPage() {
                   : 0;
             }
 
-            if (firstValue < secondValue) {
-              return filters.order === "asc"
-                ? -1
-                : 1;
+
+            if (
+              firstValue <
+              secondValue
+            ) {
+              return (
+                filters.order ===
+                "asc"
+                  ? -1
+                  : 1
+              );
             }
 
-            if (firstValue > secondValue) {
-              return filters.order === "asc"
-                ? 1
-                : -1;
+
+            if (
+              firstValue >
+              secondValue
+            ) {
+              return (
+                filters.order ===
+                "asc"
+                  ? 1
+                  : -1
+              );
             }
+
 
             return (
               firstTask.id -
@@ -266,6 +335,7 @@ function DashboardPage() {
             );
           }
         );
+
 
         return filteredTasks;
       },
@@ -283,12 +353,16 @@ function DashboardPage() {
           itemTotal === 0
             ? 0
             : Math.ceil(
-                itemTotal / pageSize
+                itemTotal /
+                pageSize
               );
 
+
         if (
-          calculatedTotalPages > 0 &&
-          page > calculatedTotalPages
+          calculatedTotalPages >
+            0 &&
+          page >
+            calculatedTotalPages
         ) {
           setPage(
             calculatedTotalPages
@@ -297,20 +371,28 @@ function DashboardPage() {
           return null;
         }
 
+
         const offset =
-          (page - 1) * pageSize;
+          (page - 1) *
+          pageSize;
+
 
         setTotal(itemTotal);
+
         setTotalPages(
           calculatedTotalPages
         );
+
 
         return taskItems.slice(
           offset,
           offset + pageSize
         );
       },
-      [page, pageSize]
+      [
+        page,
+        pageSize,
+      ]
     );
 
 
@@ -318,10 +400,12 @@ function DashboardPage() {
     useCallback(() => {
       const parameters = {
         priority:
-          filters.priority || undefined,
+          filters.priority ||
+          undefined,
 
         due_date:
-          filters.dueDate || undefined,
+          filters.dueDate ||
+          undefined,
 
         sort_by:
           filters.sortBy,
@@ -335,46 +419,67 @@ function DashboardPage() {
           pageSize,
       };
 
+
       if (
-        activeView === "project" &&
+        activeView ===
+          "project" &&
         selectedProject
       ) {
         return {
           ...parameters,
+
           project_id:
             selectedProject.id,
-          status: "pending",
+
+          status:
+            "pending",
         };
       }
 
+
       if (
-        activeView === "label" &&
+        activeView ===
+          "label" &&
         selectedLabel
       ) {
         return {
           ...parameters,
+
           label_id:
             selectedLabel.id,
-          status: "pending",
+
+          status:
+            "pending",
         };
       }
 
+
       if (
-        activeView === "search" &&
+        activeView ===
+          "search" &&
         searchQuery
       ) {
         return {
           ...parameters,
-          search: searchQuery,
+
+          search:
+            searchQuery,
         };
       }
 
-      if (activeView === "completed") {
+
+      if (
+        activeView ===
+        "completed"
+      ) {
         return {
           ...parameters,
-          status: "completed",
+
+          status:
+            "completed",
         };
       }
+
 
       return parameters;
     }, [
@@ -394,29 +499,42 @@ function DashboardPage() {
       setLoading(true);
       setError("");
 
+
       try {
         const isServerPaginatedView =
-          activeView === "project" ||
-          activeView === "label" ||
-          activeView === "search" ||
-          activeView === "completed";
+          activeView ===
+            "project" ||
+          activeView ===
+            "label" ||
+          activeView ===
+            "search" ||
+          activeView ===
+            "completed";
 
-        if (isServerPaginatedView) {
+
+        if (
+          isServerPaginatedView
+        ) {
           const data =
             await getFilteredTasks(
               getServerTaskParameters(),
               handleUnauthorized
             );
 
+
           const responseTotalPages =
-            typeof data?.total_pages ===
-            "number"
+            typeof data
+              ?.total_pages ===
+              "number"
               ? data.total_pages
               : 0;
 
+
           if (
-            responseTotalPages > 0 &&
-            page > responseTotalPages
+            responseTotalPages >
+              0 &&
+            page >
+              responseTotalPages
           ) {
             setPage(
               responseTotalPages
@@ -425,17 +543,23 @@ function DashboardPage() {
             return;
           }
 
+
           setTasks(
-            Array.isArray(data?.items)
+            Array.isArray(
+              data?.items
+            )
               ? data.items
               : []
           );
 
+
           setTotal(
-            typeof data?.total === "number"
+            typeof data?.total ===
+              "number"
               ? data.total
               : 0
           );
+
 
           setTotalPages(
             responseTotalPages
@@ -444,17 +568,21 @@ function DashboardPage() {
           return;
         }
 
+
         let data;
 
+
         if (
-          activeView === "inbox"
+          activeView ===
+          "inbox"
         ) {
           data =
             await getInboxTasks(
               handleUnauthorized
             );
         } else if (
-          activeView === "upcoming"
+          activeView ===
+          "upcoming"
         ) {
           data =
             await getUpcomingTasks(
@@ -467,40 +595,51 @@ function DashboardPage() {
             );
         }
 
+
         const taskItems =
           Array.isArray(data)
             ? data
             : [];
+
 
         const filteredTasks =
           applyLocalFiltersAndSorting(
             taskItems
           );
 
+
         const paginatedTasks =
           paginateLocalTasks(
             filteredTasks
           );
 
+
         if (
-          paginatedTasks !== null
+          paginatedTasks !==
+          null
         ) {
           setTasks(
             paginatedTasks
           );
         }
-      } catch (requestError) {
+      } catch (
+        requestError
+      ) {
         if (
-          requestError?.status === 401
+          requestError?.status ===
+          401
         ) {
           return;
         }
 
+
         setError(
-          requestError instanceof Error
+          requestError instanceof
+          Error
             ? requestError.message
             : "Something went wrong"
         );
+
 
         setTotal(0);
         setTotalPages(0);
@@ -522,33 +661,42 @@ function DashboardPage() {
       setProjectsLoading(true);
       setProjectsError("");
 
+
       try {
         const data =
           await getProjects(
             handleUnauthorized
           );
 
+
         setProjects(
           Array.isArray(data)
             ? data
             : []
         );
-      } catch (requestError) {
+      } catch (
+        requestError
+      ) {
         if (
-          requestError?.status === 401
+          requestError?.status ===
+          401
         ) {
           return;
         }
 
+
         setProjectsError(
-          requestError instanceof Error
+          requestError instanceof
+          Error
             ? requestError.message
             : "Something went wrong"
         );
       } finally {
         setProjectsLoading(false);
       }
-    }, [handleUnauthorized]);
+    }, [
+      handleUnauthorized,
+    ]);
 
 
   const loadLabels =
@@ -556,33 +704,42 @@ function DashboardPage() {
       setLabelsLoading(true);
       setLabelsError("");
 
+
       try {
         const data =
           await getLabels(
             handleUnauthorized
           );
 
+
         setLabels(
           Array.isArray(data)
             ? data
             : []
         );
-      } catch (requestError) {
+      } catch (
+        requestError
+      ) {
         if (
-          requestError?.status === 401
+          requestError?.status ===
+          401
         ) {
           return;
         }
 
+
         setLabelsError(
-          requestError instanceof Error
+          requestError instanceof
+          Error
             ? requestError.message
             : "Something went wrong"
         );
       } finally {
         setLabelsLoading(false);
       }
-    }, [handleUnauthorized]);
+    }, [
+      handleUnauthorized,
+    ]);
 
 
   useEffect(() => {
@@ -596,20 +753,29 @@ function DashboardPage() {
 
   useEffect(() => {
     loadTasks();
-  }, [loadTasks]);
+  }, [
+    loadTasks,
+  ]);
 
 
   useEffect(() => {
     function handleResize() {
-      if (window.innerWidth > 900) {
-        setIsSidebarOpen(false);
+      if (
+        window.innerWidth >
+        900
+      ) {
+        setIsSidebarOpen(
+          false
+        );
       }
     }
+
 
     window.addEventListener(
       "resize",
       handleResize
     );
+
 
     return () => {
       window.removeEventListener(
@@ -623,12 +789,17 @@ function DashboardPage() {
   async function handleToggleTaskStatus(
     task
   ) {
-    setUpdatingTaskId(task.id);
+    setUpdatingTaskId(
+      task.id
+    );
+
     setError("");
+
 
     try {
       if (
-        task.status === "completed"
+        task.status ===
+        "completed"
       ) {
         await reopenTask(
           task.id,
@@ -641,6 +812,7 @@ function DashboardPage() {
         );
       }
 
+
       if (
         tasks.length === 1 &&
         page > 1
@@ -652,15 +824,20 @@ function DashboardPage() {
       } else {
         await loadTasks();
       }
-    } catch (requestError) {
+    } catch (
+      requestError
+    ) {
       if (
-        requestError?.status === 401
+        requestError?.status ===
+        401
       ) {
         return;
       }
 
+
       setError(
-        requestError instanceof Error
+        requestError instanceof
+        Error
           ? requestError.message
           : "Something went wrong"
       );
@@ -678,12 +855,18 @@ function DashboardPage() {
         `Delete task "${task.title}"?`
       );
 
+
     if (!shouldDelete) {
       return;
     }
 
-    setDeletingTaskId(task.id);
+
+    setDeletingTaskId(
+      task.id
+    );
+
     setError("");
+
 
     try {
       await deleteTask(
@@ -691,13 +874,18 @@ function DashboardPage() {
         handleUnauthorized
       );
 
+
       if (
         editingTask?.id ===
         task.id
       ) {
         setEditingTask(null);
-        setShowTaskForm(false);
+
+        setShowTaskForm(
+          false
+        );
       }
+
 
       if (
         tasks.length === 1 &&
@@ -710,15 +898,20 @@ function DashboardPage() {
       } else {
         await loadTasks();
       }
-    } catch (requestError) {
+    } catch (
+      requestError
+    ) {
       if (
-        requestError?.status === 401
+        requestError?.status ===
+        401
       ) {
         return;
       }
 
+
       setError(
-        requestError instanceof Error
+        requestError instanceof
+        Error
           ? requestError.message
           : "Something went wrong"
       );
@@ -736,12 +929,18 @@ function DashboardPage() {
         `Delete project "${project.name}"?`
       );
 
+
     if (!shouldDelete) {
       return;
     }
 
-    setDeletingProjectId(project.id);
+
+    setDeletingProjectId(
+      project.id
+    );
+
     setProjectsError("");
+
 
     try {
       await deleteProject(
@@ -749,46 +948,72 @@ function DashboardPage() {
         handleUnauthorized
       );
 
+
       setProjects(
-        (currentProjects) =>
+        (
+          currentProjects
+        ) =>
           currentProjects.filter(
-            (currentProject) =>
+            (
+              currentProject
+            ) =>
               currentProject.id !==
               project.id
           )
       );
 
+
       if (
         selectedProject?.id ===
         project.id
       ) {
-        setSelectedProject(null);
-        setActiveView("today");
+        setSelectedProject(
+          null
+        );
+
+        setActiveView(
+          "today"
+        );
+
         setPage(1);
+
         setTasks([]);
       }
+
 
       if (
         editingProject?.id ===
         project.id
       ) {
-        setEditingProject(null);
-        setShowProjectForm(false);
+        setEditingProject(
+          null
+        );
+
+        setShowProjectForm(
+          false
+        );
       }
-    } catch (requestError) {
+    } catch (
+      requestError
+    ) {
       if (
-        requestError?.status === 401
+        requestError?.status ===
+        401
       ) {
         return;
       }
 
+
       setProjectsError(
-        requestError instanceof Error
+        requestError instanceof
+        Error
           ? requestError.message
           : "Something went wrong"
       );
     } finally {
-      setDeletingProjectId(null);
+      setDeletingProjectId(
+        null
+      );
     }
   }
 
@@ -801,12 +1026,18 @@ function DashboardPage() {
         `Delete label "#${label.name}"?`
       );
 
+
     if (!shouldDelete) {
       return;
     }
 
-    setDeletingLabelId(label.id);
+
+    setDeletingLabelId(
+      label.id
+    );
+
     setLabelsError("");
+
 
     try {
       await deleteLabel(
@@ -814,46 +1045,72 @@ function DashboardPage() {
         handleUnauthorized
       );
 
+
       setLabels(
-        (currentLabels) =>
+        (
+          currentLabels
+        ) =>
           currentLabels.filter(
-            (currentLabel) =>
+            (
+              currentLabel
+            ) =>
               currentLabel.id !==
               label.id
           )
       );
 
+
       if (
         selectedLabel?.id ===
         label.id
       ) {
-        setSelectedLabel(null);
-        setActiveView("today");
+        setSelectedLabel(
+          null
+        );
+
+        setActiveView(
+          "today"
+        );
+
         setPage(1);
+
         setTasks([]);
       }
+
 
       if (
         editingLabel?.id ===
         label.id
       ) {
-        setEditingLabel(null);
-        setShowLabelForm(false);
+        setEditingLabel(
+          null
+        );
+
+        setShowLabelForm(
+          false
+        );
       }
-    } catch (requestError) {
+    } catch (
+      requestError
+    ) {
       if (
-        requestError?.status === 401
+        requestError?.status ===
+        401
       ) {
         return;
       }
 
+
       setLabelsError(
-        requestError instanceof Error
+        requestError instanceof
+        Error
           ? requestError.message
           : "Something went wrong"
       );
     } finally {
-      setDeletingLabelId(null);
+      setDeletingLabelId(
+        null
+      );
     }
   }
 
@@ -862,10 +1119,13 @@ function DashboardPage() {
     setShowTaskForm(false);
     setEditingTask(null);
 
+
     if (page !== 1) {
       setPage(1);
+
       return;
     }
+
 
     await loadTasks();
   }
@@ -874,10 +1134,17 @@ function DashboardPage() {
   async function handleProjectSaved(
     savedProject
   ) {
-    setShowProjectForm(false);
-    setEditingProject(null);
+    setShowProjectForm(
+      false
+    );
+
+    setEditingProject(
+      null
+    );
+
 
     await loadProjects();
+
 
     if (
       selectedProject?.id ===
@@ -896,7 +1163,9 @@ function DashboardPage() {
     setShowLabelForm(false);
     setEditingLabel(null);
 
+
     await loadLabels();
+
 
     if (
       selectedLabel?.id ===
@@ -914,11 +1183,14 @@ function DashboardPage() {
     value
   ) {
     setFilters(
-      (currentFilters) => ({
+      (
+        currentFilters
+      ) => ({
         ...currentFilters,
         [name]: value,
       })
     );
+
 
     setPage(1);
   }
@@ -932,6 +1204,7 @@ function DashboardPage() {
       order: "desc",
     });
 
+
     setPage(1);
   }
 
@@ -941,10 +1214,12 @@ function DashboardPage() {
   ) {
     if (
       nextPage < 1 ||
-      nextPage > totalPages
+      nextPage >
+        totalPages
     ) {
       return;
     }
+
 
     setPage(nextPage);
   }
@@ -972,11 +1247,21 @@ function DashboardPage() {
   }
 
 
-  function handleViewChange(view) {
+  function handleViewChange(
+    view
+  ) {
     setActiveView(view);
+
     setSearchQuery("");
-    setSelectedProject(null);
-    setSelectedLabel(null);
+
+    setSelectedProject(
+      null
+    );
+
+    setSelectedLabel(
+      null
+    );
+
     setPage(1);
 
     closeAllForms();
@@ -986,10 +1271,20 @@ function DashboardPage() {
   function handleProjectSelect(
     project
   ) {
-    setActiveView("project");
+    setActiveView(
+      "project"
+    );
+
     setSearchQuery("");
-    setSelectedProject(project);
-    setSelectedLabel(null);
+
+    setSelectedProject(
+      project
+    );
+
+    setSelectedLabel(
+      null
+    );
+
     setPage(1);
 
     closeAllForms();
@@ -999,21 +1294,45 @@ function DashboardPage() {
   function handleLabelSelect(
     label
   ) {
-    setActiveView("label");
+    setActiveView(
+      "label"
+    );
+
     setSearchQuery("");
-    setSelectedLabel(label);
-    setSelectedProject(null);
+
+    setSelectedLabel(
+      label
+    );
+
+    setSelectedProject(
+      null
+    );
+
     setPage(1);
 
     closeAllForms();
   }
 
 
-  function handleSearch(query) {
-    setSearchQuery(query);
-    setActiveView("search");
-    setSelectedProject(null);
-    setSelectedLabel(null);
+  function handleSearch(
+    query
+  ) {
+    setSearchQuery(
+      query
+    );
+
+    setActiveView(
+      "search"
+    );
+
+    setSelectedProject(
+      null
+    );
+
+    setSelectedLabel(
+      null
+    );
+
     setPage(1);
 
     closeAllForms();
@@ -1022,9 +1341,19 @@ function DashboardPage() {
 
   function handleClearSearch() {
     setSearchQuery("");
-    setActiveView("today");
-    setSelectedProject(null);
-    setSelectedLabel(null);
+
+    setActiveView(
+      "today"
+    );
+
+    setSelectedProject(
+      null
+    );
+
+    setSelectedLabel(
+      null
+    );
+
     setPage(1);
 
     closeAllForms();
@@ -1045,13 +1374,29 @@ function DashboardPage() {
   function handleEditTask(
     task
   ) {
-    setEditingTask(task);
-    setEditingProject(null);
-    setEditingLabel(null);
+    setEditingTask(
+      task
+    );
 
-    setShowTaskForm(true);
-    setShowProjectForm(false);
-    setShowLabelForm(false);
+    setEditingProject(
+      null
+    );
+
+    setEditingLabel(
+      null
+    );
+
+    setShowTaskForm(
+      true
+    );
+
+    setShowProjectForm(
+      false
+    );
+
+    setShowLabelForm(
+      false
+    );
   }
 
 
@@ -1070,7 +1415,11 @@ function DashboardPage() {
     project
   ) {
     setEditingTask(null);
-    setEditingProject(project);
+
+    setEditingProject(
+      project
+    );
+
     setEditingLabel(null);
 
     setShowProjectForm(true);
@@ -1094,8 +1443,14 @@ function DashboardPage() {
     label
   ) {
     setEditingTask(null);
-    setEditingLabel(label);
-    setEditingProject(null);
+
+    setEditingLabel(
+      label
+    );
+
+    setEditingProject(
+      null
+    );
 
     setShowLabelForm(true);
     setShowTaskForm(false);
@@ -1123,42 +1478,60 @@ function DashboardPage() {
 
   function getPageTitle() {
     if (
-      activeView === "project" &&
+      activeView ===
+        "project" &&
       selectedProject
     ) {
-      return selectedProject.name;
+      return (
+        selectedProject.name
+      );
     }
 
+
     if (
-      activeView === "label" &&
+      activeView ===
+        "label" &&
       selectedLabel
     ) {
-      return `#${selectedLabel.name}`;
+      return (
+        `#${selectedLabel.name}`
+      );
     }
 
+
     if (
-      activeView === "search"
+      activeView ===
+      "search"
     ) {
-      return `Search: ${searchQuery}`;
+      return (
+        `Search: ${searchQuery}`
+      );
     }
 
+
     if (
-      activeView === "inbox"
+      activeView ===
+      "inbox"
     ) {
       return "Inbox";
     }
 
+
     if (
-      activeView === "upcoming"
+      activeView ===
+      "upcoming"
     ) {
       return "Upcoming";
     }
 
+
     if (
-      activeView === "completed"
+      activeView ===
+      "completed"
     ) {
       return "Completed";
     }
+
 
     return "Today";
   }
@@ -1169,10 +1542,13 @@ function DashboardPage() {
     showProjectForm ||
     showLabelForm;
 
+
   const canCreateTask =
     !isAnyFormOpen &&
-    activeView !== "completed" &&
-    activeView !== "search";
+    activeView !==
+      "completed" &&
+    activeView !==
+      "search";
 
 
   return (
@@ -1184,7 +1560,9 @@ function DashboardPage() {
             type="button"
             className="dashboard-sidebar-overlay"
             onClick={() =>
-              setIsSidebarOpen(false)
+              setIsSidebarOpen(
+                false
+              )
             }
             aria-label="Close sidebar"
           />
@@ -1192,11 +1570,17 @@ function DashboardPage() {
 
 
         <Sidebar
-          isOpen={isSidebarOpen}
-          onClose={() =>
-            setIsSidebarOpen(false)
+          isOpen={
+            isSidebarOpen
           }
-          activeView={activeView}
+          onClose={() =>
+            setIsSidebarOpen(
+              false
+            )
+          }
+          activeView={
+            activeView
+          }
           selectedProjectId={
             selectedProject?.id ??
             null
@@ -1269,22 +1653,27 @@ function DashboardPage() {
           <div className="dashboard-content">
 
             <header className="dashboard-header">
+
               <div className="dashboard-header-left">
                 <button
                   type="button"
                   className="dashboard-mobile-menu"
                   onClick={() =>
-                    setIsSidebarOpen(true)
+                    setIsSidebarOpen(
+                      true
+                    )
                   }
                   aria-label="Open sidebar"
                 >
                   ☰
                 </button>
 
+
                 <h1 className="dashboard-title">
                   {getPageTitle()}
                 </h1>
               </div>
+
 
               <div className="dashboard-actions">
                 <button
@@ -1304,6 +1693,7 @@ function DashboardPage() {
                     : "View options"}
                 </button>
 
+
                 {canCreateTask && (
                   <button
                     type="button"
@@ -1316,12 +1706,15 @@ function DashboardPage() {
                   </button>
                 )}
               </div>
+
             </header>
 
 
             {showFilters && (
               <TaskFilters
-                filters={filters}
+                filters={
+                  filters
+                }
                 onFilterChange={
                   handleFilterChange
                 }
@@ -1353,9 +1746,21 @@ function DashboardPage() {
 
 
             <TaskList
-              tasks={tasks}
-              loading={loading}
-              error={error}
+              tasks={
+                tasks
+              }
+              loading={
+                loading
+              }
+              error={
+                error
+              }
+              activeView={
+                activeView
+              }
+              onRetry={
+                loadTasks
+              }
               onToggleStatus={
                 handleToggleTaskStatus
               }
@@ -1377,7 +1782,9 @@ function DashboardPage() {
             {!loading &&
               !error && (
                 <PaginationControls
-                  page={page}
+                  page={
+                    page
+                  }
                   pageSize={
                     pageSize
                   }
@@ -1425,7 +1832,8 @@ function DashboardPage() {
                 activeView ===
                 "project"
                   ? selectedProject
-                      ?.id ?? null
+                      ?.id ??
+                    null
                   : null
               }
               defaultToToday={

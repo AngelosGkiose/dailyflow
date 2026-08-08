@@ -35,6 +35,7 @@ function Sidebar({
   const [searchInput, setSearchInput] =
     useState(searchQuery);
 
+
   useEffect(() => {
     setSearchInput(searchQuery);
   }, [searchQuery]);
@@ -57,6 +58,7 @@ function Sidebar({
 
   function handleClearSearch() {
     setSearchInput("");
+
     onClearSearch();
     onClose();
   }
@@ -135,6 +137,9 @@ function Sidebar({
         <button
           type="submit"
           aria-label="Search"
+          disabled={
+            !searchInput.trim()
+          }
         >
           Search
         </button>
@@ -210,7 +215,9 @@ function Sidebar({
               : "sidebar-nav-item"
           }
           onClick={() =>
-            handleViewClick("completed")
+            handleViewClick(
+              "completed"
+            )
           }
         >
           <span>✓</span>
@@ -221,7 +228,9 @@ function Sidebar({
 
       <section className="sidebar-section">
         <div className="sidebar-section-header">
-          <h3>Projects</h3>
+          <h3>
+            Projects
+          </h3>
 
           <button
             type="button"
@@ -236,14 +245,29 @@ function Sidebar({
           </button>
         </div>
 
+
         {projectsLoading ? (
-          <p className="sidebar-empty">
+          <div className="sidebar-loading-state">
+            <span className="sidebar-loading-dot" />
+
             Loading projects...
-          </p>
+          </div>
         ) : projects.length === 0 ? (
-          <p className="sidebar-empty">
-            No projects yet.
-          </p>
+          <div className="sidebar-empty-state">
+            <p>
+              Create your first project.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => {
+                onAddProject();
+                onClose();
+              }}
+            >
+              + New project
+            </button>
+          </div>
         ) : (
           <ul className="sidebar-list">
             {projects.map((project) => {
@@ -252,7 +276,8 @@ function Sidebar({
                 project.id;
 
               const isActive =
-                activeView === "project" &&
+                activeView ===
+                  "project" &&
                 selectedProjectId ===
                   project.id;
 
@@ -282,6 +307,7 @@ function Sidebar({
                     </span>
                   </button>
 
+
                   <div className="sidebar-row-actions">
                     <button
                       type="button"
@@ -308,7 +334,9 @@ function Sidebar({
                       disabled={isDeleting}
                       aria-label={`Delete ${project.name}`}
                     >
-                      ×
+                      {isDeleting
+                        ? "…"
+                        : "×"}
                     </button>
                   </div>
                 </li>
@@ -321,7 +349,9 @@ function Sidebar({
 
       <section className="sidebar-section">
         <div className="sidebar-section-header">
-          <h3>Labels</h3>
+          <h3>
+            Labels
+          </h3>
 
           <button
             type="button"
@@ -336,14 +366,29 @@ function Sidebar({
           </button>
         </div>
 
+
         {labelsLoading ? (
-          <p className="sidebar-empty">
+          <div className="sidebar-loading-state">
+            <span className="sidebar-loading-dot" />
+
             Loading labels...
-          </p>
+          </div>
         ) : labels.length === 0 ? (
-          <p className="sidebar-empty">
-            No labels yet.
-          </p>
+          <div className="sidebar-empty-state">
+            <p>
+              Create your first label.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => {
+                onAddLabel();
+                onClose();
+              }}
+            >
+              + New label
+            </button>
+          </div>
         ) : (
           <ul className="sidebar-list">
             {labels.map((label) => {
@@ -352,7 +397,8 @@ function Sidebar({
                 label.id;
 
               const isActive =
-                activeView === "label" &&
+                activeView ===
+                  "label" &&
                 selectedLabelId ===
                   label.id;
 
@@ -384,6 +430,7 @@ function Sidebar({
                     </span>
                   </button>
 
+
                   <div className="sidebar-row-actions">
                     <button
                       type="button"
@@ -395,6 +442,7 @@ function Sidebar({
                         onClose();
                       }}
                       disabled={isDeleting}
+                      aria-label={`Edit ${label.name}`}
                     >
                       ···
                     </button>
@@ -407,8 +455,11 @@ function Sidebar({
                         )
                       }
                       disabled={isDeleting}
+                      aria-label={`Delete ${label.name}`}
                     >
-                      ×
+                      {isDeleting
+                        ? "…"
+                        : "×"}
                     </button>
                   </div>
                 </li>

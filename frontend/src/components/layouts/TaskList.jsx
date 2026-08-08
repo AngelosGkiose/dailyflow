@@ -3,10 +3,84 @@ import TaskItem from "./TaskItem.jsx";
 import "../../styles/tasks.css";
 
 
+function getEmptyState(activeView) {
+  if (activeView === "today") {
+    return {
+      title: "No tasks due today",
+      message: "You're all caught up for today.",
+      icon: "✓",
+    };
+  }
+
+  if (activeView === "inbox") {
+    return {
+      title: "Your inbox is empty",
+      message:
+        "Tasks without a project will appear here.",
+      icon: "▣",
+    };
+  }
+
+  if (activeView === "upcoming") {
+    return {
+      title: "Nothing upcoming",
+      message:
+        "Tasks with future due dates will appear here.",
+      icon: "→",
+    };
+  }
+
+  if (activeView === "completed") {
+    return {
+      title: "No completed tasks yet",
+      message:
+        "Completed tasks will appear here.",
+      icon: "✓",
+    };
+  }
+
+  if (activeView === "project") {
+    return {
+      title: "No tasks in this project",
+      message:
+        "Add a task to start working on this project.",
+      icon: "●",
+    };
+  }
+
+  if (activeView === "label") {
+    return {
+      title: "No tasks with this label",
+      message:
+        "Tasks assigned to this label will appear here.",
+      icon: "#",
+    };
+  }
+
+  if (activeView === "search") {
+    return {
+      title: "No tasks found",
+      message:
+        "Try searching for another task or keyword.",
+      icon: "⌕",
+    };
+  }
+
+  return {
+    title: "No tasks here",
+    message:
+      "There are no tasks in this view.",
+    icon: "✓",
+  };
+}
+
+
 function TaskList({
   tasks,
   loading,
   error,
+  activeView,
+  onRetry,
   onToggleStatus,
   onEditTask,
   onDeleteTask,
@@ -15,12 +89,19 @@ function TaskList({
 }) {
   if (loading) {
     return (
-      <div className="task-loading-state">
+      <div
+        className="task-loading-state"
+        aria-live="polite"
+      >
         <div className="task-loading-spinner" />
 
-        <p>
-          Loading tasks...
-        </p>
+        <div>
+          <strong>Loading tasks</strong>
+
+          <p>
+            Getting your tasks ready...
+          </p>
+        </div>
       </div>
     );
   }
@@ -29,34 +110,49 @@ function TaskList({
   if (error) {
     return (
       <div
-        className="task-state task-state-error"
+        className="task-error-state"
         role="alert"
       >
-        <strong>
+        <div className="task-error-icon">
+          !
+        </div>
+
+        <h2>
           Could not load tasks
-        </strong>
+        </h2>
 
         <p>
           {error}
         </p>
+
+        <button
+          type="button"
+          className="task-retry-button"
+          onClick={onRetry}
+        >
+          Try again
+        </button>
       </div>
     );
   }
 
 
   if (tasks.length === 0) {
+    const emptyState =
+      getEmptyState(activeView);
+
     return (
       <div className="task-empty-state">
         <div className="task-empty-icon">
-          ✓
+          {emptyState.icon}
         </div>
 
         <h2>
-          Nothing here
+          {emptyState.title}
         </h2>
 
         <p>
-          There are no tasks in this view.
+          {emptyState.message}
         </p>
       </div>
     );
