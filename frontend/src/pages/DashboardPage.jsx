@@ -32,6 +32,7 @@ import {
   reopenTask,
 } from "../api/tasksApi.js";
 
+import ConfirmModal from "../components/layouts/ConfirmModal.jsx";
 import LabelForm from "../components/layouts/LabelForm.jsx";
 import Modal from "../components/layouts/Modal.jsx";
 import PaginationControls from "../components/layouts/PaginationControls.jsx";
@@ -45,7 +46,8 @@ import "../styles/dashboard.css";
 
 
 function DashboardPage() {
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
   const [activeView, setActiveView] =
     useState("today");
@@ -176,6 +178,11 @@ function DashboardPage() {
   const [
     deletingLabelId,
     setDeletingLabelId,
+  ] = useState(null);
+
+  const [
+    deleteConfirmation,
+    setDeleteConfirmation,
   ] = useState(null);
 
 
@@ -847,20 +854,54 @@ function DashboardPage() {
   }
 
 
-  async function handleDeleteTaskAction(
+  function requestDeleteTask(
     task
   ) {
-    const shouldDelete =
-      window.confirm(
-        `Delete task "${task.title}"?`
-      );
+    setDeleteConfirmation({
+      type: "task",
+      item: task,
+    });
+  }
 
 
-    if (!shouldDelete) {
+  function requestDeleteProject(
+    project
+  ) {
+    setDeleteConfirmation({
+      type: "project",
+      item: project,
+    });
+  }
+
+
+  function requestDeleteLabel(
+    label
+  ) {
+    setDeleteConfirmation({
+      type: "label",
+      item: label,
+    });
+  }
+
+
+  function closeDeleteConfirmation() {
+    if (
+      deletingTaskId ||
+      deletingProjectId ||
+      deletingLabelId
+    ) {
       return;
     }
 
+    setDeleteConfirmation(
+      null
+    );
+  }
 
+
+  async function deleteTaskConfirmed(
+    task
+  ) {
     setDeletingTaskId(
       task.id
     );
@@ -885,6 +926,11 @@ function DashboardPage() {
           false
         );
       }
+
+
+      setDeleteConfirmation(
+        null
+      );
 
 
       if (
@@ -915,26 +961,21 @@ function DashboardPage() {
           ? requestError.message
           : "Something went wrong"
       );
+
+      setDeleteConfirmation(
+        null
+      );
     } finally {
-      setDeletingTaskId(null);
+      setDeletingTaskId(
+        null
+      );
     }
   }
 
 
-  async function handleDeleteProjectAction(
+  async function deleteProjectConfirmed(
     project
   ) {
-    const shouldDelete =
-      window.confirm(
-        `Delete project "${project.name}"?`
-      );
-
-
-    if (!shouldDelete) {
-      return;
-    }
-
-
     setDeletingProjectId(
       project.id
     );
@@ -993,6 +1034,11 @@ function DashboardPage() {
           false
         );
       }
+
+
+      setDeleteConfirmation(
+        null
+      );
     } catch (
       requestError
     ) {
@@ -1010,6 +1056,10 @@ function DashboardPage() {
           ? requestError.message
           : "Something went wrong"
       );
+
+      setDeleteConfirmation(
+        null
+      );
     } finally {
       setDeletingProjectId(
         null
@@ -1018,20 +1068,9 @@ function DashboardPage() {
   }
 
 
-  async function handleDeleteLabelAction(
+  async function deleteLabelConfirmed(
     label
   ) {
-    const shouldDelete =
-      window.confirm(
-        `Delete label "#${label.name}"?`
-      );
-
-
-    if (!shouldDelete) {
-      return;
-    }
-
-
     setDeletingLabelId(
       label.id
     );
@@ -1090,6 +1129,11 @@ function DashboardPage() {
           false
         );
       }
+
+
+      setDeleteConfirmation(
+        null
+      );
     } catch (
       requestError
     ) {
@@ -1107,9 +1151,53 @@ function DashboardPage() {
           ? requestError.message
           : "Something went wrong"
       );
+
+      setDeleteConfirmation(
+        null
+      );
     } finally {
       setDeletingLabelId(
         null
+      );
+    }
+  }
+
+
+  async function handleConfirmDelete() {
+    if (!deleteConfirmation) {
+      return;
+    }
+
+
+    const {
+      type,
+      item,
+    } = deleteConfirmation;
+
+
+    if (type === "task") {
+      await deleteTaskConfirmed(
+        item
+      );
+
+      return;
+    }
+
+
+    if (
+      type === "project"
+    ) {
+      await deleteProjectConfirmed(
+        item
+      );
+
+      return;
+    }
+
+
+    if (type === "label") {
+      await deleteLabelConfirmed(
+        item
       );
     }
   }
@@ -1537,6 +1625,65 @@ function DashboardPage() {
   }
 
 
+  function getDeleteModalDetails() {
+    if (!deleteConfirmation) {
+      return null;
+    }
+
+
+    const {
+      type,
+      item,
+    } = deleteConfirmation;
+
+
+    if (type === "task") {
+      return {
+        title: "Delete task?",
+        message:
+          `"${item.title}" will be permanently deleted.`,
+        loading:
+          deletingTaskId ===
+          item.id,
+      };
+    }
+
+
+    if (
+      type === "project"
+    ) {
+      return {
+        title:
+          "Delete project?",
+
+        message:
+          `"${item.name}" and all tasks inside it will be permanently deleted.`,
+
+        loading:
+          deletingProjectId ===
+          item.id,
+      };
+    }
+
+
+    return {
+      title:
+        "Delete label?",
+
+      message:
+        `#${item.name} will be permanently deleted. Tasks using this label will not be deleted.`,
+
+      loading:
+        deletingLabelId ===
+        item.id,
+    };
+  }
+
+
+  const deleteModalDetails =
+    getDeleteModalDetails();
+
+
   const isAnyFormOpen =
     showTaskForm ||
     showProjectForm ||
@@ -1632,7 +1779,7 @@ function DashboardPage() {
             handleEditProject
           }
           onDeleteProject={
-            handleDeleteProjectAction
+            requestDeleteProject
           }
           onAddLabel={
             handleAddLabel
@@ -1641,7 +1788,7 @@ function DashboardPage() {
             handleEditLabel
           }
           onDeleteLabel={
-            handleDeleteLabelAction
+            requestDeleteLabel
           }
           onLogout={
             handleLogout
@@ -1653,7 +1800,6 @@ function DashboardPage() {
           <div className="dashboard-content">
 
             <header className="dashboard-header">
-
               <div className="dashboard-header-left">
                 <button
                   type="button"
@@ -1706,7 +1852,6 @@ function DashboardPage() {
                   </button>
                 )}
               </div>
-
             </header>
 
 
@@ -1768,7 +1913,7 @@ function DashboardPage() {
                 handleEditTask
               }
               onDeleteTask={
-                handleDeleteTaskAction
+                requestDeleteTask
               }
               updatingTaskId={
                 updatingTaskId
@@ -1910,6 +2055,31 @@ function DashboardPage() {
             />
           </Modal>
         )}
+
+
+        {deleteConfirmation &&
+          deleteModalDetails && (
+            <ConfirmModal
+              title={
+                deleteModalDetails
+                  .title
+              }
+              message={
+                deleteModalDetails
+                  .message
+              }
+              loading={
+                deleteModalDetails
+                  .loading
+              }
+              onConfirm={
+                handleConfirmDelete
+              }
+              onCancel={
+                closeDeleteConfirmation
+              }
+            />
+          )}
 
       </div>
     </main>
