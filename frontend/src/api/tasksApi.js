@@ -3,95 +3,81 @@ import {
 } from "./apiClient.js";
 
 
-function createQueryString(
+function buildQueryString(
   parameters = {}
 ) {
   const searchParameters =
     new URLSearchParams();
 
-  for (
-    const [name, value]
-    of Object.entries(parameters)
-  ) {
-    if (
-      value !== null &&
-      value !== undefined &&
-      value !== ""
-    ) {
-      searchParameters.set(
-        name,
-        String(value)
-      );
+  Object.entries(
+    parameters
+  ).forEach(
+    ([key, value]) => {
+      if (
+        value !== undefined &&
+        value !== null &&
+        value !== ""
+      ) {
+        searchParameters.append(
+          key,
+          String(value)
+        );
+      }
     }
-  }
+  );
 
-  return searchParameters.toString();
+  const queryString =
+    searchParameters.toString();
+
+  return queryString
+    ? `?${queryString}`
+    : "";
 }
 
 
 export function getFilteredTasks(
-  parameters,
-  onUnauthorized
+  parameters = {}
 ) {
   const queryString =
-    createQueryString(parameters);
+    buildQueryString(
+      parameters
+    );
 
-  const path = queryString
-    ? `/tasks/?${queryString}`
-    : "/tasks/";
-
-  return apiRequest(path, {
-    onUnauthorized,
-  });
-}
-
-
-export function getInboxTasks(
-  onUnauthorized
-) {
   return apiRequest(
-    "/tasks/inbox",
-    {
-      onUnauthorized,
-    }
+    `/tasks/${queryString}`
   );
 }
 
 
-export function getTodayTasks(
-  onUnauthorized
-) {
+export function getInboxTasks() {
   return apiRequest(
-    "/dashboard/today",
-    {
-      onUnauthorized,
-    }
+    "/tasks/inbox"
   );
 }
 
 
-export function getUpcomingTasks(
-  onUnauthorized
-) {
+export function getTodayTasks() {
   return apiRequest(
-    "/dashboard/upcoming",
-    {
-      onUnauthorized,
-    }
+    "/dashboard/today"
+  );
+}
+
+
+export function getUpcomingTasks() {
+  return apiRequest(
+    "/dashboard/upcoming"
   );
 }
 
 
 export function createTask(
-  taskData,
-  onUnauthorized
+  taskData
 ) {
   return apiRequest(
     "/tasks/",
     {
       method: "POST",
       body: taskData,
-      onUnauthorized,
     }
   );
 }
@@ -99,57 +85,49 @@ export function createTask(
 
 export function updateTask(
   taskId,
-  taskData,
-  onUnauthorized
+  taskData
 ) {
   return apiRequest(
     `/tasks/${taskId}`,
     {
       method: "PATCH",
       body: taskData,
-      onUnauthorized,
-    }
-  );
-}
-
-
-export function completeTask(
-  taskId,
-  onUnauthorized
-) {
-  return apiRequest(
-    `/tasks/${taskId}/complete`,
-    {
-      method: "PATCH",
-      onUnauthorized,
-    }
-  );
-}
-
-
-export function reopenTask(
-  taskId,
-  onUnauthorized
-) {
-  return apiRequest(
-    `/tasks/${taskId}/reopen`,
-    {
-      method: "PATCH",
-      onUnauthorized,
     }
   );
 }
 
 
 export function deleteTask(
-  taskId,
-  onUnauthorized
+  taskId
 ) {
   return apiRequest(
     `/tasks/${taskId}`,
     {
       method: "DELETE",
-      onUnauthorized,
+    }
+  );
+}
+
+
+export function completeTask(
+  taskId
+) {
+  return apiRequest(
+    `/tasks/${taskId}/complete`,
+    {
+      method: "PATCH",
+    }
+  );
+}
+
+
+export function reopenTask(
+  taskId
+) {
+  return apiRequest(
+    `/tasks/${taskId}/reopen`,
+    {
+      method: "PATCH",
     }
   );
 }
@@ -157,14 +135,12 @@ export function deleteTask(
 
 export function addLabelToTask(
   taskId,
-  labelId,
-  onUnauthorized
+  labelId
 ) {
   return apiRequest(
     `/tasks/${taskId}/labels/${labelId}`,
     {
       method: "POST",
-      onUnauthorized,
     }
   );
 }
@@ -172,14 +148,12 @@ export function addLabelToTask(
 
 export function removeLabelFromTask(
   taskId,
-  labelId,
-  onUnauthorized
+  labelId
 ) {
   return apiRequest(
     `/tasks/${taskId}/labels/${labelId}`,
     {
       method: "DELETE",
-      onUnauthorized,
     }
   );
 }

@@ -15,42 +15,64 @@ function ProjectForm({
   project = null,
   onProjectSaved,
   onCancel,
-  onUnauthorized,
 }) {
   const isEditing =
     project !== null;
 
-  const [formData, setFormData] =
-    useState({
-      name: project?.name ?? "",
-      description:
-        project?.description ?? "",
-    });
 
-  const [loading, setLoading] =
-    useState(false);
+  const [
+    formData,
+    setFormData,
+  ] = useState({
+    name:
+      project?.name ?? "",
 
-  const [error, setError] =
-    useState("");
+    description:
+      project?.description ??
+      "",
+  });
+
+
+  const [
+    loading,
+    setLoading,
+  ] = useState(false);
+
+  const [
+    error,
+    setError,
+  ] = useState("");
 
 
   useEffect(() => {
     setFormData({
-      name: project?.name ?? "",
+      name:
+        project?.name ??
+        "",
+
       description:
-        project?.description ?? "",
+        project?.description ??
+        "",
     });
 
     setError("");
-  }, [project]);
+  }, [
+    project,
+  ]);
 
 
-  function handleChange(event) {
-    const { name, value } =
-      event.target;
+  function handleChange(
+    event
+  ) {
+    const {
+      name,
+      value,
+    } = event.target;
 
     setFormData(
-      (currentFormData) => ({
+      (
+        currentFormData
+      ) => ({
         ...currentFormData,
         [name]: value,
       })
@@ -58,11 +80,15 @@ function ProjectForm({
   }
 
 
-  async function handleSubmit(event) {
+  async function handleSubmit(
+    event
+  ) {
     event.preventDefault();
+
 
     const projectName =
       formData.name.trim();
+
 
     if (!projectName) {
       setError(
@@ -72,42 +98,43 @@ function ProjectForm({
       return;
     }
 
+
     const projectData = {
-      name: projectName,
+      name:
+        projectName,
 
       description:
-        formData.description.trim() ||
+        formData.description
+          .trim() ||
         null,
     };
 
+
     setLoading(true);
     setError("");
+
 
     try {
       const savedProject =
         isEditing
           ? await updateProject(
               project.id,
-              projectData,
-              onUnauthorized
+              projectData
             )
           : await createProject(
-              projectData,
-              onUnauthorized
+              projectData
             );
+
 
       onProjectSaved(
         savedProject
       );
-    } catch (requestError) {
-      if (
-        requestError?.status === 401
-      ) {
-        return;
-      }
-
+    } catch (
+      requestError
+    ) {
       setError(
-        requestError instanceof Error
+        requestError instanceof
+        Error
           ? requestError.message
           : "Something went wrong"
       );
@@ -120,7 +147,9 @@ function ProjectForm({
   return (
     <form
       className="entity-form"
-      onSubmit={handleSubmit}
+      onSubmit={
+        handleSubmit
+      }
     >
       <div className="entity-form-header">
         <div>
@@ -137,16 +166,22 @@ function ProjectForm({
           </p>
         </div>
 
+
         <button
           type="button"
           className="entity-form-close"
-          onClick={onCancel}
-          disabled={loading}
+          onClick={
+            onCancel
+          }
+          disabled={
+            loading
+          }
           aria-label="Close project form"
         >
           ×
         </button>
       </div>
+
 
       <div className="entity-form-body">
         <div className="entity-form-field">
@@ -158,16 +193,23 @@ function ProjectForm({
             id="project-name"
             name="name"
             type="text"
-            value={formData.name}
-            onChange={handleChange}
+            value={
+              formData.name
+            }
+            onChange={
+              handleChange
+            }
             placeholder="e.g. University"
             minLength={1}
             maxLength={100}
-            disabled={loading}
+            disabled={
+              loading
+            }
             autoFocus
             required
           />
         </div>
+
 
         <div className="entity-form-field">
           <label htmlFor="project-description">
@@ -177,14 +219,21 @@ function ProjectForm({
           <textarea
             id="project-description"
             name="description"
-            value={formData.description}
-            onChange={handleChange}
+            value={
+              formData.description
+            }
+            onChange={
+              handleChange
+            }
             placeholder="Optional description..."
             maxLength={500}
             rows={4}
-            disabled={loading}
+            disabled={
+              loading
+            }
           />
         </div>
+
 
         {error && (
           <div
@@ -196,12 +245,17 @@ function ProjectForm({
         )}
       </div>
 
+
       <div className="entity-form-footer">
         <button
           type="button"
           className="entity-form-button entity-form-button-secondary"
-          onClick={onCancel}
-          disabled={loading}
+          onClick={
+            onCancel
+          }
+          disabled={
+            loading
+          }
         >
           Cancel
         </button>
@@ -209,7 +263,9 @@ function ProjectForm({
         <button
           type="submit"
           className="entity-form-button entity-form-button-primary"
-          disabled={loading}
+          disabled={
+            loading
+          }
         >
           {loading
             ? isEditing

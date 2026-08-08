@@ -15,21 +15,27 @@ function LabelForm({
   label = null,
   onLabelSaved,
   onCancel,
-  onUnauthorized,
 }) {
   const isEditing =
     label !== null;
 
-  const [name, setName] =
-    useState(
-      label?.name ?? ""
-    );
 
-  const [loading, setLoading] =
-    useState(false);
+  const [
+    name,
+    setName,
+  ] = useState(
+    label?.name ?? ""
+  );
 
-  const [error, setError] =
-    useState("");
+  const [
+    loading,
+    setLoading,
+  ] = useState(false);
+
+  const [
+    error,
+    setError,
+  ] = useState("");
 
 
   useEffect(() => {
@@ -38,14 +44,22 @@ function LabelForm({
     );
 
     setError("");
-  }, [label]);
+  }, [
+    label,
+  ]);
 
 
-  async function handleSubmit(event) {
+  async function handleSubmit(
+    event
+  ) {
     event.preventDefault();
 
+
     const normalizedName =
-      name.trim().toLowerCase();
+      name
+        .trim()
+        .toLowerCase();
+
 
     if (!normalizedName) {
       setError(
@@ -55,38 +69,38 @@ function LabelForm({
       return;
     }
 
+
     const labelData = {
-      name: normalizedName,
+      name:
+        normalizedName,
     };
+
 
     setLoading(true);
     setError("");
+
 
     try {
       const savedLabel =
         isEditing
           ? await updateLabel(
               label.id,
-              labelData,
-              onUnauthorized
+              labelData
             )
           : await createLabel(
-              labelData,
-              onUnauthorized
+              labelData
             );
+
 
       onLabelSaved(
         savedLabel
       );
-    } catch (requestError) {
-      if (
-        requestError?.status === 401
-      ) {
-        return;
-      }
-
+    } catch (
+      requestError
+    ) {
       setError(
-        requestError instanceof Error
+        requestError instanceof
+        Error
           ? requestError.message
           : "Something went wrong"
       );
@@ -99,7 +113,9 @@ function LabelForm({
   return (
     <form
       className="entity-form"
-      onSubmit={handleSubmit}
+      onSubmit={
+        handleSubmit
+      }
     >
       <div className="entity-form-header">
         <div>
@@ -116,16 +132,22 @@ function LabelForm({
           </p>
         </div>
 
+
         <button
           type="button"
           className="entity-form-close"
-          onClick={onCancel}
-          disabled={loading}
+          onClick={
+            onCancel
+          }
+          disabled={
+            loading
+          }
           aria-label="Close label form"
         >
           ×
         </button>
       </div>
+
 
       <div className="entity-form-body">
         <div className="entity-form-field">
@@ -134,27 +156,38 @@ function LabelForm({
           </label>
 
           <div className="entity-label-input">
-            <span>#</span>
+            <span>
+              #
+            </span>
 
             <input
               id="label-name"
               name="name"
               type="text"
-              value={name}
-              onChange={(event) =>
+              value={
+                name
+              }
+              onChange={(
+                event
+              ) =>
                 setName(
-                  event.target.value
+                  event
+                    .target
+                    .value
                 )
               }
               placeholder="important"
               minLength={1}
               maxLength={50}
-              disabled={loading}
+              disabled={
+                loading
+              }
               autoFocus
               required
             />
           </div>
         </div>
+
 
         {error && (
           <div
@@ -166,12 +199,17 @@ function LabelForm({
         )}
       </div>
 
+
       <div className="entity-form-footer">
         <button
           type="button"
           className="entity-form-button entity-form-button-secondary"
-          onClick={onCancel}
-          disabled={loading}
+          onClick={
+            onCancel
+          }
+          disabled={
+            loading
+          }
         >
           Cancel
         </button>
@@ -179,7 +217,9 @@ function LabelForm({
         <button
           type="submit"
           className="entity-form-button entity-form-button-primary"
-          disabled={loading}
+          disabled={
+            loading
+          }
         >
           {loading
             ? isEditing

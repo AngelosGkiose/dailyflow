@@ -14,7 +14,8 @@ import "../../styles/task-form.css";
 
 
 function getCurrentLocalDateTime() {
-  const now = new Date();
+  const now =
+    new Date();
 
   const timezoneOffset =
     now.getTimezoneOffset() *
@@ -62,50 +63,67 @@ function TaskForm({
   defaultToToday,
   onTaskSaved,
   onCancel,
-  onUnauthorized,
 }) {
   const isEditing =
     task !== null;
 
-  const [formData, setFormData] =
-    useState({
-      title:
-        task?.title ?? "",
 
-      description:
-        task?.description ?? "",
+  const [
+    formData,
+    setFormData,
+  ] = useState({
+    title:
+      task?.title ?? "",
 
-      priority:
-        task?.priority ?? "medium",
+    description:
+      task?.description ?? "",
 
-      due_date: task
-        ? formatDateTimeLocal(
-            task.due_date
+    priority:
+      task?.priority ??
+      "medium",
+
+    due_date: task
+      ? formatDateTimeLocal(
+          task.due_date
+        )
+      : defaultToToday
+        ? getCurrentLocalDateTime()
+        : "",
+
+    project_id:
+      task?.project_id !==
+        null &&
+      task?.project_id !==
+        undefined
+        ? String(
+            task.project_id
           )
-        : defaultToToday
-          ? getCurrentLocalDateTime()
+        : defaultProjectId !==
+              null &&
+            defaultProjectId !==
+              undefined
+          ? String(
+              defaultProjectId
+            )
           : "",
 
-      project_id:
-        task?.project_id !== null &&
-        task?.project_id !== undefined
-          ? String(task.project_id)
-          : defaultProjectId !== null &&
-              defaultProjectId !== undefined
-            ? String(defaultProjectId)
-            : "",
+    label_ids:
+      task?.labels?.map(
+        (label) =>
+          label.id
+      ) ?? [],
+  });
 
-      label_ids:
-        task?.labels?.map(
-          (label) => label.id
-        ) ?? [],
-    });
 
-  const [loading, setLoading] =
-    useState(false);
+  const [
+    loading,
+    setLoading,
+  ] = useState(false);
 
-  const [error, setError] =
-    useState("");
+  const [
+    error,
+    setError,
+  ] = useState("");
 
 
   useEffect(() => {
@@ -114,10 +132,12 @@ function TaskForm({
         task?.title ?? "",
 
       description:
-        task?.description ?? "",
+        task?.description ??
+        "",
 
       priority:
-        task?.priority ?? "medium",
+        task?.priority ??
+        "medium",
 
       due_date: task
         ? formatDateTimeLocal(
@@ -128,17 +148,26 @@ function TaskForm({
           : "",
 
       project_id:
-        task?.project_id !== null &&
-        task?.project_id !== undefined
-          ? String(task.project_id)
-          : defaultProjectId !== null &&
-              defaultProjectId !== undefined
-            ? String(defaultProjectId)
+        task?.project_id !==
+          null &&
+        task?.project_id !==
+          undefined
+          ? String(
+              task.project_id
+            )
+          : defaultProjectId !==
+                null &&
+              defaultProjectId !==
+                undefined
+            ? String(
+                defaultProjectId
+              )
             : "",
 
       label_ids:
         task?.labels?.map(
-          (label) => label.id
+          (label) =>
+            label.id
         ) ?? [],
     });
 
@@ -150,12 +179,18 @@ function TaskForm({
   ]);
 
 
-  function handleChange(event) {
-    const { name, value } =
-      event.target;
+  function handleChange(
+    event
+  ) {
+    const {
+      name,
+      value,
+    } = event.target;
 
     setFormData(
-      (currentFormData) => ({
+      (
+        currentFormData
+      ) => ({
         ...currentFormData,
         [name]: value,
       })
@@ -163,27 +198,40 @@ function TaskForm({
   }
 
 
-  function handleLabelChange(event) {
+  function handleLabelChange(
+    event
+  ) {
     const labelId =
-      Number(event.target.value);
+      Number(
+        event.target.value
+      );
 
     const isChecked =
       event.target.checked;
 
+
     setFormData(
-      (currentFormData) => ({
+      (
+        currentFormData
+      ) => ({
         ...currentFormData,
 
-        label_ids: isChecked
-          ? [
-              ...currentFormData.label_ids,
-              labelId,
-            ]
-          : currentFormData.label_ids.filter(
-              (currentLabelId) =>
-                currentLabelId !==
-                labelId
-            ),
+        label_ids:
+          isChecked
+            ? [
+                ...currentFormData
+                  .label_ids,
+                labelId,
+              ]
+            : currentFormData
+                .label_ids
+                .filter(
+                  (
+                    currentLabelId
+                  ) =>
+                    currentLabelId !==
+                    labelId
+                ),
       })
     );
   }
@@ -202,6 +250,7 @@ function TaskForm({
           )
       );
 
+
     const labelsToRemove =
       originalLabelIds.filter(
         (labelId) =>
@@ -210,33 +259,39 @@ function TaskForm({
           )
       );
 
+
     for (
-      const labelId of labelsToAdd
+      const labelId of
+      labelsToAdd
     ) {
       await addLabelToTask(
         taskId,
-        labelId,
-        onUnauthorized
+        labelId
       );
     }
 
+
     for (
-      const labelId of labelsToRemove
+      const labelId of
+      labelsToRemove
     ) {
       await removeLabelFromTask(
         taskId,
-        labelId,
-        onUnauthorized
+        labelId
       );
     }
   }
 
 
-  async function handleSubmit(event) {
+  async function handleSubmit(
+    event
+  ) {
     event.preventDefault();
+
 
     const title =
       formData.title.trim();
+
 
     if (!title) {
       setError(
@@ -246,11 +301,13 @@ function TaskForm({
       return;
     }
 
+
     const taskData = {
       title,
 
       description:
-        formData.description.trim() ||
+        formData.description
+          .trim() ||
         null,
 
       priority:
@@ -271,28 +328,31 @@ function TaskForm({
           : null,
     };
 
+
     setLoading(true);
     setError("");
+
 
     try {
       const savedTask =
         isEditing
           ? await updateTask(
               task.id,
-              taskData,
-              onUnauthorized
+              taskData
             )
           : await createTask(
-              taskData,
-              onUnauthorized
+              taskData
             );
+
 
       const originalLabelIds =
         isEditing
           ? task.labels?.map(
-              (label) => label.id
+              (label) =>
+                label.id
             ) ?? []
           : [];
+
 
       await synchronizeTaskLabels(
         savedTask.id,
@@ -300,16 +360,16 @@ function TaskForm({
         formData.label_ids
       );
 
-      onTaskSaved(savedTask);
-    } catch (requestError) {
-      if (
-        requestError?.status === 401
-      ) {
-        return;
-      }
 
+      onTaskSaved(
+        savedTask
+      );
+    } catch (
+      requestError
+    ) {
       setError(
-        requestError instanceof Error
+        requestError instanceof
+        Error
           ? requestError.message
           : "Something went wrong"
       );
@@ -322,7 +382,9 @@ function TaskForm({
   return (
     <form
       className="task-form"
-      onSubmit={handleSubmit}
+      onSubmit={
+        handleSubmit
+      }
     >
       <div className="task-form-header">
         <div>
@@ -339,6 +401,7 @@ function TaskForm({
           </p>
         </div>
 
+
         <button
           type="button"
           className="task-form-close"
@@ -352,6 +415,7 @@ function TaskForm({
 
 
       <div className="task-form-body">
+
         <div className="task-form-field">
           <label htmlFor="task-title">
             Task
@@ -361,12 +425,18 @@ function TaskForm({
             id="task-title"
             name="title"
             type="text"
-            value={formData.title}
-            onChange={handleChange}
+            value={
+              formData.title
+            }
+            onChange={
+              handleChange
+            }
             placeholder="What needs to be done?"
             minLength={1}
             maxLength={100}
-            disabled={loading}
+            disabled={
+              loading
+            }
             autoFocus
             required
           />
@@ -381,12 +451,18 @@ function TaskForm({
           <textarea
             id="task-description"
             name="description"
-            value={formData.description}
-            onChange={handleChange}
+            value={
+              formData.description
+            }
+            onChange={
+              handleChange
+            }
             maxLength={500}
             placeholder="Add more details..."
             rows={4}
-            disabled={loading}
+            disabled={
+              loading
+            }
           />
         </div>
 
@@ -401,9 +477,15 @@ function TaskForm({
               id="task-due-date"
               name="due_date"
               type="datetime-local"
-              value={formData.due_date}
-              onChange={handleChange}
-              disabled={loading}
+              value={
+                formData.due_date
+              }
+              onChange={
+                handleChange
+              }
+              disabled={
+                loading
+              }
             />
           </div>
 
@@ -416,9 +498,15 @@ function TaskForm({
             <select
               id="task-priority"
               name="priority"
-              value={formData.priority}
-              onChange={handleChange}
-              disabled={loading}
+              value={
+                formData.priority
+              }
+              onChange={
+                handleChange
+              }
+              disabled={
+                loading
+              }
             >
               <option value="low">
                 Low
@@ -444,9 +532,15 @@ function TaskForm({
           <select
             id="task-project"
             name="project_id"
-            value={formData.project_id}
-            onChange={handleChange}
-            disabled={loading}
+            value={
+              formData.project_id
+            }
+            onChange={
+              handleChange
+            }
+            disabled={
+              loading
+            }
           >
             <option value="">
               Inbox — No project
@@ -455,10 +549,14 @@ function TaskForm({
             {projects.map(
               (project) => (
                 <option
-                  key={project.id}
-                  value={String(
+                  key={
                     project.id
-                  )}
+                  }
+                  value={
+                    String(
+                      project.id
+                    )
+                  }
                 >
                   {project.name}
                 </option>
@@ -473,7 +571,8 @@ function TaskForm({
             Labels
           </legend>
 
-          {labels.length === 0 ? (
+          {labels.length ===
+          0 ? (
             <p className="task-form-labels-empty">
               No labels available.
             </p>
@@ -482,13 +581,17 @@ function TaskForm({
               {labels.map(
                 (label) => {
                   const isSelected =
-                    formData.label_ids.includes(
-                      label.id
-                    );
+                    formData
+                      .label_ids
+                      .includes(
+                        label.id
+                      );
 
                   return (
                     <label
-                      key={label.id}
+                      key={
+                        label.id
+                      }
                       className={
                         isSelected
                           ? "task-form-label-option selected"
@@ -497,7 +600,9 @@ function TaskForm({
                     >
                       <input
                         type="checkbox"
-                        value={label.id}
+                        value={
+                          label.id
+                        }
                         checked={
                           isSelected
                         }
@@ -509,7 +614,8 @@ function TaskForm({
                         }
                       />
 
-                      #{label.name}
+                      #
+                      {label.name}
                     </label>
                   );
                 }
@@ -527,6 +633,7 @@ function TaskForm({
             {error}
           </div>
         )}
+
       </div>
 
 
@@ -535,7 +642,9 @@ function TaskForm({
           type="button"
           className="task-form-button task-form-button-secondary"
           onClick={onCancel}
-          disabled={loading}
+          disabled={
+            loading
+          }
         >
           Cancel
         </button>
@@ -543,7 +652,9 @@ function TaskForm({
         <button
           type="submit"
           className="task-form-button task-form-button-primary"
-          disabled={loading}
+          disabled={
+            loading
+          }
         >
           {loading
             ? isEditing

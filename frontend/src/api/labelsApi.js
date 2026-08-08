@@ -3,28 +3,21 @@ import {
 } from "./apiClient.js";
 
 
-export function getLabels(
-  onUnauthorized
-) {
+export function getLabels() {
   return apiRequest(
-    "/labels/",
-    {
-      onUnauthorized,
-    }
+    "/labels/"
   );
 }
 
 
 export function createLabel(
-  labelData,
-  onUnauthorized
+  labelData
 ) {
   return apiRequest(
     "/labels/",
     {
       method: "POST",
       body: labelData,
-      onUnauthorized,
     }
   );
 }
@@ -32,29 +25,25 @@ export function createLabel(
 
 export function updateLabel(
   labelId,
-  labelData,
-  onUnauthorized
+  labelData
 ) {
   return apiRequest(
     `/labels/${labelId}`,
     {
       method: "PATCH",
       body: labelData,
-      onUnauthorized,
     }
   );
 }
 
 
 export function deleteLabel(
-  labelId,
-  onUnauthorized
+  labelId
 ) {
   return apiRequest(
     `/labels/${labelId}`,
     {
       method: "DELETE",
-      onUnauthorized,
     }
   );
 }

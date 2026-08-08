@@ -38,16 +38,10 @@ def login_user(login_data:UserLogin,db: Session):
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password",
-            headers={
-                "WWW-Authenticate": "Bearer"
-            }
+            detail="Invalid email or password"
         )
     access_token=create_access_token(data={"sub": str(user.id)})
 
-    return {
-        "access_token": access_token,
-        "token_type": "bearer"
-    }
+    return access_token
 
 

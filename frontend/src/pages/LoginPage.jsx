@@ -1,14 +1,12 @@
-import { useState } from "react";
+import {
+  useState,
+} from "react";
 
 import {
   Link,
   useLocation,
   useNavigate,
 } from "react-router";
-
-import {
-  loginUser,
-} from "../api/authApi.js";
 
 import {
   useAuth,
@@ -24,33 +22,46 @@ function LoginPage() {
   const location =
     useLocation();
 
-  const { login } =
-    useAuth();
+  const {
+    login,
+  } = useAuth();
+
 
   const registrationSuccessful =
     location.state
-      ?.registrationSuccessful === true;
+      ?.registrationSuccessful ===
+    true;
 
 
-  const [formData, setFormData] =
-    useState({
-      email: "",
-      password: "",
-    });
+  const [
+    formData,
+    setFormData,
+  ] = useState({
+    email: "",
+    password: "",
+  });
 
-  const [loading, setLoading] =
-    useState(false);
+  const [
+    loading,
+    setLoading,
+  ] = useState(false);
 
-  const [error, setError] =
-    useState("");
+  const [
+    error,
+    setError,
+  ] = useState("");
 
 
   function handleChange(event) {
-    const { name, value } =
-      event.target;
+    const {
+      name,
+      value,
+    } = event.target;
 
     setFormData(
-      (currentFormData) => ({
+      (
+        currentFormData
+      ) => ({
         ...currentFormData,
         [name]: value,
       })
@@ -58,31 +69,24 @@ function LoginPage() {
   }
 
 
-  async function handleSubmit(event) {
+  async function handleSubmit(
+    event
+  ) {
     event.preventDefault();
 
     setLoading(true);
     setError("");
 
+
     try {
-      const data =
-        await loginUser({
-          email:
-            formData.email.trim(),
+      await login({
+        email:
+          formData.email.trim(),
 
-          password:
-            formData.password,
-        });
+        password:
+          formData.password,
+      });
 
-      if (!data?.access_token) {
-        throw new Error(
-          "The server did not return an access token"
-        );
-      }
-
-      login(
-        data.access_token
-      );
 
       navigate(
         "/dashboard",
@@ -90,9 +94,12 @@ function LoginPage() {
           replace: true,
         }
       );
-    } catch (requestError) {
+    } catch (
+      requestError
+    ) {
       setError(
-        requestError instanceof Error
+        requestError instanceof
+        Error
           ? requestError.message
           : "Something went wrong"
       );
@@ -199,7 +206,9 @@ function LoginPage() {
 
           <form
             className="auth-form"
-            onSubmit={handleSubmit}
+            onSubmit={
+              handleSubmit
+            }
           >
             <div className="auth-field">
               <label htmlFor="login-email">
@@ -210,11 +219,17 @@ function LoginPage() {
                 id="login-email"
                 name="email"
                 type="email"
-                value={formData.email}
-                onChange={handleChange}
+                value={
+                  formData.email
+                }
+                onChange={
+                  handleChange
+                }
                 placeholder="name@example.com"
                 autoComplete="email"
-                disabled={loading}
+                disabled={
+                  loading
+                }
                 required
               />
             </div>
@@ -229,13 +244,19 @@ function LoginPage() {
                 id="login-password"
                 name="password"
                 type="password"
-                value={formData.password}
-                onChange={handleChange}
+                value={
+                  formData.password
+                }
+                onChange={
+                  handleChange
+                }
                 placeholder="Enter your password"
                 autoComplete="current-password"
                 minLength={8}
                 maxLength={128}
-                disabled={loading}
+                disabled={
+                  loading
+                }
                 required
               />
             </div>
@@ -254,7 +275,9 @@ function LoginPage() {
             <button
               type="submit"
               className="auth-submit"
-              disabled={loading}
+              disabled={
+                loading
+              }
             >
               {loading
                 ? "Signing in..."

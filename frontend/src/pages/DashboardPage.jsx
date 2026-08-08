@@ -9,8 +9,8 @@ import {
 } from "react-router";
 
 import {
-  removeAccessToken,
-} from "../api/apiClient.js";
+  useAuth,
+} from "../context/AuthContext.jsx";
 
 import {
   deleteLabel,
@@ -48,6 +48,10 @@ import "../styles/dashboard.css";
 function DashboardPage() {
   const navigate =
     useNavigate();
+
+  const {
+    logout,
+  } = useAuth();
 
   const [activeView, setActiveView] =
     useState("today");
@@ -187,8 +191,8 @@ function DashboardPage() {
 
 
   const handleUnauthorized =
-    useCallback(() => {
-      removeAccessToken();
+    useCallback(async () => {
+      await logout();
 
       navigate(
         "/login",
@@ -196,11 +200,14 @@ function DashboardPage() {
           replace: true,
         }
       );
-    }, [navigate]);
+    }, [
+      logout,
+      navigate,
+    ]);
 
 
-  function handleLogout() {
-    handleUnauthorized();
+  async function handleLogout() {
+    await handleUnauthorized();
   }
 
 
@@ -500,6 +507,35 @@ function DashboardPage() {
     ]);
 
 
+  const handleRequestError =
+    useCallback(
+      async (
+        requestError,
+        setRequestError
+      ) => {
+        if (
+          requestError?.status ===
+          401
+        ) {
+          await handleUnauthorized();
+
+          return;
+        }
+
+
+        setRequestError(
+          requestError instanceof
+          Error
+            ? requestError.message
+            : "Something went wrong"
+        );
+      },
+      [
+        handleUnauthorized,
+      ]
+    );
+
+
   const loadTasks =
     useCallback(async () => {
       setTasks([]);
@@ -524,8 +560,7 @@ function DashboardPage() {
         ) {
           const data =
             await getFilteredTasks(
-              getServerTaskParameters(),
-              handleUnauthorized
+              getServerTaskParameters()
             );
 
 
@@ -584,22 +619,16 @@ function DashboardPage() {
           "inbox"
         ) {
           data =
-            await getInboxTasks(
-              handleUnauthorized
-            );
+            await getInboxTasks();
         } else if (
           activeView ===
           "upcoming"
         ) {
           data =
-            await getUpcomingTasks(
-              handleUnauthorized
-            );
+            await getUpcomingTasks();
         } else {
           data =
-            await getTodayTasks(
-              handleUnauthorized
-            );
+            await getTodayTasks();
         }
 
 
@@ -632,21 +661,10 @@ function DashboardPage() {
       } catch (
         requestError
       ) {
-        if (
-          requestError?.status ===
-          401
-        ) {
-          return;
-        }
-
-
-        setError(
-          requestError instanceof
-          Error
-            ? requestError.message
-            : "Something went wrong"
+        await handleRequestError(
+          requestError,
+          setError
         );
-
 
         setTotal(0);
         setTotalPages(0);
@@ -657,9 +675,9 @@ function DashboardPage() {
       activeView,
       page,
       getServerTaskParameters,
-      handleUnauthorized,
       applyLocalFiltersAndSorting,
       paginateLocalTasks,
+      handleRequestError,
     ]);
 
 
@@ -671,10 +689,7 @@ function DashboardPage() {
 
       try {
         const data =
-          await getProjects(
-            handleUnauthorized
-          );
-
+          await getProjects();
 
         setProjects(
           Array.isArray(data)
@@ -684,25 +699,15 @@ function DashboardPage() {
       } catch (
         requestError
       ) {
-        if (
-          requestError?.status ===
-          401
-        ) {
-          return;
-        }
-
-
-        setProjectsError(
-          requestError instanceof
-          Error
-            ? requestError.message
-            : "Something went wrong"
+        await handleRequestError(
+          requestError,
+          setProjectsError
         );
       } finally {
         setProjectsLoading(false);
       }
     }, [
-      handleUnauthorized,
+      handleRequestError,
     ]);
 
 
@@ -714,10 +719,7 @@ function DashboardPage() {
 
       try {
         const data =
-          await getLabels(
-            handleUnauthorized
-          );
-
+          await getLabels();
 
         setLabels(
           Array.isArray(data)
@@ -727,25 +729,15 @@ function DashboardPage() {
       } catch (
         requestError
       ) {
-        if (
-          requestError?.status ===
-          401
-        ) {
-          return;
-        }
-
-
-        setLabelsError(
-          requestError instanceof
-          Error
-            ? requestError.message
-            : "Something went wrong"
+        await handleRequestError(
+          requestError,
+          setLabelsError
         );
       } finally {
         setLabelsLoading(false);
       }
     }, [
-      handleUnauthorized,
+      handleRequestError,
     ]);
 
 
@@ -809,13 +801,11 @@ function DashboardPage() {
         "completed"
       ) {
         await reopenTask(
-          task.id,
-          handleUnauthorized
+          task.id
         );
       } else {
         await completeTask(
-          task.id,
-          handleUnauthorized
+          task.id
         );
       }
 
@@ -825,7 +815,9 @@ function DashboardPage() {
         page > 1
       ) {
         setPage(
-          (currentPage) =>
+          (
+            currentPage
+          ) =>
             currentPage - 1
         );
       } else {
@@ -834,22 +826,14 @@ function DashboardPage() {
     } catch (
       requestError
     ) {
-      if (
-        requestError?.status ===
-        401
-      ) {
-        return;
-      }
-
-
-      setError(
-        requestError instanceof
-        Error
-          ? requestError.message
-          : "Something went wrong"
+      await handleRequestError(
+        requestError,
+        setError
       );
     } finally {
-      setUpdatingTaskId(null);
+      setUpdatingTaskId(
+        null
+      );
     }
   }
 
@@ -911,8 +895,7 @@ function DashboardPage() {
 
     try {
       await deleteTask(
-        task.id,
-        handleUnauthorized
+        task.id
       );
 
 
@@ -921,7 +904,6 @@ function DashboardPage() {
         task.id
       ) {
         setEditingTask(null);
-
         setShowTaskForm(
           false
         );
@@ -938,7 +920,9 @@ function DashboardPage() {
         page > 1
       ) {
         setPage(
-          (currentPage) =>
+          (
+            currentPage
+          ) =>
             currentPage - 1
         );
       } else {
@@ -947,19 +931,9 @@ function DashboardPage() {
     } catch (
       requestError
     ) {
-      if (
-        requestError?.status ===
-        401
-      ) {
-        return;
-      }
-
-
-      setError(
-        requestError instanceof
-        Error
-          ? requestError.message
-          : "Something went wrong"
+      await handleRequestError(
+        requestError,
+        setError
       );
 
       setDeleteConfirmation(
@@ -985,8 +959,7 @@ function DashboardPage() {
 
     try {
       await deleteProject(
-        project.id,
-        handleUnauthorized
+        project.id
       );
 
 
@@ -1017,22 +990,7 @@ function DashboardPage() {
         );
 
         setPage(1);
-
         setTasks([]);
-      }
-
-
-      if (
-        editingProject?.id ===
-        project.id
-      ) {
-        setEditingProject(
-          null
-        );
-
-        setShowProjectForm(
-          false
-        );
       }
 
 
@@ -1042,19 +1000,9 @@ function DashboardPage() {
     } catch (
       requestError
     ) {
-      if (
-        requestError?.status ===
-        401
-      ) {
-        return;
-      }
-
-
-      setProjectsError(
-        requestError instanceof
-        Error
-          ? requestError.message
-          : "Something went wrong"
+      await handleRequestError(
+        requestError,
+        setProjectsError
       );
 
       setDeleteConfirmation(
@@ -1080,8 +1028,7 @@ function DashboardPage() {
 
     try {
       await deleteLabel(
-        label.id,
-        handleUnauthorized
+        label.id
       );
 
 
@@ -1112,22 +1059,7 @@ function DashboardPage() {
         );
 
         setPage(1);
-
         setTasks([]);
-      }
-
-
-      if (
-        editingLabel?.id ===
-        label.id
-      ) {
-        setEditingLabel(
-          null
-        );
-
-        setShowLabelForm(
-          false
-        );
       }
 
 
@@ -1137,19 +1069,9 @@ function DashboardPage() {
     } catch (
       requestError
     ) {
-      if (
-        requestError?.status ===
-        401
-      ) {
-        return;
-      }
-
-
-      setLabelsError(
-        requestError instanceof
-        Error
-          ? requestError.message
-          : "Something went wrong"
+      await handleRequestError(
+        requestError,
+        setLabelsError
       );
 
       setDeleteConfirmation(
@@ -1164,7 +1086,9 @@ function DashboardPage() {
 
 
   async function handleConfirmDelete() {
-    if (!deleteConfirmation) {
+    if (
+      !deleteConfirmation
+    ) {
       return;
     }
 
@@ -1175,7 +1099,9 @@ function DashboardPage() {
     } = deleteConfirmation;
 
 
-    if (type === "task") {
+    if (
+      type === "task"
+    ) {
       await deleteTaskConfirmed(
         item
       );
@@ -1195,7 +1121,9 @@ function DashboardPage() {
     }
 
 
-    if (type === "label") {
+    if (
+      type === "label"
+    ) {
       await deleteLabelConfirmed(
         item
       );
@@ -1204,11 +1132,18 @@ function DashboardPage() {
 
 
   async function handleTaskSaved() {
-    setShowTaskForm(false);
-    setEditingTask(null);
+    setShowTaskForm(
+      false
+    );
+
+    setEditingTask(
+      null
+    );
 
 
-    if (page !== 1) {
+    if (
+      page !== 1
+    ) {
       setPage(1);
 
       return;
@@ -1248,8 +1183,13 @@ function DashboardPage() {
   async function handleLabelSaved(
     savedLabel
   ) {
-    setShowLabelForm(false);
-    setEditingLabel(null);
+    setShowLabelForm(
+      false
+    );
+
+    setEditingLabel(
+      null
+    );
 
 
     await loadLabels();
@@ -1279,7 +1219,6 @@ function DashboardPage() {
       })
     );
 
-
     setPage(1);
   }
 
@@ -1291,7 +1230,6 @@ function DashboardPage() {
       sortBy: "created_at",
       order: "desc",
     });
-
 
     setPage(1);
   }
@@ -1308,8 +1246,9 @@ function DashboardPage() {
       return;
     }
 
-
-    setPage(nextPage);
+    setPage(
+      nextPage
+    );
   }
 
 
@@ -1339,17 +1278,9 @@ function DashboardPage() {
     view
   ) {
     setActiveView(view);
-
     setSearchQuery("");
-
-    setSelectedProject(
-      null
-    );
-
-    setSelectedLabel(
-      null
-    );
-
+    setSelectedProject(null);
+    setSelectedLabel(null);
     setPage(1);
 
     closeAllForms();
@@ -1364,15 +1295,10 @@ function DashboardPage() {
     );
 
     setSearchQuery("");
-
     setSelectedProject(
       project
     );
-
-    setSelectedLabel(
-      null
-    );
-
+    setSelectedLabel(null);
     setPage(1);
 
     closeAllForms();
@@ -1387,15 +1313,10 @@ function DashboardPage() {
     );
 
     setSearchQuery("");
-
     setSelectedLabel(
       label
     );
-
-    setSelectedProject(
-      null
-    );
-
+    setSelectedProject(null);
     setPage(1);
 
     closeAllForms();
@@ -1413,14 +1334,8 @@ function DashboardPage() {
       "search"
     );
 
-    setSelectedProject(
-      null
-    );
-
-    setSelectedLabel(
-      null
-    );
-
+    setSelectedProject(null);
+    setSelectedLabel(null);
     setPage(1);
 
     closeAllForms();
@@ -1429,19 +1344,11 @@ function DashboardPage() {
 
   function handleClearSearch() {
     setSearchQuery("");
-
     setActiveView(
       "today"
     );
-
-    setSelectedProject(
-      null
-    );
-
-    setSelectedLabel(
-      null
-    );
-
+    setSelectedProject(null);
+    setSelectedLabel(null);
     setPage(1);
 
     closeAllForms();
@@ -1466,25 +1373,12 @@ function DashboardPage() {
       task
     );
 
-    setEditingProject(
-      null
-    );
+    setEditingProject(null);
+    setEditingLabel(null);
 
-    setEditingLabel(
-      null
-    );
-
-    setShowTaskForm(
-      true
-    );
-
-    setShowProjectForm(
-      false
-    );
-
-    setShowLabelForm(
-      false
-    );
+    setShowTaskForm(true);
+    setShowProjectForm(false);
+    setShowLabelForm(false);
   }
 
 
@@ -1503,11 +1397,9 @@ function DashboardPage() {
     project
   ) {
     setEditingTask(null);
-
     setEditingProject(
       project
     );
-
     setEditingLabel(null);
 
     setShowProjectForm(true);
@@ -1531,14 +1423,10 @@ function DashboardPage() {
     label
   ) {
     setEditingTask(null);
-
     setEditingLabel(
       label
     );
-
-    setEditingProject(
-      null
-    );
+    setEditingProject(null);
 
     setShowLabelForm(true);
     setShowTaskForm(false);
@@ -1547,20 +1435,35 @@ function DashboardPage() {
 
 
   function closeTaskModal() {
-    setShowTaskForm(false);
-    setEditingTask(null);
+    setShowTaskForm(
+      false
+    );
+
+    setEditingTask(
+      null
+    );
   }
 
 
   function closeProjectModal() {
-    setShowProjectForm(false);
-    setEditingProject(null);
+    setShowProjectForm(
+      false
+    );
+
+    setEditingProject(
+      null
+    );
   }
 
 
   function closeLabelModal() {
-    setShowLabelForm(false);
-    setEditingLabel(null);
+    setShowLabelForm(
+      false
+    );
+
+    setEditingLabel(
+      null
+    );
   }
 
 
@@ -1626,7 +1529,9 @@ function DashboardPage() {
 
 
   function getDeleteModalDetails() {
-    if (!deleteConfirmation) {
+    if (
+      !deleteConfirmation
+    ) {
       return null;
     }
 
@@ -1637,11 +1542,16 @@ function DashboardPage() {
     } = deleteConfirmation;
 
 
-    if (type === "task") {
+    if (
+      type === "task"
+    ) {
       return {
-        title: "Delete task?",
+        title:
+          "Delete task?",
+
         message:
           `"${item.title}" will be permanently deleted.`,
+
         loading:
           deletingTaskId ===
           item.id,
@@ -1814,7 +1724,6 @@ function DashboardPage() {
                   ☰
                 </button>
 
-
                 <h1 className="dashboard-title">
                   {getPageTitle()}
                 </h1>
@@ -1838,7 +1747,6 @@ function DashboardPage() {
                     ? "Hide view options"
                     : "View options"}
                 </button>
-
 
                 {canCreateTask && (
                   <button
@@ -1991,9 +1899,6 @@ function DashboardPage() {
               onCancel={
                 closeTaskModal
               }
-              onUnauthorized={
-                handleUnauthorized
-              }
             />
           </Modal>
         )}
@@ -2020,9 +1925,6 @@ function DashboardPage() {
               onCancel={
                 closeProjectModal
               }
-              onUnauthorized={
-                handleUnauthorized
-              }
             />
           </Modal>
         )}
@@ -2048,9 +1950,6 @@ function DashboardPage() {
               }
               onCancel={
                 closeLabelModal
-              }
-              onUnauthorized={
-                handleUnauthorized
               }
             />
           </Modal>

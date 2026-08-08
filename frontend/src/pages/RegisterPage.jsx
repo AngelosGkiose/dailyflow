@@ -1,4 +1,6 @@
-import { useState } from "react";
+import {
+  useState,
+} from "react";
 
 import {
   Link,
@@ -13,28 +15,39 @@ import "../styles/auth.css";
 
 
 function RegisterPage() {
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
-  const [formData, setFormData] =
-    useState({
-      username: "",
-      email: "",
-      password: "",
-    });
+  const [
+    formData,
+    setFormData,
+  ] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
 
-  const [loading, setLoading] =
-    useState(false);
+  const [
+    loading,
+    setLoading,
+  ] = useState(false);
 
-  const [error, setError] =
-    useState("");
+  const [
+    error,
+    setError,
+  ] = useState("");
 
 
   function handleChange(event) {
-    const { name, value } =
-      event.target;
+    const {
+      name,
+      value,
+    } = event.target;
 
     setFormData(
-      (currentFormData) => ({
+      (
+        currentFormData
+      ) => ({
         ...currentFormData,
         [name]: value,
       })
@@ -42,11 +55,14 @@ function RegisterPage() {
   }
 
 
-  async function handleSubmit(event) {
+  async function handleSubmit(
+    event
+  ) {
     event.preventDefault();
 
     setError("");
     setLoading(true);
+
 
     try {
       await registerUser({
@@ -60,6 +76,7 @@ function RegisterPage() {
           formData.password,
       });
 
+
       navigate(
         "/login",
         {
@@ -71,9 +88,12 @@ function RegisterPage() {
           },
         }
       );
-    } catch (requestError) {
+    } catch (
+      requestError
+    ) {
       setError(
-        requestError instanceof Error
+        requestError instanceof
+        Error
           ? requestError.message
           : "Something went wrong"
       );
@@ -173,7 +193,9 @@ function RegisterPage() {
 
           <form
             className="auth-form"
-            onSubmit={handleSubmit}
+            onSubmit={
+              handleSubmit
+            }
           >
             <div className="auth-field">
               <label htmlFor="username">
@@ -194,7 +216,9 @@ function RegisterPage() {
                 minLength={8}
                 maxLength={30}
                 autoComplete="username"
-                disabled={loading}
+                disabled={
+                  loading
+                }
                 required
               />
             </div>
@@ -217,7 +241,9 @@ function RegisterPage() {
                 }
                 placeholder="name@example.com"
                 autoComplete="email"
-                disabled={loading}
+                disabled={
+                  loading
+                }
                 required
               />
             </div>
@@ -242,7 +268,9 @@ function RegisterPage() {
                 minLength={8}
                 maxLength={128}
                 autoComplete="new-password"
-                disabled={loading}
+                disabled={
+                  loading
+                }
                 required
               />
             </div>
@@ -261,7 +289,9 @@ function RegisterPage() {
             <button
               type="submit"
               className="auth-submit"
-              disabled={loading}
+              disabled={
+                loading
+              }
             >
               {loading
                 ? "Creating account..."

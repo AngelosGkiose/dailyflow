@@ -7,77 +7,112 @@ import {
 } from "react";
 
 import {
-  AUTH_CHANGED_EVENT,
-  getAccessToken,
-  removeAccessToken,
-  saveAccessToken,
-} from "../api/apiClient.js";
+  getCurrentUser,
+  loginUser,
+  logoutUser,
+} from "../api/authApi.js";
 
 
-const AuthContext = createContext(null);
+const AuthContext =
+  createContext(null);
 
 
-export function AuthProvider({ children }) {
-  const [isAuthenticated, setIsAuthenticated] =
-    useState(() => Boolean(getAccessToken()));
+export function AuthProvider({
+  children,
+}) {
+  const [
+    user,
+    setUser,
+  ] = useState(null);
+
+  const [
+    authLoading,
+    setAuthLoading,
+  ] = useState(true);
+
 
   useEffect(() => {
-    function synchronizeAuthentication() {
-      setIsAuthenticated(
-        Boolean(getAccessToken())
-      );
+    async function loadCurrentUser() {
+      try {
+        const currentUser =
+          await getCurrentUser();
+
+        setUser(
+          currentUser
+        );
+      } catch (requestError) {
+        if (
+          requestError?.status ===
+          401
+        ) {
+          setUser(null);
+        } else {
+          setUser(null);
+        }
+      } finally {
+        setAuthLoading(
+          false
+        );
+      }
     }
 
-    window.addEventListener(
-      AUTH_CHANGED_EVENT,
-      synchronizeAuthentication
-    );
 
-    window.addEventListener(
-      "storage",
-      synchronizeAuthentication
-    );
-
-    return () => {
-      window.removeEventListener(
-        AUTH_CHANGED_EVENT,
-        synchronizeAuthentication
-      );
-
-      window.removeEventListener(
-        "storage",
-        synchronizeAuthentication
-      );
-    };
+    loadCurrentUser();
   }, []);
 
 
-  function login(accessToken) {
-    saveAccessToken(accessToken);
+  async function login(
+    credentials
+  ) {
+    await loginUser(
+      credentials
+    );
 
-    setIsAuthenticated(true);
+    const currentUser =
+      await getCurrentUser();
+
+    setUser(
+      currentUser
+    );
+
+    return currentUser;
   }
 
 
-  function logout() {
-    removeAccessToken();
-
-    setIsAuthenticated(false);
+  async function logout() {
+    try {
+      await logoutUser();
+    } finally {
+      setUser(null);
+    }
   }
 
 
-  const contextValue = useMemo(
-    () => ({
-      isAuthenticated,
-      login,
-      logout,
-    }),
-    [isAuthenticated]
-  );
+  const isAuthenticated =
+    user !== null;
+
+
+  const contextValue =
+    useMemo(
+      () => ({
+        user,
+        isAuthenticated,
+        authLoading,
+        login,
+        logout,
+      }),
+      [
+        user,
+        isAuthenticated,
+        authLoading,
+      ]
+    );
 
 
   return (
-    <AuthContext.Provider value={contextValue}>
+    <AuthContext.Provider
+      value={contextValue}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -85,7 +120,10 @@ export function AuthProvider({ children }) {
 
 
 export function useAuth() {
-  const context = useContext(AuthContext);
+  const context =
+    useContext(
+      AuthContext
+    );
 
   if (!context) {
     throw new Error(

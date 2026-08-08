@@ -3,28 +3,21 @@ import {
 } from "./apiClient.js";
 
 
-export function getProjects(
-  onUnauthorized
-) {
+export function getProjects() {
   return apiRequest(
-    "/projects/",
-    {
-      onUnauthorized,
-    }
+    "/projects/"
   );
 }
 
 
 export function createProject(
-  projectData,
-  onUnauthorized
+  projectData
 ) {
   return apiRequest(
     "/projects/",
     {
       method: "POST",
       body: projectData,
-      onUnauthorized,
     }
   );
 }
@@ -32,29 +25,25 @@ export function createProject(
 
 export function updateProject(
   projectId,
-  projectData,
-  onUnauthorized
+  projectData
 ) {
   return apiRequest(
     `/projects/${projectId}`,
     {
       method: "PATCH",
       body: projectData,
-      onUnauthorized,
     }
   );
 }
 
 
 export function deleteProject(
-  projectId,
-  onUnauthorized
+  projectId
 ) {
   return apiRequest(
     `/projects/${projectId}`,
     {
       method: "DELETE",
-      onUnauthorized,
     }
   );
 }
