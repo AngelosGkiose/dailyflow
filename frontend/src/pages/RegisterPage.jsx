@@ -169,8 +169,7 @@ function RegisterPage() {
 
 
         <p className="auth-brand-footer">
-          DailyFlow productivity
-          workspace
+
         </p>
       </section>
 
