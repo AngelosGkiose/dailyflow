@@ -2,7 +2,6 @@ import Modal from "./Modal.jsx";
 
 import "../../styles/confirm-modal.css";
 
-
 function ConfirmModal({
   title,
   message,
@@ -13,15 +12,14 @@ function ConfirmModal({
 }) {
   return (
     <Modal
-      onClose={
-        loading
-          ? () => {}
-          : onCancel
-      }
+      onClose={onCancel}
       ariaLabel={title}
     >
       <div className="confirm-modal">
-        <div className="confirm-modal-icon">
+        <div
+          className="confirm-modal-icon"
+          aria-hidden="true"
+        >
           !
         </div>
 
@@ -38,7 +36,7 @@ function ConfirmModal({
         <div className="confirm-modal-actions">
           <button
             type="button"
-            className="confirm-modal-button confirm-modal-cancel"
+            className="button button-secondary"
             onClick={onCancel}
             disabled={loading}
           >
@@ -47,7 +45,7 @@ function ConfirmModal({
 
           <button
             type="button"
-            className="confirm-modal-button confirm-modal-delete"
+            className="button button-danger"
             onClick={onConfirm}
             disabled={loading}
           >
@@ -60,6 +58,5 @@ function ConfirmModal({
     </Modal>
   );
 }
-
 
 export default ConfirmModal;

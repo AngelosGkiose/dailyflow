@@ -10,7 +10,6 @@ import {
 
 import "../../styles/entity-form.css";
 
-
 function LabelForm({
   label = null,
   onLabelSaved,
@@ -18,7 +17,6 @@ function LabelForm({
 }) {
   const isEditing =
     label !== null;
-
 
   const [
     name,
@@ -37,7 +35,6 @@ function LabelForm({
     setError,
   ] = useState("");
 
-
   useEffect(() => {
     setName(
       label?.name ?? ""
@@ -48,18 +45,15 @@ function LabelForm({
     label,
   ]);
 
-
   async function handleSubmit(
     event
   ) {
     event.preventDefault();
 
-
     const normalizedName =
       name
         .trim()
         .toLowerCase();
-
 
     if (!normalizedName) {
       setError(
@@ -69,16 +63,13 @@ function LabelForm({
       return;
     }
 
-
     const labelData = {
       name:
         normalizedName,
     };
 
-
     setLoading(true);
     setError("");
-
 
     try {
       const savedLabel =
@@ -90,7 +81,6 @@ function LabelForm({
           : await createLabel(
               labelData
             );
-
 
       onLabelSaved(
         savedLabel
@@ -109,13 +99,10 @@ function LabelForm({
     }
   }
 
-
   return (
     <form
       className="entity-form"
-      onSubmit={
-        handleSubmit
-      }
+      onSubmit={handleSubmit}
     >
       <div className="entity-form-header">
         <div>
@@ -132,22 +119,16 @@ function LabelForm({
           </p>
         </div>
 
-
         <button
           type="button"
           className="entity-form-close"
-          onClick={
-            onCancel
-          }
-          disabled={
-            loading
-          }
+          onClick={onCancel}
+          disabled={loading}
           aria-label="Close label form"
         >
           ×
         </button>
       </div>
-
 
       <div className="entity-form-body">
         <div className="entity-form-field">
@@ -156,7 +137,7 @@ function LabelForm({
           </label>
 
           <div className="entity-label-input">
-            <span>
+            <span aria-hidden="true">
               #
             </span>
 
@@ -164,9 +145,7 @@ function LabelForm({
               id="label-name"
               name="name"
               type="text"
-              value={
-                name
-              }
+              value={name}
               onChange={(
                 event
               ) =>
@@ -179,15 +158,12 @@ function LabelForm({
               placeholder="important"
               minLength={1}
               maxLength={50}
-              disabled={
-                loading
-              }
+              disabled={loading}
               autoFocus
               required
             />
           </div>
         </div>
-
 
         {error && (
           <div
@@ -199,27 +175,20 @@ function LabelForm({
         )}
       </div>
 
-
       <div className="entity-form-footer">
         <button
           type="button"
-          className="entity-form-button entity-form-button-secondary"
-          onClick={
-            onCancel
-          }
-          disabled={
-            loading
-          }
+          className="button button-secondary"
+          onClick={onCancel}
+          disabled={loading}
         >
           Cancel
         </button>
 
         <button
           type="submit"
-          className="entity-form-button entity-form-button-primary"
-          disabled={
-            loading
-          }
+          className="button button-primary"
+          disabled={loading}
         >
           {loading
             ? isEditing
@@ -233,6 +202,5 @@ function LabelForm({
     </form>
   );
 }
-
 
 export default LabelForm;

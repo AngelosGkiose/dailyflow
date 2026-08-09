@@ -12,7 +12,6 @@
     var(--color-border);
 }
 
-
 .task-row {
   display: flex;
   align-items: flex-start;
@@ -27,14 +26,12 @@
 
   transition:
     background
-      var(--transition-fast);
+    var(--transition-fast);
 }
-
 
 .task-row:hover {
   background: #fafafe;
 }
-
 
 .task-complete-button {
   display: grid;
@@ -61,38 +58,53 @@
   font-size: 12px;
   font-weight: 700;
 
+  cursor: pointer;
+
   transition:
     background
-      var(--transition-fast),
+    var(--transition-fast),
     border-color
-      var(--transition-fast),
+    var(--transition-fast),
     transform
-      var(--transition-fast);
+    var(--transition-fast),
+    box-shadow
+    var(--transition-fast),
+    opacity
+    var(--transition-fast);
 }
-
 
 .task-complete-button:hover:not(:disabled) {
-  transform: scale(1.08);
+  transform:
+    scale(1.08);
 }
 
+.task-complete-button:focus-visible {
+  outline: none;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(108, 92, 231, 0.18);
+}
+
+.task-complete-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
 
 .task-complete-button.task-priority-high {
   border-color:
     var(--color-priority-high);
 }
 
-
 .task-complete-button.task-priority-medium {
   border-color:
     var(--color-priority-medium);
 }
 
-
 .task-complete-button.task-priority-low {
   border-color:
     var(--color-priority-low);
 }
-
 
 .task-row-completed
 .task-complete-button {
@@ -103,12 +115,10 @@
     var(--color-success);
 }
 
-
 .task-content {
   min-width: 0;
   flex: 1;
 }
-
 
 .task-main-row {
   display: flex;
@@ -118,11 +128,10 @@
   gap: 20px;
 }
 
-
 .task-text {
   min-width: 0;
+  flex: 1;
 }
-
 
 .task-title {
   margin: 0;
@@ -134,8 +143,9 @@
   font-weight: 600;
 
   line-height: 1.4;
-}
 
+  overflow-wrap: anywhere;
+}
 
 .task-description {
   margin: 4px 0 0;
@@ -145,8 +155,9 @@
 
   font-size: 13px;
   line-height: 1.5;
-}
 
+  overflow-wrap: anywhere;
+}
 
 .task-row-completed
 .task-title {
@@ -157,13 +168,11 @@
     line-through;
 }
 
-
 .task-row-completed
 .task-description {
   color:
     var(--color-text-muted);
 }
-
 
 .task-meta {
   display: flex;
@@ -177,30 +186,25 @@
   font-size: 12px;
 }
 
-
 .task-due-date {
   font-size: 12px;
   font-weight: 500;
 }
-
 
 .task-due-overdue {
   color:
     var(--color-danger);
 }
 
-
 .task-due-today {
   color:
     var(--color-success);
 }
 
-
 .task-due-future {
   color:
     var(--color-text-secondary);
 }
-
 
 .task-priority-badge {
   padding: 3px 7px;
@@ -214,7 +218,6 @@
     capitalize;
 }
 
-
 .task-priority-badge.priority-high {
   background:
     var(--color-danger-light);
@@ -223,14 +226,12 @@
     var(--color-priority-high);
 }
 
-
 .task-priority-badge.priority-medium {
   background: #fff7e6;
 
   color:
     var(--color-priority-medium);
 }
-
 
 .task-priority-badge.priority-low {
   background:
@@ -240,8 +241,9 @@
     var(--color-priority-low);
 }
 
-
 .task-label-badge {
+  max-width: 100%;
+
   padding: 3px 7px;
 
   border:
@@ -258,12 +260,15 @@
 
   font-size: 11px;
   font-weight: 500;
-}
 
+  overflow-wrap: anywhere;
+}
 
 .task-actions {
   display: flex;
   align-items: center;
+
+  flex-shrink: 0;
 
   gap: 4px;
 
@@ -271,15 +276,13 @@
 
   transition:
     opacity
-      var(--transition-fast);
+    var(--transition-fast);
 }
-
 
 .task-row:hover
 .task-actions {
   opacity: 1;
 }
-
 
 .task-action-button {
   display: grid;
@@ -300,8 +303,19 @@
     var(--color-text-secondary);
 
   font-size: 16px;
-}
 
+  cursor: pointer;
+
+  transition:
+    background
+    var(--transition-fast),
+    color
+    var(--transition-fast),
+    box-shadow
+    var(--transition-fast),
+    opacity
+    var(--transition-fast);
+}
 
 .task-action-button:hover:not(:disabled) {
   background:
@@ -311,6 +325,18 @@
     var(--color-text-primary);
 }
 
+.task-action-button:focus-visible {
+  outline: none;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(108, 92, 231, 0.18);
+}
+
+.task-action-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
 
 .task-delete-button:hover:not(:disabled) {
   background:
@@ -330,6 +356,8 @@
 
   gap: 14px;
 
+  min-height: 220px;
+
   padding: 72px 20px;
 
   color:
@@ -337,7 +365,6 @@
 
   text-align: center;
 }
-
 
 .task-loading-state strong {
   display: block;
@@ -350,13 +377,11 @@
   font-size: 14px;
 }
 
-
 .task-loading-state p {
   margin: 0;
 
   font-size: 12px;
 }
-
 
 .task-loading-spinner {
   width: 28px;
@@ -378,7 +403,6 @@
     infinite;
 }
 
-
 @keyframes task-spinner {
   to {
     transform:
@@ -390,11 +414,12 @@
 /* EMPTY STATE */
 
 .task-empty-state {
+  min-height: 220px;
+
   padding: 72px 20px;
 
   text-align: center;
 }
-
 
 .task-empty-icon {
   display: grid;
@@ -418,7 +443,6 @@
   font-weight: 700;
 }
 
-
 .task-empty-state h2 {
   margin:
     0 0 7px;
@@ -430,7 +454,6 @@
   font-weight: 700;
 }
 
-
 .task-empty-state p {
   max-width: 360px;
 
@@ -441,6 +464,8 @@
 
   font-size: 13px;
   line-height: 1.5;
+
+  overflow-wrap: anywhere;
 }
 
 
@@ -450,6 +475,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  min-height: 220px;
 
   padding: 56px 20px;
 
@@ -465,7 +492,6 @@
 
   text-align: center;
 }
-
 
 .task-error-icon {
   display: grid;
@@ -488,7 +514,6 @@
   font-weight: 700;
 }
 
-
 .task-error-state h2 {
   margin:
     0 0 6px;
@@ -498,7 +523,6 @@
 
   font-size: 17px;
 }
-
 
 .task-error-state p {
   max-width: 400px;
@@ -511,38 +535,8 @@
 
   font-size: 13px;
   line-height: 1.5;
-}
 
-
-.task-retry-button {
-  min-height: 38px;
-
-  padding:
-    7px 14px;
-
-  border:
-    1px solid
-    var(--color-danger);
-
-  border-radius:
-    var(--radius-medium);
-
-  background:
-    var(--color-surface);
-
-  color:
-    var(--color-danger);
-
-  font-size: 13px;
-  font-weight: 600;
-}
-
-
-.task-retry-button:hover {
-  background:
-    var(--color-danger);
-
-  color: white;
+  overflow-wrap: anywhere;
 }
 
 
@@ -554,16 +548,13 @@
       14px 2px;
   }
 
-
   .task-main-row {
     gap: 8px;
   }
 
-
   .task-actions {
     opacity: 1;
   }
-
 
   .task-action-button {
     width: 28px;
@@ -572,16 +563,13 @@
     font-size: 14px;
   }
 
-
   .task-title {
     font-size: 14px;
   }
 
-
   .task-description {
     font-size: 12px;
   }
-
 
   .task-meta {
     gap: 5px;
@@ -589,13 +577,11 @@
     margin-top: 7px;
   }
 
-
   .task-empty-state,
   .task-loading-state {
     padding:
       54px 16px;
   }
-
 
   .task-error-state {
     padding:

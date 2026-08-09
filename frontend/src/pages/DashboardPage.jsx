@@ -53,36 +53,50 @@ function DashboardPage() {
     logout,
   } = useAuth();
 
-  const [activeView, setActiveView] =
-    useState("today");
+  const [
+    activeView,
+    setActiveView,
+  ] = useState("today");
 
   const [
     isSidebarOpen,
     setIsSidebarOpen,
   ] = useState(false);
 
-  const [searchQuery, setSearchQuery] =
-    useState("");
+  const [
+    searchQuery,
+    setSearchQuery,
+  ] = useState("");
 
-  const [filters, setFilters] =
-    useState({
-      priority: "",
-      dueDate: "",
-      sortBy: "created_at",
-      order: "desc",
-    });
+  const [
+    filters,
+    setFilters,
+  ] = useState({
+    priority: "",
+    dueDate: "",
+    sortBy: "created_at",
+    order: "desc",
+  });
 
-  const [showFilters, setShowFilters] =
-    useState(false);
+  const [
+    showFilters,
+    setShowFilters,
+  ] = useState(false);
 
-  const [page, setPage] =
-    useState(1);
+  const [
+    page,
+    setPage,
+  ] = useState(1);
 
-  const [pageSize, setPageSize] =
-    useState(10);
+  const [
+    pageSize,
+    setPageSize,
+  ] = useState(10);
 
-  const [total, setTotal] =
-    useState(0);
+  const [
+    total,
+    setTotal,
+  ] = useState(0);
 
   const [
     totalPages,
@@ -114,14 +128,20 @@ function DashboardPage() {
     setEditingLabel,
   ] = useState(null);
 
-  const [tasks, setTasks] =
-    useState([]);
+  const [
+    tasks,
+    setTasks,
+  ] = useState([]);
 
-  const [projects, setProjects] =
-    useState([]);
+  const [
+    projects,
+    setProjects,
+  ] = useState([]);
 
-  const [labels, setLabels] =
-    useState([]);
+  const [
+    labels,
+    setLabels,
+  ] = useState([]);
 
   const [
     showTaskForm,
@@ -138,8 +158,10 @@ function DashboardPage() {
     setShowLabelForm,
   ] = useState(false);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [
+    loading,
+    setLoading,
+  ] = useState(true);
 
   const [
     projectsLoading,
@@ -151,8 +173,10 @@ function DashboardPage() {
     setLabelsLoading,
   ] = useState(true);
 
-  const [error, setError] =
-    useState("");
+  const [
+    error,
+    setError,
+  ] = useState("");
 
   const [
     projectsError,
@@ -218,8 +242,9 @@ function DashboardPage() {
           ...taskItems,
         ];
 
-
-        if (filters.priority) {
+        if (
+          filters.priority
+        ) {
           filteredTasks =
             filteredTasks.filter(
               (task) =>
@@ -228,12 +253,15 @@ function DashboardPage() {
             );
         }
 
-
-        if (filters.dueDate) {
+        if (
+          filters.dueDate
+        ) {
           filteredTasks =
             filteredTasks.filter(
               (task) => {
-                if (!task.due_date) {
+                if (
+                  !task.due_date
+                ) {
                   return false;
                 }
 
@@ -252,7 +280,6 @@ function DashboardPage() {
             );
         }
 
-
         filteredTasks.sort(
           (
             firstTask,
@@ -260,7 +287,6 @@ function DashboardPage() {
           ) => {
             let firstValue;
             let secondValue;
-
 
             if (
               filters.sortBy ===
@@ -316,7 +342,6 @@ function DashboardPage() {
                   : 0;
             }
 
-
             if (
               firstValue <
               secondValue
@@ -328,7 +353,6 @@ function DashboardPage() {
                   : 1
               );
             }
-
 
             if (
               firstValue >
@@ -342,7 +366,6 @@ function DashboardPage() {
               );
             }
 
-
             return (
               firstTask.id -
               secondTask.id
@@ -350,10 +373,11 @@ function DashboardPage() {
           }
         );
 
-
         return filteredTasks;
       },
-      [filters]
+      [
+        filters,
+      ]
     );
 
 
@@ -371,7 +395,6 @@ function DashboardPage() {
                 pageSize
               );
 
-
         if (
           calculatedTotalPages >
             0 &&
@@ -385,18 +408,17 @@ function DashboardPage() {
           return null;
         }
 
-
         const offset =
           (page - 1) *
           pageSize;
 
-
-        setTotal(itemTotal);
+        setTotal(
+          itemTotal
+        );
 
         setTotalPages(
           calculatedTotalPages
         );
-
 
         return taskItems.slice(
           offset,
@@ -433,7 +455,6 @@ function DashboardPage() {
           pageSize,
       };
 
-
       if (
         activeView ===
           "project" &&
@@ -449,7 +470,6 @@ function DashboardPage() {
             "pending",
         };
       }
-
 
       if (
         activeView ===
@@ -467,7 +487,6 @@ function DashboardPage() {
         };
       }
 
-
       if (
         activeView ===
           "search" &&
@@ -481,7 +500,6 @@ function DashboardPage() {
         };
       }
 
-
       if (
         activeView ===
         "completed"
@@ -493,7 +511,6 @@ function DashboardPage() {
             "completed",
         };
       }
-
 
       return parameters;
     }, [
@@ -522,7 +539,6 @@ function DashboardPage() {
           return;
         }
 
-
         setRequestError(
           requestError instanceof
           Error
@@ -542,7 +558,6 @@ function DashboardPage() {
       setLoading(true);
       setError("");
 
-
       try {
         const isServerPaginatedView =
           activeView ===
@@ -554,7 +569,6 @@ function DashboardPage() {
           activeView ===
             "completed";
 
-
         if (
           isServerPaginatedView
         ) {
@@ -563,14 +577,12 @@ function DashboardPage() {
               getServerTaskParameters()
             );
 
-
           const responseTotalPages =
             typeof data
               ?.total_pages ===
               "number"
               ? data.total_pages
               : 0;
-
 
           if (
             responseTotalPages >
@@ -585,7 +597,6 @@ function DashboardPage() {
             return;
           }
 
-
           setTasks(
             Array.isArray(
               data?.items
@@ -594,14 +605,12 @@ function DashboardPage() {
               : []
           );
 
-
           setTotal(
             typeof data?.total ===
               "number"
               ? data.total
               : 0
           );
-
 
           setTotalPages(
             responseTotalPages
@@ -610,9 +619,7 @@ function DashboardPage() {
           return;
         }
 
-
         let data;
-
 
         if (
           activeView ===
@@ -631,24 +638,20 @@ function DashboardPage() {
             await getTodayTasks();
         }
 
-
         const taskItems =
           Array.isArray(data)
             ? data
             : [];
-
 
         const filteredTasks =
           applyLocalFiltersAndSorting(
             taskItems
           );
 
-
         const paginatedTasks =
           paginateLocalTasks(
             filteredTasks
           );
-
 
         if (
           paginatedTasks !==
@@ -686,7 +689,6 @@ function DashboardPage() {
       setProjectsLoading(true);
       setProjectsError("");
 
-
       try {
         const data =
           await getProjects();
@@ -715,7 +717,6 @@ function DashboardPage() {
     useCallback(async () => {
       setLabelsLoading(true);
       setLabelsError("");
-
 
       try {
         const data =
@@ -769,12 +770,10 @@ function DashboardPage() {
       }
     }
 
-
     window.addEventListener(
       "resize",
       handleResize
     );
-
 
     return () => {
       window.removeEventListener(
@@ -794,7 +793,6 @@ function DashboardPage() {
 
     setError("");
 
-
     try {
       if (
         task.status ===
@@ -808,7 +806,6 @@ function DashboardPage() {
           task.id
         );
       }
-
 
       if (
         tasks.length === 1 &&
@@ -892,28 +889,27 @@ function DashboardPage() {
 
     setError("");
 
-
     try {
       await deleteTask(
         task.id
       );
 
-
       if (
         editingTask?.id ===
         task.id
       ) {
-        setEditingTask(null);
+        setEditingTask(
+          null
+        );
+
         setShowTaskForm(
           false
         );
       }
 
-
       setDeleteConfirmation(
         null
       );
-
 
       if (
         tasks.length === 1 &&
@@ -956,12 +952,10 @@ function DashboardPage() {
 
     setProjectsError("");
 
-
     try {
       await deleteProject(
         project.id
       );
-
 
       setProjects(
         (
@@ -975,7 +969,6 @@ function DashboardPage() {
               project.id
           )
       );
-
 
       if (
         selectedProject?.id ===
@@ -992,7 +985,6 @@ function DashboardPage() {
         setPage(1);
         setTasks([]);
       }
-
 
       setDeleteConfirmation(
         null
@@ -1025,12 +1017,10 @@ function DashboardPage() {
 
     setLabelsError("");
 
-
     try {
       await deleteLabel(
         label.id
       );
-
 
       setLabels(
         (
@@ -1044,7 +1034,6 @@ function DashboardPage() {
               label.id
           )
       );
-
 
       if (
         selectedLabel?.id ===
@@ -1061,7 +1050,6 @@ function DashboardPage() {
         setPage(1);
         setTasks([]);
       }
-
 
       setDeleteConfirmation(
         null
@@ -1092,15 +1080,14 @@ function DashboardPage() {
       return;
     }
 
-
     const {
       type,
       item,
     } = deleteConfirmation;
 
-
     if (
-      type === "task"
+      type ===
+      "task"
     ) {
       await deleteTaskConfirmed(
         item
@@ -1109,9 +1096,9 @@ function DashboardPage() {
       return;
     }
 
-
     if (
-      type === "project"
+      type ===
+      "project"
     ) {
       await deleteProjectConfirmed(
         item
@@ -1120,9 +1107,9 @@ function DashboardPage() {
       return;
     }
 
-
     if (
-      type === "label"
+      type ===
+      "label"
     ) {
       await deleteLabelConfirmed(
         item
@@ -1140,7 +1127,6 @@ function DashboardPage() {
       null
     );
 
-
     if (
       page !== 1
     ) {
@@ -1148,7 +1134,6 @@ function DashboardPage() {
 
       return;
     }
-
 
     await loadTasks();
   }
@@ -1165,9 +1150,7 @@ function DashboardPage() {
       null
     );
 
-
     await loadProjects();
-
 
     if (
       selectedProject?.id ===
@@ -1191,9 +1174,7 @@ function DashboardPage() {
       null
     );
 
-
     await loadLabels();
-
 
     if (
       selectedLabel?.id ===
@@ -1295,10 +1276,15 @@ function DashboardPage() {
     );
 
     setSearchQuery("");
+
     setSelectedProject(
       project
     );
-    setSelectedLabel(null);
+
+    setSelectedLabel(
+      null
+    );
+
     setPage(1);
 
     closeAllForms();
@@ -1313,10 +1299,15 @@ function DashboardPage() {
     );
 
     setSearchQuery("");
+
     setSelectedLabel(
       label
     );
-    setSelectedProject(null);
+
+    setSelectedProject(
+      null
+    );
+
     setPage(1);
 
     closeAllForms();
@@ -1334,8 +1325,14 @@ function DashboardPage() {
       "search"
     );
 
-    setSelectedProject(null);
-    setSelectedLabel(null);
+    setSelectedProject(
+      null
+    );
+
+    setSelectedLabel(
+      null
+    );
+
     setPage(1);
 
     closeAllForms();
@@ -1344,11 +1341,19 @@ function DashboardPage() {
 
   function handleClearSearch() {
     setSearchQuery("");
+
     setActiveView(
       "today"
     );
-    setSelectedProject(null);
-    setSelectedLabel(null);
+
+    setSelectedProject(
+      null
+    );
+
+    setSelectedLabel(
+      null
+    );
+
     setPage(1);
 
     closeAllForms();
@@ -1397,9 +1402,11 @@ function DashboardPage() {
     project
   ) {
     setEditingTask(null);
+
     setEditingProject(
       project
     );
+
     setEditingLabel(null);
 
     setShowProjectForm(true);
@@ -1423,9 +1430,11 @@ function DashboardPage() {
     label
   ) {
     setEditingTask(null);
+
     setEditingLabel(
       label
     );
+
     setEditingProject(null);
 
     setShowLabelForm(true);
@@ -1478,7 +1487,6 @@ function DashboardPage() {
       );
     }
 
-
     if (
       activeView ===
         "label" &&
@@ -1489,7 +1497,6 @@ function DashboardPage() {
       );
     }
 
-
     if (
       activeView ===
       "search"
@@ -1499,14 +1506,12 @@ function DashboardPage() {
       );
     }
 
-
     if (
       activeView ===
       "inbox"
     ) {
       return "Inbox";
     }
-
 
     if (
       activeView ===
@@ -1515,14 +1520,12 @@ function DashboardPage() {
       return "Upcoming";
     }
 
-
     if (
       activeView ===
       "completed"
     ) {
       return "Completed";
     }
-
 
     return "Today";
   }
@@ -1535,15 +1538,14 @@ function DashboardPage() {
       return null;
     }
 
-
     const {
       type,
       item,
     } = deleteConfirmation;
 
-
     if (
-      type === "task"
+      type ===
+      "task"
     ) {
       return {
         title:
@@ -1558,9 +1560,9 @@ function DashboardPage() {
       };
     }
 
-
     if (
-      type === "project"
+      type ===
+      "project"
     ) {
       return {
         title:
@@ -1574,7 +1576,6 @@ function DashboardPage() {
           item.id,
       };
     }
-
 
     return {
       title:
@@ -1713,15 +1714,20 @@ function DashboardPage() {
               <div className="dashboard-header-left">
                 <button
                   type="button"
-                  className="dashboard-mobile-menu"
+                  className="button button-secondary button-icon dashboard-mobile-menu"
                   onClick={() =>
                     setIsSidebarOpen(
                       true
                     )
                   }
                   aria-label="Open sidebar"
+                  aria-expanded={
+                    isSidebarOpen
+                  }
                 >
-                  ☰
+                  <span aria-hidden="true">
+                    ☰
+                  </span>
                 </button>
 
                 <h1 className="dashboard-title">
@@ -1733,7 +1739,7 @@ function DashboardPage() {
               <div className="dashboard-actions">
                 <button
                   type="button"
-                  className="dashboard-button"
+                  className="button button-secondary"
                   onClick={() =>
                     setShowFilters(
                       (
@@ -1741,6 +1747,9 @@ function DashboardPage() {
                       ) =>
                         !currentValue
                     )
+                  }
+                  aria-expanded={
+                    showFilters
                   }
                 >
                   {showFilters
@@ -1751,7 +1760,7 @@ function DashboardPage() {
                 {canCreateTask && (
                   <button
                     type="button"
-                    className="dashboard-button dashboard-button-primary"
+                    className="button button-primary"
                     onClick={
                       handleAddTask
                     }

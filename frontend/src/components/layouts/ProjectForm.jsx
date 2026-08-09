@@ -10,7 +10,6 @@ import {
 
 import "../../styles/entity-form.css";
 
-
 function ProjectForm({
   project = null,
   onProjectSaved,
@@ -18,7 +17,6 @@ function ProjectForm({
 }) {
   const isEditing =
     project !== null;
-
 
   const [
     formData,
@@ -28,10 +26,8 @@ function ProjectForm({
       project?.name ?? "",
 
     description:
-      project?.description ??
-      "",
+      project?.description ?? "",
   });
-
 
   const [
     loading,
@@ -43,23 +39,19 @@ function ProjectForm({
     setError,
   ] = useState("");
 
-
   useEffect(() => {
     setFormData({
       name:
-        project?.name ??
-        "",
+        project?.name ?? "",
 
       description:
-        project?.description ??
-        "",
+        project?.description ?? "",
     });
 
     setError("");
   }, [
     project,
   ]);
-
 
   function handleChange(
     event
@@ -79,16 +71,13 @@ function ProjectForm({
     );
   }
 
-
   async function handleSubmit(
     event
   ) {
     event.preventDefault();
 
-
     const projectName =
       formData.name.trim();
-
 
     if (!projectName) {
       setError(
@@ -97,7 +86,6 @@ function ProjectForm({
 
       return;
     }
-
 
     const projectData = {
       name:
@@ -109,10 +97,8 @@ function ProjectForm({
         null,
     };
 
-
     setLoading(true);
     setError("");
-
 
     try {
       const savedProject =
@@ -124,7 +110,6 @@ function ProjectForm({
           : await createProject(
               projectData
             );
-
 
       onProjectSaved(
         savedProject
@@ -143,13 +128,10 @@ function ProjectForm({
     }
   }
 
-
   return (
     <form
       className="entity-form"
-      onSubmit={
-        handleSubmit
-      }
+      onSubmit={handleSubmit}
     >
       <div className="entity-form-header">
         <div>
@@ -166,22 +148,16 @@ function ProjectForm({
           </p>
         </div>
 
-
         <button
           type="button"
           className="entity-form-close"
-          onClick={
-            onCancel
-          }
-          disabled={
-            loading
-          }
+          onClick={onCancel}
+          disabled={loading}
           aria-label="Close project form"
         >
           ×
         </button>
       </div>
-
 
       <div className="entity-form-body">
         <div className="entity-form-field">
@@ -193,23 +169,16 @@ function ProjectForm({
             id="project-name"
             name="name"
             type="text"
-            value={
-              formData.name
-            }
-            onChange={
-              handleChange
-            }
+            value={formData.name}
+            onChange={handleChange}
             placeholder="e.g. University"
             minLength={1}
             maxLength={100}
-            disabled={
-              loading
-            }
+            disabled={loading}
             autoFocus
             required
           />
         </div>
-
 
         <div className="entity-form-field">
           <label htmlFor="project-description">
@@ -222,18 +191,13 @@ function ProjectForm({
             value={
               formData.description
             }
-            onChange={
-              handleChange
-            }
+            onChange={handleChange}
             placeholder="Optional description..."
             maxLength={500}
             rows={4}
-            disabled={
-              loading
-            }
+            disabled={loading}
           />
         </div>
-
 
         {error && (
           <div
@@ -245,27 +209,20 @@ function ProjectForm({
         )}
       </div>
 
-
       <div className="entity-form-footer">
         <button
           type="button"
-          className="entity-form-button entity-form-button-secondary"
-          onClick={
-            onCancel
-          }
-          disabled={
-            loading
-          }
+          className="button button-secondary"
+          onClick={onCancel}
+          disabled={loading}
         >
           Cancel
         </button>
 
         <button
           type="submit"
-          className="entity-form-button entity-form-button-primary"
-          disabled={
-            loading
-          }
+          className="button button-primary"
+          disabled={loading}
         >
           {loading
             ? isEditing
@@ -279,6 +236,5 @@ function ProjectForm({
     </form>
   );
 }
-
 
 export default ProjectForm;

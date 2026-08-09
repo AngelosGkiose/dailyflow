@@ -9,6 +9,7 @@ import {
 } from "./context/AuthContext.jsx";
 
 import "./index.css";
+import "./styles/buttons.css";
 
 
 createRoot(

@@ -5,7 +5,6 @@
     var(--color-surface);
 }
 
-
 .entity-form-header {
   display: flex;
   align-items: flex-start;
@@ -20,7 +19,6 @@
     var(--color-border);
 }
 
-
 .entity-form-header h2 {
   margin: 0 0 5px;
 
@@ -29,8 +27,9 @@
 
   font-size: 21px;
   font-weight: 700;
-}
 
+  overflow-wrap: anywhere;
+}
 
 .entity-form-header p {
   margin: 0;
@@ -39,8 +38,9 @@
     var(--color-text-secondary);
 
   font-size: 13px;
-}
 
+  overflow-wrap: anywhere;
+}
 
 .entity-form-close {
   display: grid;
@@ -64,10 +64,11 @@
 
   font-size: 24px;
   line-height: 1;
+
+  cursor: pointer;
 }
 
-
-.entity-form-close:hover {
+.entity-form-close:not(:disabled):hover {
   background:
     var(--color-surface-secondary);
 
@@ -75,6 +76,18 @@
     var(--color-text-primary);
 }
 
+.entity-form-close:focus-visible {
+  outline: none;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(108, 92, 231, 0.18);
+}
+
+.entity-form-close:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
 
 .entity-form-body {
   display: flex;
@@ -85,14 +98,12 @@
   padding: 24px 26px;
 }
 
-
 .entity-form-field {
   display: flex;
   flex-direction: column;
 
   gap: 7px;
 }
-
 
 .entity-form-field label {
   color:
@@ -101,7 +112,6 @@
   font-size: 13px;
   font-weight: 600;
 }
-
 
 .entity-form-field input,
 .entity-form-field textarea {
@@ -126,18 +136,16 @@
 
   transition:
     border-color
-      var(--transition-fast),
+    var(--transition-fast),
     box-shadow
-      var(--transition-fast);
+    var(--transition-fast);
 }
-
 
 .entity-form-field textarea {
   min-height: 100px;
 
   resize: vertical;
 }
-
 
 .entity-form-field input:focus,
 .entity-form-field textarea:focus {
@@ -149,13 +157,17 @@
     rgba(108, 92, 231, 0.10);
 }
 
-
 .entity-form-field input::placeholder,
 .entity-form-field textarea::placeholder {
   color:
     var(--color-text-muted);
 }
 
+.entity-form-field input:disabled,
+.entity-form-field textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
 
 .entity-label-input {
   display: flex;
@@ -173,11 +185,10 @@
 
   transition:
     border-color
-      var(--transition-fast),
+    var(--transition-fast),
     box-shadow
-      var(--transition-fast);
+    var(--transition-fast);
 }
-
 
 .entity-label-input:focus-within {
   border-color:
@@ -188,7 +199,6 @@
     rgba(108, 92, 231, 0.10);
 }
 
-
 .entity-label-input span {
   padding-left: 12px;
 
@@ -198,20 +208,17 @@
   font-weight: 700;
 }
 
-
 .entity-label-input input {
   border: 0;
 
   box-shadow: none;
 }
 
-
 .entity-label-input input:focus {
   border: 0;
 
   box-shadow: none;
 }
-
 
 .entity-form-error {
   padding: 11px 13px;
@@ -230,8 +237,9 @@
     var(--color-danger);
 
   font-size: 13px;
-}
 
+  overflow-wrap: anywhere;
+}
 
 .entity-form-footer {
   display: flex;
@@ -248,79 +256,23 @@
   background: #fafafe;
 }
 
-
-.entity-form-button {
-  min-height: 40px;
-
-  padding: 8px 16px;
-
-  border-radius:
-    var(--radius-medium);
-
-  font-weight: 600;
-
-  transition:
-    background
-      var(--transition-fast),
-    border-color
-      var(--transition-fast);
-}
-
-
-.entity-form-button-secondary {
-  border:
-    1px solid
-    var(--color-border-strong);
-
-  background:
-    var(--color-surface);
-
-  color:
-    var(--color-text-primary);
-}
-
-
-.entity-form-button-secondary:hover {
-  background:
-    var(--color-surface-secondary);
-}
-
-
-.entity-form-button-primary {
-  border:
-    1px solid
-    var(--color-primary);
-
-  background:
-    var(--color-primary);
-
-  color: white;
-}
-
-
-.entity-form-button-primary:hover {
-  border-color:
-    var(--color-primary-hover);
-
-  background:
-    var(--color-primary-hover);
-}
-
-
 @media (max-width: 600px) {
   .entity-form-header {
-    padding: 20px 18px 16px;
+    padding:
+      20px 18px 16px;
   }
 
   .entity-form-body {
-    padding: 20px 18px;
+    padding:
+      20px 18px;
   }
 
   .entity-form-footer {
-    padding: 16px 18px;
+    padding:
+      16px 18px;
   }
 
-  .entity-form-footer button {
+  .entity-form-footer .button {
     flex: 1;
   }
 }

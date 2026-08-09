@@ -2,7 +2,6 @@
   padding: 28px;
 }
 
-
 .confirm-modal-icon {
   display: grid;
   place-items: center;
@@ -24,7 +23,6 @@
   font-weight: 700;
 }
 
-
 .confirm-modal-content h2 {
   margin:
     0 0 8px;
@@ -34,8 +32,9 @@
 
   font-size: 20px;
   font-weight: 700;
-}
 
+  overflow-wrap: anywhere;
+}
 
 .confirm-modal-content p {
   margin: 0;
@@ -45,8 +44,9 @@
 
   font-size: 14px;
   line-height: 1.55;
-}
 
+  overflow-wrap: anywhere;
+}
 
 .confirm-modal-actions {
   display: flex;
@@ -57,74 +57,16 @@
   margin-top: 26px;
 }
 
-
-.confirm-modal-button {
-  min-height: 40px;
-
-  padding:
-    8px 16px;
-
-  border-radius:
-    var(--radius-medium);
-
-  font-weight: 600;
-
-  transition:
-    background var(--transition-fast),
-    border-color var(--transition-fast);
-}
-
-
-.confirm-modal-cancel {
-  border:
-    1px solid
-    var(--color-border-strong);
-
-  background:
-    var(--color-surface);
-
-  color:
-    var(--color-text-primary);
-}
-
-
-.confirm-modal-cancel:hover:not(:disabled) {
-  background:
-    var(--color-surface-secondary);
-}
-
-
-.confirm-modal-delete {
-  border:
-    1px solid
-    var(--color-danger);
-
-  background:
-    var(--color-danger);
-
-  color: white;
-}
-
-
-.confirm-modal-delete:hover:not(:disabled) {
-  background: #cf3d42;
-
-  border-color: #cf3d42;
-}
-
-
 @media (max-width: 500px) {
   .confirm-modal {
     padding: 22px 18px;
   }
 
-
   .confirm-modal-actions {
     flex-direction: column-reverse;
   }
 
-
-  .confirm-modal-button {
+  .confirm-modal-actions .button {
     width: 100%;
   }
 }

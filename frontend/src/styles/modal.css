@@ -13,22 +13,27 @@
   background:
     rgba(20, 17, 28, 0.48);
 
-  backdrop-filter: blur(3px);
+  backdrop-filter:
+    blur(3px);
 }
-
 
 .modal-container {
   width: 100%;
+
   max-width: 620px;
-  max-height: calc(100vh - 48px);
+  max-height:
+    calc(100vh - 48px);
 
   overflow-y: auto;
 
-  border: 1px solid
+  border:
+    1px solid
     var(--color-border);
 
   border-radius:
     var(--radius-large);
+
+  outline: none;
 
   background:
     var(--color-surface);
@@ -37,13 +42,22 @@
     var(--shadow-medium);
 
   animation:
-    modal-enter 160ms ease;
+    modal-enter
+    160ms
+    ease;
 }
 
+.modal-container:focus-visible {
+  box-shadow:
+    var(--shadow-medium),
+    0 0 0 3px
+    rgba(108, 92, 231, 0.18);
+}
 
 @keyframes modal-enter {
   from {
     opacity: 0;
+
     transform:
       translateY(10px)
       scale(0.98);
@@ -51,12 +65,21 @@
 
   to {
     opacity: 1;
+
     transform:
       translateY(0)
       scale(1);
   }
 }
 
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+  .modal-container {
+    animation: none;
+  }
+}
 
 @media (max-width: 600px) {
   .modal-overlay {

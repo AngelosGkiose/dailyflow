@@ -67,7 +67,6 @@ function TaskForm({
   const isEditing =
     task !== null;
 
-
   const [
     formData,
     setFormData,
@@ -113,7 +112,6 @@ function TaskForm({
           label.id
       ) ?? [],
   });
-
 
   const [
     loading,
@@ -209,7 +207,6 @@ function TaskForm({
     const isChecked =
       event.target.checked;
 
-
     setFormData(
       (
         currentFormData
@@ -250,7 +247,6 @@ function TaskForm({
           )
       );
 
-
     const labelsToRemove =
       originalLabelIds.filter(
         (labelId) =>
@@ -258,7 +254,6 @@ function TaskForm({
             labelId
           )
       );
-
 
     for (
       const labelId of
@@ -269,7 +264,6 @@ function TaskForm({
         labelId
       );
     }
-
 
     for (
       const labelId of
@@ -288,10 +282,8 @@ function TaskForm({
   ) {
     event.preventDefault();
 
-
     const title =
       formData.title.trim();
-
 
     if (!title) {
       setError(
@@ -300,7 +292,6 @@ function TaskForm({
 
       return;
     }
-
 
     const taskData = {
       title,
@@ -328,10 +319,8 @@ function TaskForm({
           : null,
     };
 
-
     setLoading(true);
     setError("");
-
 
     try {
       const savedTask =
@@ -344,7 +333,6 @@ function TaskForm({
               taskData
             );
 
-
       const originalLabelIds =
         isEditing
           ? task.labels?.map(
@@ -353,13 +341,11 @@ function TaskForm({
             ) ?? []
           : [];
 
-
       await synchronizeTaskLabels(
         savedTask.id,
         originalLabelIds,
         formData.label_ids
       );
-
 
       onTaskSaved(
         savedTask
@@ -382,9 +368,7 @@ function TaskForm({
   return (
     <form
       className="task-form"
-      onSubmit={
-        handleSubmit
-      }
+      onSubmit={handleSubmit}
     >
       <div className="task-form-header">
         <div>
@@ -400,7 +384,6 @@ function TaskForm({
               : "Create a new task and organize it."}
           </p>
         </div>
-
 
         <button
           type="button"
@@ -425,18 +408,12 @@ function TaskForm({
             id="task-title"
             name="title"
             type="text"
-            value={
-              formData.title
-            }
-            onChange={
-              handleChange
-            }
+            value={formData.title}
+            onChange={handleChange}
             placeholder="What needs to be done?"
             minLength={1}
             maxLength={100}
-            disabled={
-              loading
-            }
+            disabled={loading}
             autoFocus
             required
           />
@@ -454,15 +431,11 @@ function TaskForm({
             value={
               formData.description
             }
-            onChange={
-              handleChange
-            }
+            onChange={handleChange}
             maxLength={500}
             placeholder="Add more details..."
             rows={4}
-            disabled={
-              loading
-            }
+            disabled={loading}
           />
         </div>
 
@@ -480,15 +453,10 @@ function TaskForm({
               value={
                 formData.due_date
               }
-              onChange={
-                handleChange
-              }
-              disabled={
-                loading
-              }
+              onChange={handleChange}
+              disabled={loading}
             />
           </div>
-
 
           <div className="task-form-field">
             <label htmlFor="task-priority">
@@ -501,12 +469,8 @@ function TaskForm({
               value={
                 formData.priority
               }
-              onChange={
-                handleChange
-              }
-              disabled={
-                loading
-              }
+              onChange={handleChange}
+              disabled={loading}
             >
               <option value="low">
                 Low
@@ -535,12 +499,8 @@ function TaskForm({
             value={
               formData.project_id
             }
-            onChange={
-              handleChange
-            }
-            disabled={
-              loading
-            }
+            onChange={handleChange}
+            disabled={loading}
           >
             <option value="">
               Inbox — No project
@@ -549,9 +509,7 @@ function TaskForm({
             {projects.map(
               (project) => (
                 <option
-                  key={
-                    project.id
-                  }
+                  key={project.id}
                   value={
                     String(
                       project.id
@@ -571,8 +529,7 @@ function TaskForm({
             Labels
           </legend>
 
-          {labels.length ===
-          0 ? (
+          {labels.length === 0 ? (
             <p className="task-form-labels-empty">
               No labels available.
             </p>
@@ -589,9 +546,7 @@ function TaskForm({
 
                   return (
                     <label
-                      key={
-                        label.id
-                      }
+                      key={label.id}
                       className={
                         isSelected
                           ? "task-form-label-option selected"
@@ -600,18 +555,14 @@ function TaskForm({
                     >
                       <input
                         type="checkbox"
-                        value={
-                          label.id
-                        }
+                        value={label.id}
                         checked={
                           isSelected
                         }
                         onChange={
                           handleLabelChange
                         }
-                        disabled={
-                          loading
-                        }
+                        disabled={loading}
                       />
 
                       #
@@ -640,21 +591,17 @@ function TaskForm({
       <div className="task-form-footer">
         <button
           type="button"
-          className="task-form-button task-form-button-secondary"
+          className="button button-secondary"
           onClick={onCancel}
-          disabled={
-            loading
-          }
+          disabled={loading}
         >
           Cancel
         </button>
 
         <button
           type="submit"
-          className="task-form-button task-form-button-primary"
-          disabled={
-            loading
-          }
+          className="button button-primary"
+          disabled={loading}
         >
           {loading
             ? isEditing

@@ -14,7 +14,9 @@ function PaginationControls({
   }
 
   const firstItem =
-    (page - 1) * pageSize + 1;
+    (page - 1) *
+    pageSize +
+    1;
 
   const lastItem =
     Math.min(
@@ -23,23 +25,35 @@ function PaginationControls({
     );
 
 
-  function handlePageSizeChange(event) {
+  function handlePageSizeChange(
+    event
+  ) {
     onPageSizeChange(
-      Number(event.target.value)
+      Number(
+        event.target.value
+      )
     );
   }
 
 
   return (
-    <div className="pagination">
+    <div
+      className="pagination"
+      aria-label="Task pagination"
+    >
       <div className="pagination-summary">
         Showing{" "}
-        <strong>{firstItem}</strong>
-        {" - "}
-        <strong>{lastItem}</strong>
+        <strong>
+          {firstItem}
+          {" - "}
+          {lastItem}
+        </strong>
         {" of "}
-        <strong>{total}</strong>
+        <strong>
+          {total}
+        </strong>
       </div>
+
 
       <div className="pagination-controls">
         <div className="pagination-size">
@@ -72,19 +86,28 @@ function PaginationControls({
           </select>
         </div>
 
+
         <div className="pagination-navigation">
           <button
             type="button"
-            className="pagination-button"
+            className="button button-secondary button-icon button-small"
             onClick={() =>
-              onPageChange(page - 1)
+              onPageChange(
+                page - 1
+              )
             }
             disabled={page <= 1}
+            aria-label="Previous page"
           >
-            ←
+            <span aria-hidden="true">
+              ←
+            </span>
           </button>
 
-          <span className="pagination-page">
+          <span
+            className="pagination-page"
+            aria-live="polite"
+          >
             {totalPages === 0
               ? "0 / 0"
               : `${page} / ${totalPages}`}
@@ -92,16 +115,21 @@ function PaginationControls({
 
           <button
             type="button"
-            className="pagination-button"
+            className="button button-secondary button-icon button-small"
             onClick={() =>
-              onPageChange(page + 1)
+              onPageChange(
+                page + 1
+              )
             }
             disabled={
               totalPages === 0 ||
               page >= totalPages
             }
+            aria-label="Next page"
           >
-            →
+            <span aria-hidden="true">
+              →
+            </span>
           </button>
         </div>
       </div>
