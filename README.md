@@ -8,6 +8,46 @@ A React frontend is included as a client for interacting with the API.
 
 ---
 
+## Application Preview
+
+![DailyFlow Dashboard](docs/dailyflow-dashboard.png)
+
+---
+
+## API Documentation
+
+DailyFlow provides interactive API documentation through FastAPI's Swagger UI.
+
+### Authentication
+
+![DailyFlow Authentication API](docs/swagger-authentication.png)
+
+### Tasks & Projects
+
+![DailyFlow Tasks and Projects API](docs/swagger-tasks-projects.png)
+
+### Labels & Dashboard
+
+![DailyFlow Labels and Dashboard API](docs/swagger-labels-dashboard.png)
+
+After starting the application, the interactive Swagger documentation is available at:
+
+```text
+http://localhost:8000/docs
+```
+
+The API is organized into the following groups:
+
+```text
+/auth
+/tasks
+/projects
+/labels
+/dashboard
+```
+
+---
+
 ## Features
 
 ### Authentication
@@ -25,6 +65,7 @@ A React frontend is included as a client for interacting with the API.
 
 - Create tasks
 - Retrieve tasks
+- Retrieve individual tasks
 - Update tasks
 - Delete tasks
 - Complete tasks
@@ -35,21 +76,22 @@ A React frontend is included as a client for interacting with the API.
 
 ### Task Querying
 
-Tasks can be:
+The Tasks API supports:
 
-- Filtered by status
-- Filtered by priority
-- Filtered by project
-- Filtered by label
-- Filtered by due date
-- Searched
-- Sorted
-- Paginated
+- Filtering by status
+- Filtering by priority
+- Filtering by project
+- Filtering by label
+- Filtering by due date
+- Search
+- Sorting
+- Pagination
 
 ### Projects
 
 - Create projects
 - Retrieve projects
+- Retrieve individual projects
 - Update projects
 - Delete projects
 - Associate tasks with projects
@@ -58,6 +100,7 @@ Tasks can be:
 
 - Create labels
 - Retrieve labels
+- Retrieve individual labels
 - Update labels
 - Delete labels
 - Assign labels to tasks
@@ -135,7 +178,7 @@ Repositories handle database queries and persistence operations.
 
 ### Schemas
 
-Pydantic schemas provide request validation and define API request and response structures.
+Pydantic schemas provide request validation and define the structure of API requests and responses.
 
 ### Models
 
@@ -145,7 +188,7 @@ SQLAlchemy models define the database entities and their relationships.
 
 ## Database
 
-DailyFlow uses PostgreSQL as its relational database.
+DailyFlow uses **PostgreSQL** as its relational database.
 
 The main entities are:
 
@@ -164,6 +207,8 @@ Task
 
 SQLAlchemy is used as the ORM, while Alembic manages database schema migrations.
 
+When the application runs with Docker, PostgreSQL data is stored in a Docker volume so that the data persists when containers are stopped or recreated.
+
 ---
 
 ## Authentication Flow
@@ -179,7 +224,7 @@ Generate JWT
      ↓
 Store JWT in HttpOnly Cookie
      ↓
-Browser sends Cookie
+Browser sends Cookie automatically
      ↓
 Backend validates JWT
      ↓
@@ -188,53 +233,13 @@ Authenticated User
 
 The JWT is not directly accessible from frontend JavaScript because it is stored in an HttpOnly cookie.
 
----
-
-# API Documentation
-
-FastAPI automatically generates interactive OpenAPI documentation through Swagger UI.
-
-After starting the application, Swagger is available at:
-
-```text
-http://localhost:8000/docs
-```
-
-The API is organized into:
-
-```text
-/auth
-/tasks
-/projects
-/labels
-/dashboard
-```
-
-### Authentication
-
-![DailyFlow Authentication API](docs/swagger-authentication.png)
-
-### Tasks & Projects
-
-![DailyFlow Tasks and Projects API](docs/swagger-tasks-projects.png)
-
-### Labels & Dashboard
-
-![DailyFlow Labels and Dashboard API](docs/swagger-labels-dashboard.png)
-
----
-
-# Application Preview
-
-The React frontend provides a user interface for interacting with the DailyFlow REST API.
-
-![DailyFlow Dashboard](docs/dailyflow-dashboard.png)
+Passwords are never stored in plain text. They are hashed using Argon2 before being stored in the database.
 
 ---
 
 # Setup Instructions
 
-The recommended way to run DailyFlow is with Docker.
+The recommended way to run DailyFlow is with **Docker**.
 
 ## Prerequisites
 
@@ -253,6 +258,8 @@ When using Docker, you do not need to manually install PostgreSQL or the backend
 git clone <YOUR_REPOSITORY_URL>
 cd dailyflow
 ```
+
+Replace `<YOUR_REPOSITORY_URL>` with the URL of this GitHub repository.
 
 ---
 
@@ -278,11 +285,13 @@ DATABASE_URL=postgresql+psycopg://dailyflow_user:your_password@db:5432/dailyflow
 
 Replace the example values with your own values.
 
-> Do not commit `.env.docker` or real secrets to Git.
+> Do not commit `.env.docker`, passwords, secret keys, or other sensitive information to Git.
+
+If your PostgreSQL password contains characters that have special meaning inside a URL, make sure the password used inside `DATABASE_URL` is URL-encoded.
 
 ---
 
-## 3. Start DailyFlow
+## 3. Start the Application
 
 From the project root, run:
 
@@ -295,13 +304,13 @@ Docker Compose starts the complete application:
 ```text
 DailyFlow
 │
-├── Frontend
+├── Frontend Container
 │   └── React + Vite
 │
-├── Backend
+├── Backend Container
 │   └── FastAPI
 │
-└── Database
+└── Database Container
     └── PostgreSQL
 ```
 
@@ -311,7 +320,9 @@ The backend automatically runs:
 alembic upgrade head
 ```
 
-before starting the FastAPI server, ensuring that the database schema is up to date.
+before starting the FastAPI server.
+
+This ensures that the PostgreSQL database schema is up to date.
 
 ---
 
@@ -351,7 +362,7 @@ Then run:
 docker compose down
 ```
 
-PostgreSQL data is stored in a Docker volume, so the data persists when containers are stopped or recreated.
+PostgreSQL data is stored in a Docker volume, so the data remains available when the containers are recreated.
 
 To start the application again:
 
@@ -431,7 +442,7 @@ http://127.0.0.1:8000/docs
 
 ---
 
-# Project Structure
+## Project Structure
 
 ```text
 dailyflow/
@@ -466,7 +477,7 @@ dailyflow/
 
 ---
 
-# What This Project Demonstrates
+## What This Project Demonstrates
 
 DailyFlow demonstrates practical backend and REST API development concepts including:
 
@@ -495,7 +506,7 @@ DailyFlow demonstrates practical backend and REST API development concepts inclu
 
 ---
 
-# Development Status
+## Development Status
 
 DailyFlow is under active development.
 
