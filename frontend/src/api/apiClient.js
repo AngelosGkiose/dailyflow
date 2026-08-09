@@ -1,4 +1,5 @@
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL;
 
 
 export class ApiError extends Error {
@@ -34,6 +35,7 @@ export async function apiRequest(
       JSON.stringify(body);
   }
 
+
   let response;
 
   try {
@@ -41,9 +43,12 @@ export async function apiRequest(
       `${API_BASE_URL}${path}`,
       {
         method,
-        headers: requestHeaders,
-        body: requestBody,
-        credentials: "include",
+        headers:
+          requestHeaders,
+        body:
+          requestBody,
+        credentials:
+          "include",
       }
     );
   } catch {
@@ -54,7 +59,10 @@ export async function apiRequest(
   }
 
 
-  if (response.status === 204) {
+  if (
+    response.status ===
+    204
+  ) {
     return null;
   }
 
@@ -66,18 +74,21 @@ export async function apiRequest(
       "content-type"
     );
 
+
   if (
     contentType?.includes(
       "application/json"
     )
   ) {
-    data = await response.json();
+    data =
+      await response.json();
   }
 
 
   if (!response.ok) {
     let message =
       "The request could not be completed";
+
 
     if (
       typeof data?.detail ===
@@ -98,6 +109,7 @@ export async function apiRequest(
           )
           .join(", ");
     }
+
 
     throw new ApiError(
       message,
