@@ -8,6 +8,12 @@ A React frontend is included as a client for interacting with the API.
 
 ---
 
+## Demo
+
+[![Watch the DailyFlow Demo](docs/dailyflow-dashboard.png)](https://github.com/user-attachments/assets/2ab65cb3-8e16-4140-bc05-fc4261ce8541)
+**▶ Click the image above to watch the DailyFlow demo.**
+---
+
 ## Application Preview
 
 ![DailyFlow Dashboard](docs/dailyflow-dashboard.png)
@@ -148,21 +154,14 @@ Dedicated API endpoints provide:
 
 ## Backend Architecture
 
-The backend follows a layered architecture:
+## Architecture
 
-```text
-HTTP Request
-     ↓
-Router
-     ↓
-Service
-     ↓
-Repository
-     ↓
-SQLAlchemy ORM
-     ↓
-PostgreSQL
-```
+DailyFlow follows a layered backend architecture that separates HTTP handling, business logic, data access and persistence.
+
+<p align="center">
+  <img src="docs/architecture.png" alt="DailyFlow Architecture" width="1024">
+</p>
+
 
 ### Routers
 
@@ -190,20 +189,10 @@ SQLAlchemy models define the database entities and their relationships.
 
 DailyFlow uses **PostgreSQL** as its relational database.
 
-The main entities are:
 
-```text
-User
- │
- ├── Projects
- ├── Tasks
- └── Labels
 
-Task
- │
- ├── Project
- └── Labels (many-to-many)
-```
+![DailyFlow Database Schema](docs/database-schema.png)
+
 
 SQLAlchemy is used as the ORM, while Alembic manages database schema migrations.
 
@@ -215,21 +204,9 @@ When the application runs with Docker, PostgreSQL data is stored in a Docker vol
 
 DailyFlow uses JWT authentication with HttpOnly cookies.
 
-```text
-Login Request
-     ↓
-Validate Credentials
-     ↓
-Generate JWT
-     ↓
-Store JWT in HttpOnly Cookie
-     ↓
-Browser sends Cookie automatically
-     ↓
-Backend validates JWT
-     ↓
-Authenticated User
-```
+<p align="center">
+  <img src="docs/authentication-flow.png" alt="DailyFlow Authentication Flow" width="1189">
+</p>
 
 The JWT is not directly accessible from frontend JavaScript because it is stored in an HttpOnly cookie.
 
@@ -255,11 +232,9 @@ When using Docker, you do not need to manually install PostgreSQL or the backend
 ## 1. Clone the Repository
 
 ```bash
-git clone <YOUR_REPOSITORY_URL>
+git clone <https://github.com/AngelosGkiose/dailyflow.git>
 cd dailyflow
 ```
-
-Replace `<YOUR_REPOSITORY_URL>` with the URL of this GitHub repository.
 
 ---
 
@@ -284,8 +259,6 @@ DATABASE_URL=postgresql+psycopg://dailyflow_user:your_password@db:5432/dailyflow
 ```
 
 Replace the example values with your own values.
-
-> Do not commit `.env.docker`, passwords, secret keys, or other sensitive information to Git.
 
 If your PostgreSQL password contains characters that have special meaning inside a URL, make sure the password used inside `DATABASE_URL` is URL-encoded.
 
